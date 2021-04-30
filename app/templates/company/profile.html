@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+
+<h2>{{name}}'s Company Profile</h2>
+
+{% if citystate %}
+<p>Headquarters in {{ citystate }}</p>
+{% endif %}
+
+{% if url %}
+<footer>Learn more @ {{ url }}</footer>
+{% endif %}
+
+{% endblock %}

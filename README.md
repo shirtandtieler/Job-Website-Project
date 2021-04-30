@@ -1,1 +1,1 @@
-# Website Project - Team 3
+# Project

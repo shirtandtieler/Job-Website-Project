@@ -1,3 +1,5 @@
+# Set of values defined by GitHub as part of the default 'python' gitignore
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
