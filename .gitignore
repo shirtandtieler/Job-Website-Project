@@ -1,6 +1,7 @@
 # Set of values defined by GitHub as part of the default 'python' gitignore
 
 .idea/*
+/logs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
