@@ -58,14 +58,14 @@ def postjob():
     user = User.query.filter_by(id=current_user.get_id()).first()
     if user is None:
         flash('Could not find user!')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     if user.account_type != AccountType.COMPANY:
         flash(f'Not a company!')
-        redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     form = JobPostForm()
     if form.validate_on_submit():
         # TODO Add new job post to database
         # TODO redirect to page for newly created job posting
         flash(f'Mock-created job post: {form.title.data}')
-        return redirect(url_for('index'))
+        return redirect(url_for('main.index'))
     return render_template('company/newjobpost.html', form=form)
