@@ -98,8 +98,8 @@ class SeekerProfile(Base):
     zip_code = Column(String, default=Null)
     user = relationship("UserAccount", back_populates="SeekerProfile")
     
-class SeekerEducation(Base):
-    __tablename__='SeekerEducation'
+class SeekerHistoryEducation(Base):
+    __tablename__='SeekerHistoryEducation'
     id = Column(Integer, nullable=False, primary_key=True)
     seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
     education_lvl = Column(String, nullable=False)
