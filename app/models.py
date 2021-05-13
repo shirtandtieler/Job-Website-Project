@@ -5,6 +5,8 @@ from flask import url_for
 from sqlalchemy import Boolean, CheckConstraint, Column, Date, Enum, ForeignKey, Integer, SmallInteger, String, \
     Sequence, Table, Text, UniqueConstraint, text, MetaData, DateTime
 from sqlalchemy.orm import relationship, validates
+from sqlalchemy.sql.functions import current_timestamp
+from sqlalchemy.sql.sqltypes import TIMESTAMP
 
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -154,6 +156,18 @@ class JobPost(db.Model):  # many to one with company-type user account
         return f"JobPost[by#{self.company_id}|{self.job_title}]"
 
 
+class UserActivity(db.Model):
+    __tablename__ = 'UserActivity'
+    
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('useraccount.id'), unique=True, nullable=False)
+    is_active = Column(Boolean, nullable=True, default=True)
+    join_date = Column(TIMESTAMP, nullable=True, default=current_timestamp)
+    last_login = Column(TIMESTAMP, nullable=True, default=current_timestamp)
+    
+    
+        
+        
 @login.user_loader
 def load_user(id):
     print(f"Loading user w/id {id}")
