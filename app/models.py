@@ -2,11 +2,12 @@ from datetime import datetime
 from hashlib import md5
 
 from flask import url_for
+from sqlalchemy.sql.elements import Null
 from sqlalchemy import Boolean, CheckConstraint, Column, Date, Enum, ForeignKey, Integer, SmallInteger, String, \
     Sequence, Table, Text, UniqueConstraint, text, MetaData, DateTime
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.sql.functions import current_timestamp
-from sqlalchemy.sql.sqltypes import TIMESTAMP
+from sqlalchemy.sql.sqltypes import SMALLINT, TIMESTAMP
 
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -16,7 +17,7 @@ metadata = MetaData()
 
 account_types = Enum('Seeker', 'Company', 'Admin', name='account_types')
 skill_types = Enum('tech', 'biz', name='skill_types')
-
+skill_levels = Enum('1','2','3','4','5', name='skill_levels')
 
 class Attitude(db.Model):
     __tablename__ = 'attitude'
@@ -87,6 +88,10 @@ class User(UserMixin, db.Model):
                 self.set_password(value)
             else:
                 setattr(self, field, value)
+                
+    def update(self):
+        if self.is_active == True:
+            self.last_login = datetime.utcnow
 
 
 class CompanyProfile(db.Model):  # one to one with company-type user account
@@ -156,17 +161,38 @@ class JobPost(db.Model):  # many to one with company-type user account
         return f"JobPost[by#{self.company_id}|{self.job_title}]"
 
 
-class UserActivity(db.Model):
-    __tablename__ = 'UserActivity'
+class SeekerHistoryEducation(db.Model):
+    __tablename__='SeekerHistoryEducation'
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    education_lvl = Column(String, nullable=False)
+    study_field = Column(String, nullable=False)
+    school = Column(String, nullable=False)
+    city = Column(String, default=Null)
+    state_abv = Column(String, default=Null)
+    active_enrollment = Column(SMALLINT, default=Null)
+    start_date = Column(Date, default=Null)
     
-    id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('useraccount.id'), unique=True, nullable=False)
-    is_active = Column(Boolean, nullable=True, default=True)
-    join_date = Column(TIMESTAMP, nullable=True, default=current_timestamp)
-    last_login = Column(TIMESTAMP, nullable=True, default=current_timestamp)
+    seekr = relationship('useraccount', back_populates= 'SeekerHistoryEducation')
+
+class SeekerHistoryJob(db.Model):
+    __tablename__='SeekerHistoryJob'
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    city = Column(String(191), server_default=text("NULL"))
+    state = Column(String(2), server_default=text("NULL"))
     
+    seekr = relationship('useraccount', back_populates= 'SeekerHistoryJob')
     
-        
+class SeekerSkill(db.Model):
+    __tablename__='SeekerSkill'
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    skill_id = Column(Integer, ForeignKey('Skill.id'),nullable=False)
+    skill_level = Column(Enum(skill_levels),nullable=False)
+    
+    seekr = relationship('useraccount', back_populates= 'SeekerSkill')
+    skill = relationship('Skill', back_populates= 'SeekerHistoryJob')
         
 @login.user_loader
 def load_user(id):
