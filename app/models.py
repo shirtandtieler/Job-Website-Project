@@ -7,8 +7,8 @@ from sqlalchemy import Boolean, CheckConstraint, Column, Date, Enum, ForeignKey,
     Sequence, Table, Text, UniqueConstraint, text, MetaData, DateTime
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.sql.functions import current_timestamp
-from sqlalchemy.sql.sqltypes import SMALLINT, TIMESTAMP
-
+from sqlalchemy.sql.sqltypes import LargeBinary, SMALLINT, TIMESTAMP
+from sqlalchemy_imageattach.entity import Image, image_attachment
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -18,6 +18,7 @@ metadata = MetaData()
 account_types = Enum('Seeker', 'Company', 'Admin', name='account_types')
 skill_types = Enum('tech', 'biz', name='skill_types')
 skill_levels = Enum('1','2','3','4','5', name='skill_levels')
+job_lables = Enum("Want to apply", "Considering to apply", "Will not apply", name='job_labels')
 
 class Attitude(db.Model):
     __tablename__ = 'attitude'
@@ -47,10 +48,10 @@ class User(UserMixin, db.Model):
     account_type = Column(account_types, nullable=False)
     email = Column(String(191), nullable=False, unique=True)
     password = Column(String(191), nullable=False)
-
     is_active = Column(Boolean, default=True)
     join_date = Column(DateTime, nullable=False, default=datetime.utcnow)
     last_login = Column(DateTime, nullable=False, default=datetime.utcnow)
+    
 
     def __repr__(self):
         status = ("" if self.is_active else "Non") + "Active"
@@ -92,6 +93,11 @@ class User(UserMixin, db.Model):
     def update(self):
         if self.is_active == True:
             self.last_login = datetime.utcnow
+            
+class CompanyPicture(db.Model, Image):
+    __tablename__ = 'company_picture'
+    user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
+    user = relationship('User')
 
 
 class CompanyProfile(db.Model):  # one to one with company-type user account
@@ -103,7 +109,7 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
     city = Column(String(191), server_default=text("NULL"))
     state = Column(String(2), server_default=text("NULL"))
     website = Column(String(191), server_default=text("NULL"))
-
+    picture = image_attachment('UserPicture')
     job_posts = relationship("JobPost", back_populates="company")
 
     def __repr__(self):
@@ -132,7 +138,8 @@ class SeekerProfile(db.Model):  # one to one with seeker-type user account
     phone_number = Column(Integer)
     city = Column(String(191), server_default=text("NULL"))
     state = Column(String(2), server_default=text("NULL"))
-
+    resume = Column(LargeBinary, nullable=False)
+    picture = image_attachment('UserPicture')
     @validates('seeker_id')
     def validate_account(self, key, seeker_id):
         acct = User.query.filter_by(id=seeker_id).first()
@@ -145,6 +152,10 @@ class SeekerProfile(db.Model):  # one to one with seeker-type user account
             raise ValueError(f"Account type is not a Seeker")
         return seeker_id
 
+class SeekerPicture(db.Model, Image):
+    __tablename__ = 'company_picture'
+    user_id = Column(Integer, ForeignKey('seekerprofile.id'), primary_key=True)
+    user = relationship('seekerprofile')
 
 class JobPost(db.Model):  # many to one with company-type user account
     __tablename__ = 'jobpost'
@@ -154,7 +165,7 @@ class JobPost(db.Model):  # many to one with company-type user account
     job_title = Column(String(191), nullable=False)
     description = Column(String(191))
     created_timestamp = Column(DateTime, default=datetime.utcnow)
-
+    active = Column(Boolean, default=True, nullable=False)
     company = relationship("CompanyProfile", back_populates="job_posts")
 
     def __repr__(self):
@@ -188,11 +199,35 @@ class SeekerSkill(db.Model):
     __tablename__='SeekerSkill'
     id = Column(Integer, nullable=False, primary_key=True)
     seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
-    skill_id = Column(Integer, ForeignKey('Skill.id'),nullable=False)
-    skill_level = Column(Enum(skill_levels),nullable=False)
-    
     seekr = relationship('useraccount', back_populates= 'SeekerSkill')
+    skill_id = Column(Integer, ForeignKey('Skill.id'),nullable=False)
     skill = relationship('Skill', back_populates= 'SeekerHistoryJob')
+    skill_level = Column(Enum(skill_levels),nullable=False)
+     
+class Applied(db.Model):
+    __tablename__='Applied'
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    seekr = relationship('useraccount', back_populates= 'Applied')
+    job_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
+    jobpost = relationship('Skill', back_populates= 'Applied')
+    
+class Bookmark(db.Model):
+    __tablename__='Bookmarks'
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    seekr = relationship('useraccount', back_populates= 'Bookmarks')
+    job_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
+    jobpost = relationship('Skill', back_populates= 'Bookmarks')
+    
+class SeekerSearch(db.Model):
+    __tablename__='SeekerSearch'
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    seekr = relationship('useraccount', back_populates= 'SeekerSearch')
+    job_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
+    jobpost = relationship('Skill', back_populates= 'SeekerSearch')
+    label = Column(job_lables, nullable=False)
         
 @login.user_loader
 def load_user(id):
