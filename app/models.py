@@ -93,11 +93,12 @@ class User(UserMixin, db.Model):
     def update(self):
         if self.is_active == True:
             self.last_login = datetime.utcnow
-            
+
+
 class CompanyPicture(db.Model, Image):
-    __tablename__ = 'company_picture'
-    user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
-    user = relationship('User')
+    __tablename__ = 'companypicture'
+    user_id = Column(Integer, ForeignKey('companyprofile.id'), primary_key=True)
+    user = relationship('CompanyProfile')
 
 
 class CompanyProfile(db.Model):  # one to one with company-type user account
@@ -109,7 +110,7 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
     city = Column(String(191), server_default=text("NULL"))
     state = Column(String(2), server_default=text("NULL"))
     website = Column(String(191), server_default=text("NULL"))
-    picture = image_attachment('UserPicture')
+    picture = image_attachment('CompanyPicture')
     job_posts = relationship("JobPost", back_populates="company")
 
     def __repr__(self):
@@ -139,7 +140,8 @@ class SeekerProfile(db.Model):  # one to one with seeker-type user account
     city = Column(String(191), server_default=text("NULL"))
     state = Column(String(2), server_default=text("NULL"))
     resume = Column(LargeBinary, nullable=False)
-    picture = image_attachment('UserPicture')
+    picture = image_attachment('SeekerPicture')
+
     @validates('seeker_id')
     def validate_account(self, key, seeker_id):
         acct = User.query.filter_by(id=seeker_id).first()
@@ -152,10 +154,12 @@ class SeekerProfile(db.Model):  # one to one with seeker-type user account
             raise ValueError(f"Account type is not a Seeker")
         return seeker_id
 
+
 class SeekerPicture(db.Model, Image):
-    __tablename__ = 'company_picture'
+    __tablename__ = 'seekerpicture'
     user_id = Column(Integer, ForeignKey('seekerprofile.id'), primary_key=True)
-    user = relationship('seekerprofile')
+    user = relationship('SeekerProfile')
+
 
 class JobPost(db.Model):  # many to one with company-type user account
     __tablename__ = 'jobpost'
