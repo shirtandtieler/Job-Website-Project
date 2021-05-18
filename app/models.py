@@ -189,6 +189,23 @@ class JobPostAttitude(db.Model):
 
     company = relationship("CompanyProfile", back_populates="jobpostattitude")
 
+
+'''
+
+class CompanySeekerSearch(db.Model):
+    __tablename__ = 'companyseekersearch'
+
+    id = Column(Integer, nullable=False, primary_key=True)
+
+    seekrid = Column(Integer, ForeignKey('seekerprofile.seeker_id'), nullable=False)
+    seekr_city = Column(Integer, ForeignKey('seekerprofile.city'), nullable=False)
+    seekr_state = Column(Integer, ForeignKey('seekerprofile.state'), nullable=False)
+    seekr_skill = Column(ForeignKey('skill.title'), default='Not update yet')
+    seekr_type = Column(ForeignKey('skill.type'), default='Not update yet')
+    seekr_attitude = Column(ForeignKey('attitude.title'), nullable=False)
+
+    company = relationship("CompanyProfile", back_populates="companyseekersearch")
+'''
 @login.user_loader
 def load_user(id):
     print(f"Loading user w/id {id}")
