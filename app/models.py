@@ -1,6 +1,6 @@
 from datetime import datetime
 from hashlib import md5
-
+from sqlalchemy.sql.elements import Null
 from flask import url_for
 from sqlalchemy.sql.elements import Null
 from sqlalchemy import Boolean, CheckConstraint, Column, Date, Enum, ForeignKey, Integer, SmallInteger, String, \
@@ -12,13 +12,14 @@ from sqlalchemy_imageattach.entity import Image, image_attachment
 from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-
+from sqlalchemy.sql.sqltypes import SMALLINT, TIMESTAMP
 metadata = MetaData()
 
 account_types = Enum('Seeker', 'Company', 'Admin', name='account_types')
+job_lables = Enum("Want to apply", "Considering to apply", "Will not apply", name='job_labels')
 skill_types = Enum('tech', 'biz', name='skill_types')
 skill_levels = Enum('1','2','3','4','5', name='skill_levels')
-job_lables = Enum("Want to apply", "Considering to apply", "Will not apply", name='job_labels')
+important_level = Enum('1','2','3','4','5','6','7', name='important_level')
 
 class Attitude(db.Model):
     __tablename__ = 'attitude'
@@ -155,10 +156,21 @@ class SeekerProfile(db.Model):  # one to one with seeker-type user account
         return seeker_id
 
 
+
 class SeekerPicture(db.Model, Image):
     __tablename__ = 'seekerpicture'
     user_id = Column(Integer, ForeignKey('seekerprofile.id'), primary_key=True)
     user = relationship('SeekerProfile')
+
+
+class SeekerAttitude(db.modle):
+    __tablename__ = 'seekerAttitude'
+
+    id = Column(Integer, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('seekerprofile.seeker_id'), nullable=False)
+    attitude_id = Column(Integer, ForeignKey('attitude.id'), nullable=False)
+
+    seekr = relationship('useraccount', back_populates= 'SeekerAttitude')
 
 
 class JobPost(db.Model):  # many to one with company-type user account
@@ -167,6 +179,9 @@ class JobPost(db.Model):  # many to one with company-type user account
     id = Column(Integer, primary_key=True)
     company_id = Column(ForeignKey('companyprofile.company_id'), nullable=False)
     job_title = Column(String(191), nullable=False)
+    is_remote = Column(Boolean, default='null')
+    city = Column(String(191), default='null')
+    state_abbv = Column(String(2), default='null')
     description = Column(String(191))
     created_timestamp = Column(DateTime, default=datetime.utcnow)
     active = Column(Boolean, default=True, nullable=False)
@@ -174,6 +189,29 @@ class JobPost(db.Model):  # many to one with company-type user account
 
     def __repr__(self):
         return f"JobPost[by#{self.company_id}|{self.job_title}]"
+
+      
+class JobPostSkill(db.Model):
+    __tablename__ = 'jobpostskill'
+
+    id = Column(Integer, nullable=False, primary_key=True)
+    jobpost_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
+    skill_id = Column(Integer, ForeignKey('skill.id'), nullable=False)
+    skill_level_min = Column(Enum(skill_levels), nullable=False)
+    importance_level = Column(Enum(important_level), nullable=False)
+
+    company = relationship("CompanyProfile", back_populates="jobpostskill")
+
+
+class JobPostAttitude(db.Model):
+    __tablename__ = 'jobpostattitude'
+
+    id = Column(Integer, nullable=False, primary_key=True)
+    jobpost_id = Column(Integer, ForeignKey('jobpost.id'), nullable= False)
+    attitude_id = Column(Integer, ForeignKey('attitude.id'), nullable=False)
+    importance_level = Column(Enum(important_level), nullable=False)
+
+    company = relationship("CompanyProfile", back_populates="jobpostattitude")
 
 
 class SeekerHistoryEducation(db.Model):
@@ -233,6 +271,22 @@ class SeekerSearch(db.Model):
     jobpost = relationship('Skill', back_populates= 'SeekerSearch')
     label = Column(job_lables, nullable=False)
         
+'''
+
+class CompanySeekerSearch(db.Model):
+    __tablename__ = 'companyseekersearch'
+
+    id = Column(Integer, nullable=False, primary_key=True)
+
+    seekrid = Column(Integer, ForeignKey('seekerprofile.seeker_id'), nullable=False)
+    seekr_city = Column(Integer, ForeignKey('seekerprofile.city'), nullable=False)
+    seekr_state = Column(Integer, ForeignKey('seekerprofile.state'), nullable=False)
+    seekr_skill = Column(ForeignKey('skill.title'), default='Not update yet')
+    seekr_type = Column(ForeignKey('skill.type'), default='Not update yet')
+    seekr_attitude = Column(ForeignKey('attitude.title'), nullable=False)
+    company = relationship("CompanyProfile", back_populates="companyseekersearch")
+'''
+
 @login.user_loader
 def load_user(id):
     print(f"Loading user w/id {id}")
