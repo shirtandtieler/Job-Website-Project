@@ -206,7 +206,7 @@ class SeekerSkill(db.Model):
     seekr = relationship('useraccount', back_populates= 'SeekerSkill')
     skill_id = Column(Integer, ForeignKey('Skill.id'),nullable=False)
     skill = relationship('Skill', back_populates= 'SeekerHistoryJob')
-    skill_level = Column(Enum(skill_levels),nullable=False)
+    skill_level = Column(db.Enum('1','2','3','4','5', name='skill_levels'),nullable=False)
      
 class Applied(db.Model):
     __tablename__='Applied'
