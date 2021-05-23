@@ -1,0 +1,2339 @@
+{
+    ".NET Developer": {
+        "jobs": 1416,
+        "range": [
+            85500,
+            108500
+        ],
+        "skills": [
+            "C#",
+            ".NET",
+            "Microsoft SQL Server",
+            "JavaScript",
+            "ASP.NET",
+            "Microsoft Visual Studio",
+            "HTML",
+            "jQuery",
+            "SQL",
+            "Database"
+        ]
+    },
+    "AWS Engineer": {
+        "jobs": 500,
+        "range": [
+            90500,
+            119500
+        ],
+        "skills": [
+            "Linux",
+            "Jenkins",
+            "Amazon Web Services",
+            "Scripting",
+            "Software deployment",
+            "Git",
+            "Automation",
+            "QA",
+            "Continuous integration",
+            "Apache Maven"
+        ]
+    },
+    "Administrator": {
+        "jobs": 2536,
+        "range": [
+            40000,
+            53000
+        ],
+        "skills": [
+            "Technical support",
+            "Microsoft Windows",
+            "Active Directory",
+            "Network",
+            "QA",
+            "Hardware",
+            "Database",
+            "Customer service",
+            "Project management",
+            "Security"
+        ]
+    },
+    "Application Engineer": {
+        "jobs": 5116,
+        "range": [
+            40000,
+            53000
+        ],
+        "skills": [
+            "Software engineering",
+            "QA",
+            "SQL",
+            "JavaScript",
+            "Technical support",
+            "Java",
+            "HTML",
+            "Linux",
+            "Microsoft Windows",
+            "Microsoft SQL Server"
+        ]
+    },
+    "Application Support": {
+        "jobs": 212,
+        "range": [
+            40000,
+            53000
+        ],
+        "skills": [
+            "Technical support",
+            "QA",
+            "SQL",
+            "Microsoft Windows",
+            "Active Directory",
+            "Hardware",
+            "Network",
+            "Customer service",
+            "Database",
+            "Microsoft SQL Server"
+        ]
+    },
+    "Applications Developer": {
+        "jobs": 4934,
+        "range": [
+            63500,
+            86000
+        ],
+        "skills": [
+            "SQL",
+            "Software development",
+            "JavaScript",
+            "Microsoft SQL Server",
+            "C#",
+            "HTML",
+            "Java",
+            ".NET",
+            "jQuery",
+            "Database"
+        ]
+    },
+    "Art Director": {
+        "jobs": 59,
+        "range": [
+            63000,
+            83500
+        ],
+        "skills": [
+            "Art director",
+            "Graphics",
+            "Adobe Photoshop",
+            "Adobe Illustrator",
+            "Marketing",
+            "Adobe InDesign",
+            "Art",
+            "Advertising",
+            "Logos",
+            "Photography"
+        ]
+    },
+    "Assistant": {
+        "jobs": 130,
+        "range": [
+            30500,
+            51500
+        ],
+        "skills": [
+            "Customer service",
+            "Sales",
+            "Microsoft Windows",
+            "Technical support",
+            "QA",
+            "Research",
+            "Operations",
+            "Inventory",
+            "Hardware",
+            "Network"
+        ]
+    },
+    "Automation Engineer": {
+        "jobs": 460,
+        "range": [
+            71000,
+            91500
+        ],
+        "skills": [
+            "QA",
+            "Automation",
+            "Test cases",
+            "Java",
+            "SQL",
+            "Automated testing",
+            "Scripting",
+            "Selenium WebDriver",
+            "Selenium",
+            "Regression testing"
+        ]
+    },
+    "Big Data Developer": {
+        "jobs": 95,
+        "range": [
+            85000,
+            110500
+        ],
+        "skills": [
+            "Apache Hadoop",
+            "SQL",
+            "Apache Hive",
+            "Big data",
+            "Java",
+            "Apache Spark",
+            "HDFS",
+            "Database",
+            "MapReduce",
+            "Apache Sqoop"
+        ]
+    },
+    "Business Analyst": {
+        "jobs": 2124,
+        "range": [
+            67500,
+            90000
+        ],
+        "skills": [
+            "Business analysis",
+            "QA",
+            "Project management",
+            "Agile",
+            "Acceptance testing",
+            "SQL",
+            "Microsoft Visio",
+            "Use cases",
+            "Business process",
+            "SDLC"
+        ]
+    },
+    "C# Developer": {
+        "jobs": 374,
+        "range": [
+            65500,
+            90000
+        ],
+        "skills": [
+            "C#",
+            ".NET",
+            "Microsoft SQL Server",
+            "SQL",
+            "JavaScript",
+            "HTML",
+            "ASP.NET",
+            "Microsoft Visual Studio",
+            "jQuery",
+            "Software development"
+        ]
+    },
+    "CIO": {
+        "jobs": 13,
+        "range": [
+            168500,
+            221500
+        ],
+        "skills": [
+            "Project management",
+            "Senior management",
+            "Infrastructure",
+            "IT management",
+            "Operations",
+            "Network",
+            "Software development",
+            "Strategic planning",
+            "Agile",
+            "Security"
+        ]
+    },
+    "Change Management Specialist": {
+        "jobs": 11,
+        "range": [
+            78500,
+            105500
+        ],
+        "skills": [
+            "Change management",
+            "Project management",
+            "QA",
+            "Organizational change management",
+            "ITIL",
+            "Operations",
+            "Microsoft Project",
+            "Agile",
+            "Program management",
+            "Process improvement"
+        ]
+    },
+    "Cloud Architect": {
+        "jobs": 552,
+        "range": [
+            117500,
+            147500
+        ],
+        "skills": [
+            "Cloud",
+            "Amazon Web Services",
+            "Infrastructure",
+            "Cloud architecture",
+            "Linux",
+            "Microsoft Windows Azure",
+            "Active Directory",
+            "DevOps",
+            "Security",
+            "VMware"
+        ]
+    },
+    "Cloud Consultant": {
+        "jobs": 154,
+        "range": [
+            116500,
+            154000
+        ],
+        "skills": [
+            "Cloud",
+            "Amazon Web Services",
+            "Microsoft Windows Azure",
+            "Infrastructure",
+            "QA",
+            "Oracle",
+            "Security",
+            "Migration",
+            "Python",
+            "Active Directory"
+        ]
+    },
+    "Cloud Engineer": {
+        "jobs": 902,
+        "range": [
+            87000,
+            114000
+        ],
+        "skills": [
+            "Linux",
+            "Amazon Web Services",
+            "Cloud",
+            "Infrastructure",
+            "Scripting",
+            "Jenkins",
+            "Automation",
+            "DevOps",
+            "Network",
+            "Software deployment"
+        ]
+    },
+    "Cloud Systems Engineer": {
+        "jobs": 45,
+        "range": [
+            84500,
+            121000
+        ],
+        "skills": [
+            "Microsoft Windows",
+            "Active Directory",
+            "Amazon Web Services",
+            "Infrastructure",
+            "Linux",
+            "Network",
+            "Cloud",
+            "Systems engineering",
+            "VMware",
+            "Hardware"
+        ]
+    },
+    "Compliance Analyst": {
+        "jobs": 57,
+        "range": [
+            60000,
+            83500
+        ],
+        "skills": [
+            "Audit",
+            "Security",
+            "QA",
+            "Information security",
+            "Policies and procedures",
+            "Risk assessment",
+            "Research",
+            "Finance",
+            "Security analysis",
+            "Security controls"
+        ]
+    },
+    "Computer Support": {
+        "jobs": 170,
+        "range": [
+            39500,
+            54000
+        ],
+        "skills": [
+            "Hardware",
+            "Technical support",
+            "Microsoft Windows",
+            "Network",
+            "Active Directory",
+            "Customer service",
+            "Printers",
+            "Networking",
+            "Security",
+            "Help desk"
+        ]
+    },
+    "Computer Systems Analyst": {
+        "jobs": 17,
+        "range": [
+            49000,
+            65500
+        ],
+        "skills": [
+            "Systems analysis",
+            "QA",
+            "Technical support",
+            "SQL",
+            "Microsoft Windows",
+            "Project management",
+            "Active Directory",
+            "Business analysis",
+            "Hardware",
+            "Network"
+        ]
+    },
+    "Customer Service Representative": {
+        "jobs": 49,
+        "range": [
+            30000,
+            46000
+        ],
+        "skills": [
+            "Customer service",
+            "Sales",
+            "Technical support",
+            "Microsoft Windows",
+            "Hardware",
+            "QA",
+            "Network",
+            "Inventory",
+            "Billing",
+            "Operations"
+        ]
+    },
+    "Customer Support Specialist": {
+        "jobs": 5,
+        "range": [
+            39500,
+            54000
+        ],
+        "skills": [
+            "Customer support",
+            "Technical support",
+            "Customer service",
+            "Microsoft Windows",
+            "Hardware",
+            "Network",
+            "QA",
+            "Active Directory",
+            "Help desk",
+            "Sales"
+        ]
+    },
+    "Cyber Security Analyst": {
+        "jobs": 146,
+        "range": [
+            64500,
+            93000
+        ],
+        "skills": [
+            "Security",
+            "Information security",
+            "Network",
+            "Security analysis",
+            "Cyber security",
+            "Risk assessment",
+            "IT security",
+            "Security controls",
+            "Microsoft Windows",
+            "Active Directory"
+        ]
+    },
+    "Data Analyst": {
+        "jobs": 775,
+        "range": [
+            55500,
+            73500
+        ],
+        "skills": [
+            "Data analysis",
+            "SQL",
+            "Database",
+            "QA",
+            "Microsoft SQL Server",
+            "Business analysis",
+            "Business intelligence",
+            "Tableau",
+            "Data warehouse",
+            "Analytics"
+        ]
+    },
+    "Data Architect": {
+        "jobs": 472,
+        "range": [
+            111500,
+            138000
+        ],
+        "skills": [
+            "Data modeling",
+            "SQL",
+            "Data warehouse",
+            "Data architecture",
+            "Oracle",
+            "Microsoft SQL Server",
+            "Database",
+            "Business intelligence",
+            "Data analysis",
+            "DBA"
+        ]
+    },
+    "Data Center Engineer": {
+        "jobs": 32,
+        "range": [
+            68500,
+            89000
+        ],
+        "skills": [
+            "Data center",
+            "Cisco",
+            "Network",
+            "Hardware",
+            "Switches",
+            "Technical support",
+            "Active Directory",
+            "Microsoft Windows",
+            "Infrastructure",
+            "Linux"
+        ]
+    },
+    "Data Center Technician": {
+        "jobs": 47,
+        "range": [
+            40000,
+            53000
+        ],
+        "skills": [
+            "Data center",
+            "Network",
+            "Hardware",
+            "Technical support",
+            "Microsoft Windows",
+            "Networking",
+            "Cables",
+            "Switches",
+            "Active Directory",
+            "Infrastructure"
+        ]
+    },
+    "Data Scientist": {
+        "jobs": 370,
+        "range": [
+            85500,
+            109000
+        ],
+        "skills": [
+            "Data science",
+            "Python",
+            "Machine learning",
+            "SQL",
+            "Data analysis",
+            "R",
+            "Statistics",
+            "Tableau",
+            "Analytics",
+            "Research"
+        ]
+    },
+    "Database Administrator": {
+        "jobs": 448,
+        "range": [
+            82000,
+            100500
+        ],
+        "skills": [
+            "Database",
+            "DBA",
+            "Microsoft SQL Server",
+            "SQL",
+            "Backup",
+            "Oracle",
+            "Microsoft SSIS",
+            "Stored procedures",
+            "Microsoft SSRS",
+            "Performance tuning"
+        ]
+    },
+    "Database Architect": {
+        "jobs": 23,
+        "range": [
+            100000,
+            128000
+        ],
+        "skills": [
+            "Database",
+            "DBA",
+            "Microsoft SQL Server",
+            "Oracle",
+            "SQL",
+            "Database architecture",
+            "Data warehouse",
+            "Database design",
+            "Data modeling",
+            "Data architecture"
+        ]
+    },
+    "Database Developer": {
+        "jobs": 136,
+        "range": [
+            65000,
+            86500
+        ],
+        "skills": [
+            "SQL",
+            "Microsoft SQL Server",
+            "Database",
+            "Microsoft SSIS",
+            "Microsoft SSRS",
+            "Stored procedures",
+            "Transact-SQL",
+            "Database design",
+            "Oracle",
+            "Data warehouse"
+        ]
+    },
+    "Database Engineer": {
+        "jobs": 86,
+        "range": [
+            76000,
+            97000
+        ],
+        "skills": [
+            "Database",
+            "SQL",
+            "Microsoft SQL Server",
+            "DBA",
+            "Oracle",
+            "Database design",
+            "Microsoft SSIS",
+            "PL/SQL",
+            "Data warehouse",
+            "Backup"
+        ]
+    },
+    "Designer": {
+        "jobs": 969,
+        "range": [
+            39500,
+            54000
+        ],
+        "skills": [
+            "Adobe Photoshop",
+            "Graphics",
+            "Adobe Illustrator",
+            "UX",
+            "HTML",
+            "UI",
+            "Marketing",
+            "Adobe InDesign",
+            "Prototyping",
+            "QA"
+        ]
+    },
+    "Desktop Support Manager": {
+        "jobs": 1,
+        "range": [
+            40000,
+            53000
+        ],
+        "skills": [
+            "Technical support",
+            "Active Directory",
+            "Hardware",
+            "Microsoft Windows",
+            "Network",
+            "Microsoft Exchange",
+            "Project management",
+            "Printers",
+            "Customer service",
+            "Microsoft Windows 7"
+        ]
+    },
+    "DevOps Consultant": {
+        "jobs": 26,
+        "range": [
+            105000,
+            135500
+        ],
+        "skills": [
+            "Amazon Web Services",
+            "DevOps",
+            "Jenkins",
+            "Python",
+            "Git",
+            "Linux",
+            "Ansible",
+            "Java",
+            "Cloud",
+            "Continuous integration"
+        ]
+    },
+    "DevOps Engineer": {
+        "jobs": 1034,
+        "range": [
+            82000,
+            117500
+        ],
+        "skills": [
+            "Linux",
+            "DevOps",
+            "Amazon Web Services",
+            "Jenkins",
+            "Python",
+            "Scripting",
+            "Automation",
+            "Software deployment",
+            "Cloud",
+            "Git"
+        ]
+    },
+    "Developer": {
+        "jobs": 17481,
+        "range": [
+            51000,
+            72000
+        ],
+        "skills": [
+            "JavaScript",
+            "SQL",
+            "Java",
+            "C#",
+            "HTML",
+            "Microsoft SQL Server",
+            "Software development",
+            ".NET",
+            "Agile",
+            "QA"
+        ]
+    },
+    "Director": {
+        "jobs": 669,
+        "range": [
+            75000,
+            104500
+        ],
+        "skills": [
+            "Project management",
+            "Senior management",
+            "Operations",
+            "QA",
+            "Sales",
+            "Marketing",
+            "Agile",
+            "Program management",
+            "Finance",
+            "Change management"
+        ]
+    },
+    "Director of Operations": {
+        "jobs": 34,
+        "range": [
+            110000,
+            151000
+        ],
+        "skills": [
+            "Operations",
+            "Project management",
+            "Senior management",
+            "QA",
+            "Sales",
+            "Finance",
+            "Customer service",
+            "Marketing",
+            "Network",
+            "Program management"
+        ]
+    },
+    "Enterprise Architect": {
+        "jobs": 248,
+        "range": [
+            130500,
+            162000
+        ],
+        "skills": [
+            "Enterprise architecture",
+            "Project management",
+            "Agile",
+            "Solution architecture",
+            "Java",
+            "IT management",
+            "Oracle",
+            "Software development",
+            "Cloud architecture",
+            "Cloud"
+        ]
+    },
+    "Field Technician": {
+        "jobs": 111,
+        "range": [
+            40000,
+            55000
+        ],
+        "skills": [
+            "Technical support",
+            "Hardware",
+            "Network",
+            "Microsoft Windows",
+            "Active Directory",
+            "Customer service",
+            "Networking",
+            "Field engineering",
+            "Printers",
+            "Field service"
+        ]
+    },
+    "Frontend Developer": {
+        "jobs": 564,
+        "range": [
+            64500,
+            84500
+        ],
+        "skills": [
+            "JavaScript",
+            "UI",
+            "HTML",
+            "jQuery",
+            "HTML5",
+            "Ajax",
+            "Bootstrap",
+            "AngularJS",
+            "Web development",
+            "Node.js"
+        ]
+    },
+    "Frontend Web Developer": {
+        "jobs": 44,
+        "range": [
+            61000,
+            76500
+        ],
+        "skills": [
+            "JavaScript",
+            "HTML",
+            "jQuery",
+            "UI",
+            "HTML5",
+            "Web development",
+            "Bootstrap",
+            "Adobe Photoshop",
+            "Ajax",
+            "AngularJS"
+        ]
+    },
+    "Full Stack .Net Developer": {
+        "jobs": 153,
+        "range": [
+            73500,
+            95500
+        ],
+        "skills": [
+            "C#",
+            "JavaScript",
+            ".NET",
+            "ASP.NET",
+            "Microsoft SQL Server",
+            "jQuery",
+            "Microsoft Visual Studio",
+            "Ajax",
+            "HTML",
+            "ADO.NET"
+        ]
+    },
+    "Full Stack Developer": {
+        "jobs": 1428,
+        "range": [
+            60000,
+            89000
+        ],
+        "skills": [
+            "JavaScript",
+            "HTML",
+            "jQuery",
+            "HTML5",
+            "UI",
+            "AngularJS",
+            "Node.js",
+            "Java",
+            "Bootstrap",
+            "Git"
+        ]
+    },
+    "Full Stack Java Developer": {
+        "jobs": 417,
+        "range": [
+            77000,
+            104500
+        ],
+        "skills": [
+            "Java",
+            "JavaScript",
+            "Hibernate",
+            "Spring",
+            "Web services",
+            "XML",
+            "J2EE",
+            "JUnit",
+            "JSP",
+            "UI"
+        ]
+    },
+    "Graphic Designer": {
+        "jobs": 127,
+        "range": [
+            39500,
+            534567935
+        ],
+        "skills": [
+            "Graphics",
+            "Adobe Photoshop",
+            "Adobe Illustrator",
+            "Adobe InDesign",
+            "Marketing",
+            "Logos",
+            "HTML",
+            "Web design",
+            "Photography",
+            "Illustration"
+        ]
+    },
+    "Hadoop Developer": {
+        "jobs": 74,
+        "range": [
+            76000,
+            101000
+        ],
+        "skills": [
+            "Apache Hive",
+            "Apache Hadoop",
+            "HDFS",
+            "Apache Sqoop",
+            "Java",
+            "Apache Pig",
+            "MapReduce",
+            "Apache HBase",
+            "SQL",
+            "Apache Spark"
+        ]
+    },
+    "IT Analyst": {
+        "jobs": 367,
+        "range": [
+            40000,
+            53000
+        ],
+        "skills": [
+            "Technical support",
+            "Active Directory",
+            "Microsoft Windows",
+            "Network",
+            "Hardware",
+            "QA",
+            "Project management",
+            "SQL",
+            "Customer service",
+            "Microsoft Exchange"
+        ]
+    },
+    "IT Coordinator": {
+        "jobs": 24,
+        "range": [
+            39500,
+            54000
+        ],
+        "skills": [
+            "Technical support",
+            "Network",
+            "Hardware",
+            "Active Directory",
+            "Microsoft Windows",
+            "Networking",
+            "Printers",
+            "Help desk",
+            "Microsoft Exchange",
+            "System administration"
+        ]
+    },
+    "IT Director": {
+        "jobs": 68,
+        "range": [
+            156500,
+            182500
+        ],
+        "skills": [
+            "Project management",
+            "Network",
+            "IT management",
+            "Infrastructure",
+            "Senior management",
+            "Technical support",
+            "Active Directory",
+            "Microsoft Windows",
+            "Operations",
+            "Microsoft Exchange"
+        ]
+    },
+    "IT Manager": {
+        "jobs": 501,
+        "range": [
+            72500,
+            88000
+        ],
+        "skills": [
+            "IT management",
+            "Project management",
+            "Network",
+            "Technical support",
+            "Active Directory",
+            "Microsoft Windows",
+            "Infrastructure",
+            "Hardware",
+            "Microsoft Exchange",
+            "Networking"
+        ]
+    },
+    "Implementation Engineer": {
+        "jobs": 31,
+        "range": [
+            68000,
+            88000
+        ],
+        "skills": [
+            "Network",
+            "Technical support",
+            "QA",
+            "Project management",
+            "Cisco",
+            "Infrastructure",
+            "Microsoft Windows",
+            "SQL",
+            "Active Directory",
+            "Networking"
+        ]
+    },
+    "Information Assurance Analyst": {
+        "jobs": 14,
+        "range": [
+            70500,
+            97000
+        ],
+        "skills": [
+            "Security",
+            "Information assurance",
+            "Information security",
+            "Security controls",
+            "Security analysis",
+            "Network",
+            "System security",
+            "NIST SP 800 Series",
+            "Risk assessment",
+            "Cyber security"
+        ]
+    },
+    "Information Security Analyst": {
+        "jobs": 110,
+        "range": [
+            64000,
+            92500
+        ],
+        "skills": [
+            "Information security",
+            "Security",
+            "Security analysis",
+            "Risk assessment",
+            "Network",
+            "Security controls",
+            "NIST SP 800 Series",
+            "Cyber security",
+            "System security",
+            "Microsoft Windows"
+        ]
+    },
+    "Information Security Engineer": {
+        "jobs": 118,
+        "range": [
+            83500,
+            108000
+        ],
+        "skills": [
+            "Security",
+            "Information security",
+            "Network",
+            "Active Directory",
+            "Network security",
+            "Cyber security",
+            "Firewall",
+            "Risk assessment",
+            "Microsoft Windows",
+            "Linux"
+        ]
+    },
+    "Information Security Officer": {
+        "jobs": 49,
+        "range": [
+            89500,
+            125000
+        ],
+        "skills": [
+            "Information security",
+            "Security",
+            "Network",
+            "Cyber security",
+            "Risk assessment",
+            "Risk management",
+            "Project management",
+            "CISSP",
+            "IT security",
+            "Audit"
+        ]
+    },
+    "Information Systems Manager": {
+        "jobs": 21,
+        "range": [
+            75000,
+            104500
+        ],
+        "skills": [
+            "Project management",
+            "Network",
+            "Technical support",
+            "Active Directory",
+            "IT management",
+            "Microsoft Windows",
+            "QA",
+            "Operations",
+            "Hardware",
+            "Infrastructure"
+        ]
+    },
+    "Java Developer": {
+        "jobs": 3053,
+        "range": [
+            73500,
+            91500
+        ],
+        "skills": [
+            "Java",
+            "JavaScript",
+            "Spring",
+            "J2EE",
+            "Web services",
+            "Hibernate",
+            "JSP",
+            "HTML",
+            "XML",
+            "Oracle"
+        ]
+    },
+    "Lead Architect": {
+        "jobs": 273,
+        "range": [
+            122000,
+            156500
+        ],
+        "skills": [
+            "Project management",
+            "Java",
+            "Agile",
+            "Software development",
+            "IT management",
+            "Oracle",
+            "JavaScript",
+            "SQL",
+            "Microsoft SQL Server",
+            "QA"
+        ]
+    },
+    "Lead Data Scientist": {
+        "jobs": 14,
+        "range": [
+            115000,
+            149500
+        ],
+        "skills": [
+            "Machine learning",
+            "Data science",
+            "Python",
+            "SQL",
+            "R",
+            "Big data",
+            "Data analysis",
+            "Analytics",
+            "Statistics",
+            "Modeling"
+        ]
+    },
+    "Lead UI Developer": {
+        "jobs": 31,
+        "range": [
+            83500,
+            102500
+        ],
+        "skills": [
+            "JavaScript",
+            "UI",
+            "HTML",
+            "jQuery",
+            "HTML5",
+            "AngularJS",
+            "Web development",
+            "Bootstrap",
+            "Ajax",
+            "Node.js"
+        ]
+    },
+    "Network Administrator": {
+        "jobs": 192,
+        "range": [
+            47000,
+            63000
+        ],
+        "skills": [
+            "Network",
+            "Active Directory",
+            "Microsoft Windows",
+            "Network management",
+            "Technical support",
+            "Hardware",
+            "Switches",
+            "Cisco",
+            "Networking",
+            "Microsoft Exchange"
+        ]
+    },
+    "Network Analyst": {
+        "jobs": 78,
+        "range": [
+            45500,
+            68500
+        ],
+        "skills": [
+            "Network",
+            "Cisco",
+            "Switches",
+            "Technical support",
+            "Active Directory",
+            "Microsoft Windows",
+            "Hardware",
+            "Networking",
+            "Routers",
+            "LAN"
+        ]
+    },
+    "Network Architect": {
+        "jobs": 101,
+        "range": [
+            67500,
+            84500
+        ],
+        "skills": [
+            "Network",
+            "Cisco",
+            "Switches",
+            "Border Gateway Protocol",
+            "Network design",
+            "Network engineering",
+            "Firewall",
+            "Data center",
+            "LAN",
+            "Infrastructure"
+        ]
+    },
+    "Network Engineer": {
+        "jobs": 1032,
+        "range": [
+            67500,
+            84500
+        ],
+        "skills": [
+            "Network",
+            "Cisco",
+            "Switches",
+            "Network engineering",
+            "Routers",
+            "Firewall",
+            "LAN",
+            "Technical support",
+            "Networking",
+            "Border Gateway Protocol"
+        ]
+    },
+    "Network Security Engineer": {
+        "jobs": 87,
+        "range": [
+            68500,
+            95000
+        ],
+        "skills": [
+            "Network",
+            "Security",
+            "Network security",
+            "Firewall",
+            "Cisco",
+            "Switches",
+            "VPN",
+            "Routers",
+            "Network engineering",
+            "LAN"
+        ]
+    },
+    "Operations Analyst": {
+        "jobs": 132,
+        "range": [
+            48500,
+            75000
+        ],
+        "skills": [
+            "Operations",
+            "Project management",
+            "QA",
+            "Technical support",
+            "Network",
+            "Microsoft Windows",
+            "Customer service",
+            "Sales",
+            "Active Directory",
+            "Hardware"
+        ]
+    },
+    "Operations Manager": {
+        "jobs": 133,
+        "range": [
+            68000,
+            96000
+        ],
+        "skills": [
+            "Operations",
+            "Operations management",
+            "Project management",
+            "QA",
+            "Sales",
+            "Customer service",
+            "Network",
+            "Technical support",
+            "Microsoft Windows",
+            "Finance"
+        ]
+    },
+    "Oracle DBA": {
+        "jobs": 80,
+        "range": [
+            83500,
+            106000
+        ],
+        "skills": [
+            "Oracle",
+            "Database",
+            "Oracle DBA",
+            "Oracle RMAN",
+            "Oracle Data Guard",
+            "RAC",
+            "Backup",
+            "DBA",
+            "Linux",
+            "SQL"
+        ]
+    },
+    "Oracle Developer": {
+        "jobs": 180,
+        "range": [
+            79500,
+            103500
+        ],
+        "skills": [
+            "Oracle",
+            "SQL",
+            "PL/SQL",
+            "Database",
+            "Oracle EBS",
+            "QA",
+            "Unix",
+            "Finance",
+            "Oracle Applications",
+            "Project management"
+        ]
+    },
+    "Process Engineer": {
+        "jobs": 74,
+        "range": [
+            71500,
+            97000
+        ],
+        "skills": [
+            "Process engineering",
+            "QA",
+            "Manufacturing",
+            "Project management",
+            "Process improvement",
+            "Operations",
+            "Continuous improvement",
+            "Six Sigma",
+            "Change management",
+            "Lean Six Sigma"
+        ]
+    },
+    "Product Manager": {
+        "jobs": 689,
+        "range": [
+            96000,
+            122000
+        ],
+        "skills": [
+            "Product management",
+            "Project management",
+            "Agile",
+            "Marketing",
+            "QA",
+            "Roadmaps",
+            "Business analysis",
+            "Sales",
+            "Product development",
+            "Scrum"
+        ]
+    },
+    "Program Manager": {
+        "jobs": 689,
+        "range": [
+            99000,
+            126500
+        ],
+        "skills": [
+            "Project management",
+            "Program management",
+            "Agile",
+            "QA",
+            "Microsoft Project",
+            "Change management",
+            "Finance",
+            "PMO",
+            "Business analysis",
+            "Operations"
+        ]
+    },
+    "Project Coordinator": {
+        "jobs": 148,
+        "range": [
+            54000,
+            69500
+        ],
+        "skills": [
+            "Project management",
+            "Project coordination",
+            "QA",
+            "Microsoft Project",
+            "Microsoft SharePoint",
+            "Customer service",
+            "Presentations",
+            "Business analysis",
+            "Agile",
+            "Sales"
+        ]
+    },
+    "Project Manager": {
+        "jobs": 2345,
+        "range": [
+            75000,
+            104500
+        ],
+        "skills": [
+            "Project management",
+            "QA",
+            "Microsoft Project",
+            "Agile",
+            "Business analysis",
+            "Program management",
+            "Change management",
+            "Finance",
+            "IT project management",
+            "SDLC"
+        ]
+    },
+    "QA Analyst": {
+        "jobs": 1004,
+        "range": [
+            50000,
+            70500
+        ],
+        "skills": [
+            "QA",
+            "Test cases",
+            "SQL",
+            "Test plans",
+            "Regression testing",
+            "HP Quality Center",
+            "Acceptance testing",
+            "Agile",
+            "Automated testing",
+            "Scripting"
+        ]
+    },
+    "QA Automation Engineer": {
+        "jobs": 107,
+        "range": [
+            70500,
+            93000
+        ],
+        "skills": [
+            "QA",
+            "Automated testing",
+            "Test cases",
+            "SQL",
+            "Java",
+            "Automation",
+            "Selenium WebDriver",
+            "Selenium",
+            "Regression testing",
+            "Test plans"
+        ]
+    },
+    "QA Engineer": {
+        "jobs": 333,
+        "range": [
+            62000,
+            80000
+        ],
+        "skills": [
+            "QA",
+            "Test cases",
+            "Test plans",
+            "SQL",
+            "Regression testing",
+            "Automated testing",
+            "Agile",
+            "Java",
+            "Scripting",
+            "Automation"
+        ]
+    },
+    "QA Lead": {
+        "jobs": 105,
+        "range": [
+            74000,
+            91000
+        ],
+        "skills": [
+            "QA",
+            "Test cases",
+            "Test plans",
+            "SQL",
+            "Agile",
+            "QA management",
+            "Regression testing",
+            "HP Quality Center",
+            "Automated testing",
+            "Acceptance testing"
+        ]
+    },
+    "QA Manager": {
+        "jobs": 70,
+        "range": [
+            93000,
+            118500
+        ],
+        "skills": [
+            "QA",
+            "QA management",
+            "Project management",
+            "Agile",
+            "Test plans",
+            "Test cases",
+            "Automated testing",
+            "Acceptance testing",
+            "Automation",
+            "HP Quality Center"
+        ]
+    },
+    "Quality Engineer": {
+        "jobs": 248,
+        "range": [
+            61000,
+            79000
+        ],
+        "skills": [
+            "QA",
+            "Test cases",
+            "Verification and validation",
+            "Audit",
+            "Test plans",
+            "ISO 9000",
+            "Manufacturing",
+            "Corrective and preventive action",
+            "Automated testing",
+            "Regression testing"
+        ]
+    },
+    "Quality Manager": {
+        "jobs": 57,
+        "range": [
+            61000,
+            79000
+        ],
+        "skills": [
+            "QA",
+            "Quality management",
+            "Audit",
+            "Project management",
+            "ISO 9000",
+            "Operations",
+            "Corrective and preventive action",
+            "Metrics",
+            "Continuous improvement",
+            "Quality control"
+        ]
+    },
+    "React Developer": {
+        "jobs": 471,
+        "range": [
+            66500,
+            91500
+        ],
+        "skills": [
+            "JavaScript",
+            "jQuery",
+            "UI",
+            "Ajax",
+            "HTML",
+            "JSON",
+            "Web services",
+            "Bootstrap",
+            "RESTful",
+            "Web applications"
+        ]
+    },
+    "Research Associate": {
+        "jobs": 13,
+        "range": [
+            46000,
+            72500
+        ],
+        "skills": [
+            "Research",
+            "Data analysis",
+            "QA",
+            "Statistics",
+            "SQL",
+            "Python",
+            "Database",
+            "Analytics",
+            "Presentations",
+            "Project management"
+        ]
+    },
+    "Research Scientist": {
+        "jobs": 19,
+        "range": [
+            86000,
+            109500
+        ],
+        "skills": [
+            "Research",
+            "Python",
+            "Data analysis",
+            "Statistics",
+            "Data science",
+            "QA",
+            "Machine learning",
+            "SQL",
+            "Project management",
+            "MATLAB"
+        ]
+    },
+    "Researcher": {
+        "jobs": 105,
+        "range": [
+            53000,
+            82500
+        ],
+        "skills": [
+            "Research",
+            "QA",
+            "Data analysis",
+            "Python",
+            "Project management",
+            "SQL",
+            "MATLAB",
+            "Java",
+            "C++",
+            "Statistics"
+        ]
+    },
+    "SQL Server DBA": {
+        "jobs": 42,
+        "range": [
+            82000,
+            100500
+        ],
+        "skills": [
+            "Microsoft SQL Server",
+            "Database",
+            "Microsoft SQL Server DBA",
+            "Microsoft SSIS",
+            "SQL",
+            "DBA",
+            "Backup",
+            "Replication",
+            "Microsoft SSRS",
+            "Stored procedures"
+        ]
+    },
+    "Salesforce Developer": {
+        "jobs": 568,
+        "range": [
+            7867030007,
+            10112040906
+        ],
+        "skills": [
+            "Salesforce.com",
+            "Apex",
+            "Workflow",
+            "Data Loader",
+            "Force.com",
+            "Visualforce",
+            "Sales",
+            "QA",
+            "SOQL",
+            "JavaScript"
+        ]
+    },
+    "Scrum Master": {
+        "jobs": 435,
+        "range": [
+            89500,
+            111000
+        ],
+        "skills": [
+            "Agile",
+            "Scrum master",
+            "Scrum",
+            "Project management",
+            "QA",
+            "Sprint",
+            "Business analysis",
+            "JIRA",
+            "Product owner",
+            "User stories"
+        ]
+    },
+    "Security Architect": {
+        "jobs": 195,
+        "range": [
+            118000,
+            150000
+        ],
+        "skills": [
+            "Security",
+            "Information security",
+            "Security architecture",
+            "Network",
+            "Cyber security",
+            "Infrastructure",
+            "CISSP",
+            "IT security",
+            "Network security",
+            "Firewall"
+        ]
+    },
+    "Security Engineer": {
+        "jobs": 871,
+        "range": [
+            81500,
+            108000
+        ],
+        "skills": [
+            "Security",
+            "Network",
+            "Information security",
+            "Firewall",
+            "Microsoft Windows",
+            "Active Directory",
+            "Cyber security",
+            "Security engineering",
+            "Network security",
+            "Linux"
+        ]
+    },
+    "Security Manager": {
+        "jobs": 141,
+        "range": [
+            80000,
+            116500
+        ],
+        "skills": [
+            "Security",
+            "Information security",
+            "Network",
+            "Cyber security",
+            "Project management",
+            "Microsoft Windows",
+            "IT security",
+            "Security management",
+            "Risk assessment",
+            "Audit"
+        ]
+    },
+    "Security Officer": {
+        "jobs": 68,
+        "range": [
+            28000,
+            57500
+        ],
+        "skills": [
+            "Security",
+            "Security officer",
+            "Network",
+            "Microsoft Windows",
+            "Customer service",
+            "Information security",
+            "Cyber security",
+            "Hardware",
+            "ISSO",
+            "Risk assessment"
+        ]
+    },
+    "Security Specialist": {
+        "jobs": 117,
+        "range": [
+            64000,
+            92500
+        ],
+        "skills": [
+            "Security",
+            "Information security",
+            "Network",
+            "Security analysis",
+            "Risk assessment",
+            "Microsoft Windows",
+            "QA",
+            "Active Directory",
+            "Cyber security",
+            "Operations"
+        ]
+    },
+    "ServiceNow Developer": {
+        "jobs": 123,
+        "range": [
+            88500,
+            110500
+        ],
+        "skills": [
+            "ServiceNow",
+            "Workflow",
+            "JavaScript",
+            "Configuration management database",
+            "UI",
+            "Scripting",
+            "Business rules",
+            "Change management",
+            "ITIL",
+            "HTML"
+        ]
+    },
+    "SharePoint Developer": {
+        "jobs": 107,
+        "range": [
+            85500,
+            108500
+        ],
+        "skills": [
+            "Microsoft SharePoint",
+            "Microsoft SharePoint Designer",
+            "Microsoft InfoPath",
+            "Workflow",
+            "JavaScript",
+            "Web parts",
+            "Microsoft SQL Server",
+            "Microsoft Visual Studio",
+            "C#",
+            ".NET"
+        ]
+    },
+    "Software Architect": {
+        "jobs": 192,
+        "range": [
+            112000,
+            146000
+        ],
+        "skills": [
+            "Project management",
+            "Java",
+            "SQL",
+            "JavaScript",
+            "Microsoft SQL Server",
+            "Agile",
+            "Oracle",
+            "QA",
+            "Linux",
+            "Software development"
+        ]
+    },
+    "Software Development Manager": {
+        "jobs": 45,
+        "range": [
+            112500,
+            144500
+        ],
+        "skills": [
+            "Project management",
+            "Agile",
+            "Software development",
+            "QA",
+            "Java",
+            "JavaScript",
+            "Microsoft SQL Server",
+            "C#",
+            ".NET",
+            "SQL"
+        ]
+    },
+    "Solutions Architect": {
+        "jobs": 966,
+        "range": [
+            117500,
+            147500
+        ],
+        "skills": [
+            "Solution architecture",
+            "Project management",
+            "Agile",
+            "Cloud",
+            "SQL",
+            "QA",
+            "Oracle",
+            "Microsoft SQL Server",
+            "Infrastructure",
+            "Java"
+        ]
+    },
+    "Splunk Administrator": {
+        "jobs": 13,
+        "range": [
+            86000,
+            104000
+        ],
+        "skills": [
+            "Splunk",
+            "Security",
+            "Linux",
+            "Technical support",
+            "Microsoft Windows",
+            "Software deployment",
+            "CentOS",
+            "Linux administration",
+            "Red Hat Enterprise Linux",
+            "ISO 9000"
+        ]
+    },
+    "Systems Administrator": {
+        "jobs": 1006,
+        "range": [
+            53000,
+            65500
+        ],
+        "skills": [
+            "Active Directory",
+            "System administration",
+            "Microsoft Windows",
+            "Technical support",
+            "Network",
+            "Hardware",
+            "Microsoft Exchange",
+            "VMware",
+            "Linux",
+            "Infrastructure"
+        ]
+    },
+    "Systems Architect": {
+        "jobs": 175,
+        "range": [
+            108500,
+            138000
+        ],
+        "skills": [
+            "Systems architecture",
+            "Linux",
+            "Microsoft Windows",
+            "Project management",
+            "Infrastructure",
+            "Microsoft SQL Server",
+            "Active Directory",
+            "Network",
+            "QA",
+            "SQL"
+        ]
+    },
+    "Systems Engineer": {
+        "jobs": 1424,
+        "range": [
+            72000,
+            89500
+        ],
+        "skills": [
+            "Active Directory",
+            "Systems engineering",
+            "Microsoft Windows",
+            "Network",
+            "Microsoft Exchange",
+            "Technical support",
+            "VMware",
+            "Hardware",
+            "Infrastructure",
+            "Linux"
+        ]
+    },
+    "Teacher": {
+        "jobs": 1,
+        "range": [
+            46000,
+            68000
+        ],
+        "skills": [
+            "HTML",
+            "Java",
+            "Mathematics",
+            "JavaScript",
+            "Python",
+            "QA",
+            "Research",
+            "Tutoring",
+            "Customer service",
+            "SQL"
+        ]
+    },
+    "Team Lead": {
+        "jobs": 122,
+        "range": [
+            61000,
+            88500
+        ],
+        "skills": [
+            "Team leadership",
+            "QA",
+            "Project management",
+            "Technical support",
+            "Microsoft Windows",
+            "Network",
+            "Customer service",
+            "Active Directory",
+            "SQL",
+            "Hardware"
+        ]
+    },
+    "Technical Operations Officer": {
+        "jobs": 2283,
+        "range": [
+            39500,
+            54000
+        ],
+        "skills": [
+            "Technical support",
+            "Project management",
+            "Microsoft Windows",
+            "Network",
+            "QA",
+            "Hardware",
+            "Active Directory",
+            "Customer service",
+            "SQL",
+            "Networking"
+        ]
+    },
+    "Technical Architect": {
+        "jobs": 258,
+        "range": [
+            106000,
+            131500
+        ],
+        "skills": [
+            "Java",
+            "Oracle",
+            "JavaScript",
+            "Microsoft SQL Server",
+            "Project management",
+            "Agile",
+            "SQL",
+            "QA",
+            ".NET",
+            "Linux"
+        ]
+    },
+    "Technical Lead": {
+        "jobs": 321,
+        "range": [
+            90500,
+            116000
+        ],
+        "skills": [
+            "IT management",
+            "SQL",
+            "QA",
+            "Java",
+            "Project management",
+            "JavaScript",
+            "Oracle",
+            "Agile",
+            "Microsoft SQL Server",
+            "Database"
+        ]
+    },
+    "Technical Specialist": {
+        "jobs": 196,
+        "range": [
+            40000,
+            53000
+        ],
+        "skills": [
+            "Technical support",
+            "Microsoft Windows",
+            "Hardware",
+            "Network",
+            "Active Directory",
+            "Customer service",
+            "QA",
+            "Project management",
+            "Help desk",
+            "SQL"
+        ]
+    },
+    "Technical Support Manager": {
+        "jobs": 5,
+        "range": [
+            39500,
+            54000
+        ],
+        "skills": [
+            "Technical support",
+            "Network",
+            "Microsoft Windows",
+            "Customer service",
+            "Project management",
+            "Hardware",
+            "Active Directory",
+            "QA",
+            "Operations",
+            "Networking"
+        ]
+    },
+    "Technical Support Specialist": {
+        "jobs": 36,
+        "range": [
+            39500,
+            54000
+        ],
+        "skills": [
+            "Technical support",
+            "Microsoft Windows",
+            "Hardware",
+            "Active Directory",
+            "Network",
+            "Customer service",
+            "Help desk",
+            "Printers",
+            "Networking",
+            "Microsoft Windows 7"
+        ]
+    },
+    "Technical Writer": {
+        "jobs": 237,
+        "range": [
+            53500,
+            72500
+        ],
+        "skills": [
+            "Technical writing",
+            "Writing",
+            "Editing",
+            "QA",
+            "Adobe Acrobat",
+            "Project management",
+            "Adobe FrameMaker",
+            "Microsoft Visio",
+            "Microsoft SharePoint",
+            "User guides"
+        ]
+    },
+    "Technician": {
+        "jobs": 1036,
+        "range": [
+            36500,
+            51500
+        ],
+        "skills": [
+            "Technical support",
+            "Microsoft Windows",
+            "Hardware",
+            "Network",
+            "Customer service",
+            "Active Directory",
+            "QA",
+            "Networking",
+            "Printers",
+            "Help desk"
+        ]
+    },
+    "Telecommunications Analyst": {
+        "jobs": 13,
+        "range": [
+            39500,
+            54000
+        ],
+        "skills": [
+            "Telecommunications",
+            "Network",
+            "Technical support",
+            "VoIP",
+            "Cisco",
+            "Project management",
+            "Networking",
+            "Hardware",
+            "QA",
+            "Customer service"
+        ]
+    },
+    "Telecommunications Engineer": {
+        "jobs": 47,
+        "range": [
+            62500,
+            82500
+        ],
+        "skills": [
+            "Telecommunications",
+            "Network",
+            "VoIP",
+            "Cisco",
+            "Avaya",
+            "Technical support",
+            "PBX",
+            "Networking",
+            "SIP",
+            "Switches"
+        ]
+    },
+    "UI Designer": {
+        "jobs": 139,
+        "range": [
+            65000,
+            90500
+        ],
+        "skills": [
+            "UI",
+            "Adobe Photoshop",
+            "UX",
+            "Adobe Illustrator",
+            "Wireframe",
+            "Prototyping",
+            "Graphics",
+            "HTML",
+            "Sketch",
+            "Web design"
+        ]
+    },
+    "UX Designer": {
+        "jobs": 345,
+        "range": [
+            63000,
+            102000
+        ],
+        "skills": [
+            "UX",
+            "Wireframe",
+            "UI",
+            "Prototyping",
+            "Adobe Photoshop",
+            "Sketch",
+            "Adobe Illustrator",
+            "Usability testing",
+            "Graphics",
+            "HTML"
+        ]
+    },
+    "Unix Administrator": {
+        "jobs": 30,
+        "range": [
+            67000,
+            88500
+        ],
+        "skills": [
+            "Linux",
+            "Linux administration",
+            "Red Hat Linux",
+            "Red Hat Enterprise Linux",
+            "Network",
+            "System administration",
+            "DNS",
+            "Hardware",
+            "Security",
+            "VMware"
+        ]
+    },
+    "VP of IT": {
+        "jobs": 4,
+        "range": [
+            149500,
+            189000
+        ],
+        "skills": [
+            "Senior management",
+            "Project management",
+            "IT management",
+            "Infrastructure",
+            "Network",
+            "Operations",
+            "Software development",
+            "Agile",
+            "Change management",
+            "Disaster recovery"
+        ]
+    },
+    "Web Designer": {
+        "jobs": 33,
+        "range": [
+            45500,
+            66000
+        ],
+        "skills": [
+            "HTML",
+            "Web design",
+            "Adobe Photoshop",
+            "JavaScript",
+            "UI",
+            "Adobe Illustrator",
+            "HTML5",
+            "Graphics",
+            "Web development",
+            "WordPress"
+        ]
+    },
+    "Web Developer": {
+        "jobs": 473,
+        "range": [
+            51000,
+            72000
+        ],
+        "skills": [
+            "JavaScript",
+            "HTML",
+            "Web development",
+            "jQuery",
+            "HTML5",
+            "PHP",
+            "SQL",
+            "UI",
+            "MySQL",
+            "Bootstrap"
+        ]
+    }
+}

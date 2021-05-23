@@ -1,0 +1,47 @@
+﻿Values,Authority,Caring,Enjoyment,Learning,Order,Purpose,Results,Safety
+Strong control,1,0,0,0,0,0,0,0
+Competitive work,1,0,0,0,0,0,0,0
+Dominant leadership,1,0,0,0,0,0,0,0
+Individual motivation,1,0,0,0,0,0,0,0
+Loyalty,0,1,0,0,0,0,0,0
+Collaborative work,0,1,0,0,0,0,0,0
+Teamwork focus,0,1,0,0,0,0,0,0
+Interpersonal motivation,0,1,0,0,0,0,0,0
+Playfulness,0,0,1,0,0,0,0,0
+Lighthearted environment,0,0,1,0,0,0,0,0
+Embraces spontaneity,0,0,1,0,0,0,0,0
+Stimulating environment,0,0,1,0,0,0,0,0
+Curiosity,0,0,0,1,0,0,0,0
+Innovative work,0,0,0,1,0,0,0,0
+Adventurous,0,0,0,1,0,0,0,0
+Knowledge-centric,0,0,0,1,0,0,0,0
+Cooperation,0,0,0,0,1,0,0,0
+Methodical,0,0,0,0,1,0,0,0
+Policy/procedure driven,0,0,0,0,1,0,0,0
+Strucuted environment,0,0,0,0,1,0,0,0
+Driving sustainability,0,0,0,0,0,1,0,0
+Open minded,0,0,0,0,0,1,0,0
+Shared ideals,0,0,0,0,0,1,0,0
+Global focus,0,0,0,0,0,1,0,0
+Success-focused,0,0,0,0,0,0,1,0
+Outcome-oriented,0,0,0,0,0,0,1,0
+Goal-driven,0,0,0,0,0,0,1,0
+KPI driven,0,0,0,0,0,0,1,0
+Security,0,0,0,0,0,0,0,1
+Risk-conscious,0,0,0,0,0,0,0,1
+Pragmaticism,0,0,0,0,0,0,0,1
+Careful planning,0,0,0,0,0,0,0,1
+Stable work,1,0,0,0,1,0,1,1
+Flexible work,0,1,1,1,0,1,0,0
+Group accountability,0,1,0,0,1,1,0,1
+Personal accountability,1,0,1,1,0,0,1,0
+Supportive environment,0,1,0,0,1,0,0,0
+Independent work,0,0,1,0,0,0,1,0
+Hierarchical structure,1,0,0,0,0,0,0,1
+Dynamic environment,0,0,0,1,0,1,0,0
+Market driven goals,1,0,0,0,0,0,1,0
+Cost-consciousness,0,0,0,0,1,0,0,1
+Teamwork,0,1,0,0,0,1,0,0
+Free-spirited,0,0,1,1,0,0,0,0
+Quality driven,1,1,1,1,1,1,1,1
+Quantity driven,1,1,1,1,1,1,1,1

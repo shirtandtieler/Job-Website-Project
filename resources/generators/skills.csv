@@ -1,0 +1,258 @@
+Skill,Count,Type
+QA,58,Biz
+Project management,45,Biz
+Agile,23,Biz
+Customer service,22,Biz
+Operations,17,Biz
+Sales,11,Biz
+Risk assessment,9,Biz
+Business analysis,8,Biz
+Finance,8,Biz
+Change management,7,Biz
+Marketing,7,Biz
+Research,7,Biz
+Help desk,6,Biz
+Senior management,6,Biz
+Program management,5,Biz
+Security analysis,5,Biz
+Workflow,3,Biz
+Corrective and preventive action,2,Biz
+Process improvement,2,Biz
+QA management,2,Biz
+Scrum,2,Biz
+Strategic planning,2,Biz
+Advertising,1,Biz
+Art director,1,Biz
+Billing,1,Biz
+Business development,1,Biz
+Business process,1,Biz
+Business rules,1,Biz
+Customer support,1,Biz
+Editing,1,Biz
+IT project management,1,Biz
+Operations management,1,Biz
+Organizational change management,1,Biz
+Policies and procedures,1,Biz
+Product development,1,Biz
+Product management,1,Biz
+Product owner,1,Biz
+Project coordination,1,Biz
+Quality control,1,Biz
+Quality management,1,Biz
+Risk management,1,Biz
+Roadmaps,1,Biz
+Salesforce.com,1,Biz
+Scrum master,1,Biz
+Security management,1,Biz
+Systems analysis,1,Biz
+Team leadership,1,Biz
+Technical writing,1,Biz
+Tutoring,1,Biz
+Use cases,1,Biz
+User guides,1,Biz
+User stories,1,Biz
+WordPress,1,Biz
+Writing,1,Biz
+Network,51,Tech
+SQL,44,Tech
+Microsoft Windows,40,Tech
+Active Directory,34,Tech
+Technical support,34,Tech
+Hardware,30,Tech
+JavaScript,25,Tech
+Microsoft SQL Server,23,Tech
+HTML,21,Tech
+Java,21,Tech
+Security,19,Tech
+Infrastructure,18,Tech
+Linux,18,Tech
+Database,17,Tech
+Networking,15,Tech
+Oracle,15,Tech
+UI,12,Tech
+Information security,11,Tech
+jQuery,11,Tech
+Cyber security,10,Tech
+.NET,9,Tech
+Cisco,9,Tech
+Python,9,Tech
+Software development,9,Tech
+C#,8,Tech
+Cloud,8,Tech
+IT management,8,Tech
+Microsoft Exchange,8,Tech
+Switches,8,Tech
+Adobe Photoshop,7,Tech
+Amazon Web Services,7,Tech
+Automated testing,7,Tech
+Automation,7,Tech
+Data analysis,7,Tech
+Scripting,7,Tech
+Test cases,7,Tech
+Adobe Illustrator,6,Tech
+Bootstrap,6,Tech
+DBA,6,Tech
+Firewall,6,Tech
+Graphics,6,Tech
+HTML5,6,Tech
+Printers,6,Tech
+Regression testing,6,Tech
+Test plans,6,Tech
+Ajax,5,Tech
+Audit,5,Tech
+Data warehouse,5,Tech
+Microsoft Visual Studio,5,Tech
+Statistics,5,Tech
+VMware,5,Tech
+Web development,5,Tech
+Acceptance testing,4,Tech
+Analytics,4,Tech
+AngularJS,4,Tech
+ASP.NET,4,Tech
+Backup,4,Tech
+DevOps,4,Tech
+Git,4,Tech
+IT security,4,Tech
+Jenkins,4,Tech
+LAN,4,Tech
+Microsoft Project,4,Tech
+Microsoft SSIS,4,Tech
+Network security,4,Tech
+Security controls,4,Tech
+Software deployment,4,Tech
+Adobe InDesign,3,Tech
+Data center,3,Tech
+Data science,3,Tech
+Database design,3,Tech
+HP Quality Center,3,Tech
+ISO 9000,3,Tech
+Machine learning,3,Tech
+Microsoft SharePoint,3,Tech
+Microsoft SSRS,3,Tech
+Network engineering,3,Tech
+Node.js,3,Tech
+Prototyping,3,Tech
+Routers,3,Tech
+Stored procedures,3,Tech
+System administration,3,Tech
+UX,3,Tech
+Web design,3,Tech
+Web services,3,Tech
+Apache Hadoop,2,Tech
+Apache Hive,2,Tech
+Apache Spark,2,Tech
+Apache Sqoop,2,Tech
+Big data,2,Tech
+Border Gateway Protocol,2,Tech
+Business intelligence,2,Tech
+CISSP,2,Tech
+Cloud architecture,2,Tech
+Continuous improvement,2,Tech
+Continuous integration,2,Tech
+Data architecture,2,Tech
+Data modeling,2,Tech
+HDFS,2,Tech
+Hibernate,2,Tech
+Inventory,2,Tech
+ITIL,2,Tech
+J2EE,2,Tech
+JSP,2,Tech
+Linux administration,2,Tech
+Logos,2,Tech
+Manufacturing,2,Tech
+MapReduce,2,Tech
+MATLAB,2,Tech
+Microsoft Visio,2,Tech
+Microsoft Windows 7,2,Tech
+Microsoft Windows Azure,2,Tech
+NIST SP 800 Series,2,Tech
+Photography,2,Tech
+PL/SQL,2,Tech
+Presentations,2,Tech
+R,2,Tech
+Red Hat Enterprise Linux,2,Tech
+SDLC,2,Tech
+Selenium,2,Tech
+Selenium WebDriver,2,Tech
+Sketch,2,Tech
+Solution architecture,2,Tech
+Spring,2,Tech
+System security,2,Tech
+Systems engineering,2,Tech
+Tableau,2,Tech
+Telecommunications,2,Tech
+VoIP,2,Tech
+Wireframe,2,Tech
+XML,2,Tech
+ADO.NET,1,Tech
+Adobe Acrobat,1,Tech
+Adobe FrameMaker,1,Tech
+Ansible,1,Tech
+Apache HBase,1,Tech
+Apache Maven,1,Tech
+Apache Pig,1,Tech
+Apex,1,Tech
+Art,1,Tech
+Avaya,1,Tech
+C++,1,Tech
+Cables,1,Tech
+CentOS,1,Tech
+Configuration management database,1,Tech
+Data Loader,1,Tech
+Database architecture,1,Tech
+Disaster recovery,1,Tech
+DNS,1,Tech
+Enterprise architecture,1,Tech
+Field engineering,1,Tech
+Field service,1,Tech
+Force.com,1,Tech
+Illustration,1,Tech
+Information assurance,1,Tech
+ISSO,1,Tech
+JIRA,1,Tech
+JSON,1,Tech
+JUnit,1,Tech
+Lean Six Sigma,1,Tech
+Mathematics,1,Tech
+Metrics,1,Tech
+Microsoft InfoPath,1,Tech
+Microsoft SharePoint Designer,1,Tech
+Microsoft SQL Server DBA,1,Tech
+Migration,1,Tech
+Modeling,1,Tech
+MySQL,1,Tech
+Network design,1,Tech
+Network management,1,Tech
+Oracle Applications,1,Tech
+Oracle Data Guard,1,Tech
+Oracle DBA,1,Tech
+Oracle EBS,1,Tech
+Oracle RMAN,1,Tech
+PBX,1,Tech
+Performance tuning,1,Tech
+PHP,1,Tech
+PMO,1,Tech
+Process engineering,1,Tech
+RAC,1,Tech
+Red Hat Linux,1,Tech
+Replication,1,Tech
+RESTful,1,Tech
+Security architecture,1,Tech
+Security engineering,1,Tech
+Security officer,1,Tech
+ServiceNow,1,Tech
+SIP,1,Tech
+Six Sigma,1,Tech
+Software engineering,1,Tech
+SOQL,1,Tech
+Splunk,1,Tech
+Sprint,1,Tech
+Systems architecture,1,Tech
+Transact-SQL,1,Tech
+Unix,1,Tech
+Usability testing,1,Tech
+Verification and validation,1,Tech
+Visualforce,1,Tech
+VPN,1,Tech
+Web applications,1,Tech
+Web parts,1,Tech
