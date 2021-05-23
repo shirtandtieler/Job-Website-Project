@@ -163,7 +163,7 @@ class SeekerPicture(db.Model, Image):
     user = relationship('SeekerProfile')
 
 
-class SeekerAttitude(db.modle):
+class SeekerAttitude(db.Model):
     __tablename__ = 'seekerAttitude'
 
     id = Column(Integer, primary_key=True)
@@ -197,8 +197,8 @@ class JobPostSkill(db.Model):
     id = Column(Integer, nullable=False, primary_key=True)
     jobpost_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
     skill_id = Column(Integer, ForeignKey('skill.id'), nullable=False)
-    skill_level_min = Column(Enum(skill_levels), nullable=False)
-    importance_level = Column(Enum(important_level), nullable=False)
+    skill_level_min = Column(skill_levels, nullable=False)
+    importance_level = Column(important_level, nullable=False)
 
     company = relationship("CompanyProfile", back_populates="jobpostskill")
 
@@ -209,7 +209,7 @@ class JobPostAttitude(db.Model):
     id = Column(Integer, nullable=False, primary_key=True)
     jobpost_id = Column(Integer, ForeignKey('jobpost.id'), nullable= False)
     attitude_id = Column(Integer, ForeignKey('attitude.id'), nullable=False)
-    importance_level = Column(Enum(important_level), nullable=False)
+    importance_level = Column(important_level, nullable=False)
 
     company = relationship("CompanyProfile", back_populates="jobpostattitude")
 
@@ -217,7 +217,7 @@ class JobPostAttitude(db.Model):
 class SeekerHistoryEducation(db.Model):
     __tablename__='SeekerHistoryEducation'
     id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
     education_lvl = Column(String, nullable=False)
     study_field = Column(String, nullable=False)
     school = Column(String, nullable=False)
@@ -231,7 +231,7 @@ class SeekerHistoryEducation(db.Model):
 class SeekerHistoryJob(db.Model):
     __tablename__='SeekerHistoryJob'
     id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
     city = Column(String(191), server_default=text("NULL"))
     state = Column(String(2), server_default=text("NULL"))
     
@@ -240,16 +240,16 @@ class SeekerHistoryJob(db.Model):
 class SeekerSkill(db.Model):
     __tablename__='SeekerSkill'
     id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
     seekr = relationship('useraccount', back_populates= 'SeekerSkill')
-    skill_id = Column(Integer, ForeignKey('Skill.id'),nullable=False)
+    skill_id = Column(Integer, ForeignKey('skill.id'),nullable=False)
     skill = relationship('Skill', back_populates= 'SeekerHistoryJob')
-    skill_level = Column(db.Enum('1','2','3','4','5', name='skill_levels'),nullable=False)
+    skill_level = Column(skill_levels,nullable=False)
      
 class Applied(db.Model):
     __tablename__='Applied'
     id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
     seekr = relationship('useraccount', back_populates= 'Applied')
     job_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
     jobpost = relationship('Skill', back_populates= 'Applied')
@@ -257,7 +257,7 @@ class Applied(db.Model):
 class Bookmark(db.Model):
     __tablename__='Bookmarks'
     id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
     seekr = relationship('useraccount', back_populates= 'Bookmarks')
     job_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
     jobpost = relationship('Skill', back_populates= 'Bookmarks')
@@ -265,7 +265,7 @@ class Bookmark(db.Model):
 class SeekerSearch(db.Model):
     __tablename__='SeekerSearch'
     id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('UserAccount.id'),nullable=False)
+    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
     seekr = relationship('useraccount', back_populates= 'SeekerSearch')
     job_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
     jobpost = relationship('Skill', back_populates= 'SeekerSearch')
