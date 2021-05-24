@@ -2,6 +2,7 @@
 # The functions below handle the routing/behavior.
 
 from flask import render_template, flash, redirect, url_for
+
 from app.main import bp
 from app.constants import AccountType
 from app.main.forms import JobPostForm
@@ -19,15 +20,22 @@ def index():
 
 
 @bp.route('/profile')
-@login_required
-def profile():
-    """ Displays profile based on the current user's account type """
-    # query user accounts for "current_user"'s ID
-    user = User.query.filter_by(id=current_user.get_id()).first()
+@bp.route("/profile/<uid>", methods=['GET'])
+def profile(uid=None):
+    """ Displays profile for the provided user """
+    if uid is None:  # user may or may not be logged in
+        if not current_user.is_active:
+            # not logged in and no profile requested, so just send to login
+            flash("Log in required to view your profile")
+            return redirect(url_for('main.login'))
+        uid = current_user.get_id()
+
+    # query user account
+    user = User.query.filter_by(id=uid).first()
     if user is None:
         flash(f'Could not find user!')
-        return redirect(url_for('index'))
-    flash(f'Found user with email: {user.email}')
+        return redirect(url_for('main.index'))
+
     if user.account_type == AccountType.SEEKER:
         prof = SeekerProfile.query.filter_by(id=user.id).first()
         if prof is None:  # TODO should not happen unless auto-profile wasn't implemented
