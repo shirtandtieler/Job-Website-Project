@@ -3,7 +3,7 @@ from hashlib import md5
 from sqlalchemy.sql.elements import Null
 from flask import url_for
 from sqlalchemy.sql.elements import Null
-from sqlalchemy import Boolean, CheckConstraint, Column, Date, Enum, ForeignKey, Integer, SmallInteger, String, \
+from sqlalchemy import Boolean, CheckConstraint, Column, Date, ForeignKey, Integer, SmallInteger, String, \
     Sequence, Table, Text, UniqueConstraint, text, MetaData, DateTime
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.sql.functions import current_timestamp
@@ -13,46 +13,127 @@ from app import db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from sqlalchemy.sql.sqltypes import SMALLINT, TIMESTAMP
+import enum
+from sqlalchemy.dialects.postgresql import ENUM
+
 metadata = MetaData()
 
-account_types = Enum('Seeker', 'Company', 'Admin', name='account_types')
-job_lables = Enum("Want to apply", "Considering to apply", "Will not apply", name='job_labels')
-skill_types = Enum('tech', 'biz', name='skill_types')
-skill_levels = Enum('1','2','3','4','5', name='skill_levels')
-important_level = Enum('1','2','3','4','5','6','7', name='important_level')
+
+class AccountTypes(enum.Enum):
+    """
+    An enumeration for identifying the account type of a user: seeker, company, or admin.
+    """
+    s = 'Seeker'
+    c = 'Company'
+    a = 'Admin'
+
+
+class SkillTypes(enum.Enum):
+    """
+    An enumeration for identifying which type a given skill is: technical or business.
+    """
+    t = 'Tech'
+    b = 'Biz'
+
+
+class SkillLevels(enum.IntEnum):
+    """
+    An enumeration for declaring how experienced one is in a given context.
+    Used by seekers in relation to their skills.
+    """
+    novice = 1
+    familiar = 2
+    competent = 3
+    proficient = 4
+    expert = 5
+
+
+class ImportanceLevel(enum.IntEnum):
+    """
+    An enumeration for declaring an importance level of an attribute in some context.
+    Used in job posts for companies to declare how important it is for a seeker to have some skill or attitude.
+    """
+    none = 0
+    vlow = 1
+    low = 2
+    mid = 3
+    high = 4
+    vhigh = 5
+
+
+class EducationLevel(enum.IntEnum):
+    """
+    An enumeration for declaring education levels.
+    Used in seeker profiles for declaring their certification or degrees.
+    """
+    certification = 0
+    associate = 1
+    bachelor = 2
+    master = 3
+    doctoral = 4
+
+
+##### SHARED TYPES #####
+
 
 class Attitude(db.Model):
+    """
+    Represents a cultural attitude.
+    """
     __tablename__ = 'attitude'
 
     id = Column(Integer, primary_key=True)
     title = Column(String(191), nullable=False, unique=True)
+
+    _seekers = relationship("SeekerAttitude", back_populates="_attitude")
+    _job_posts = relationship("JobPostAttitude", back_populates="_attitude")
 
     def __repr__(self):
         return f"Attitude[{self.title}]"
 
 
 class Skill(db.Model):
+    """
+    Represents a technical or business skill.
+    """
     __tablename__ = 'skill'
 
     id = Column(Integer, primary_key=True)
     title = Column(String(191), nullable=False, unique=True)
-    type = Column(skill_types, nullable=False)
+    type = Column(ENUM(SkillTypes), nullable=False)
+
+    _seekers = relationship("SeekerSkill", back_populates="_skill")
+    _job_posts = relationship("JobPostSkill", back_populates="_skill")
 
     def __repr__(self):
         return f"{self.type.capitalize()}Skill[{self.title}]"
 
 
+class UserPicture(db.Model, Image):
+    __tablename__ = 'user_picture'
+
+    user_id = Column(Integer, ForeignKey('user.id', ondelete="CASCADE"), primary_key=True)
+
+    _user = relationship('User', back_populates="_picture")
+
+
 class User(UserMixin, db.Model):
-    __tablename__ = 'useraccount'
+    """
+    Represents an account with the website (whether seeker, company, or admin).
+    """
+    __tablename__ = 'user'
 
     id = Column(Integer, primary_key=True)
-    account_type = Column(account_types, nullable=False)
+    account_type = Column(ENUM(AccountTypes), nullable=False)
     email = Column(String(191), nullable=False, unique=True)
     password = Column(String(191), nullable=False)
     is_active = Column(Boolean, default=True)
     join_date = Column(DateTime, nullable=False, default=datetime.utcnow)
     last_login = Column(DateTime, nullable=False, default=datetime.utcnow)
-    
+
+    _picture = image_attachment("UserPicture", uselist=False, back_populates="_user")
+    _company = relationship("CompanyProfile", uselist=False, back_populates="_user")
+    _seeker = relationship("SeekerProfile", uselist=False, back_populates="_user")
 
     def __repr__(self):
         status = ("" if self.is_active else "Non") + "Active"
@@ -68,51 +149,31 @@ class User(UserMixin, db.Model):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
-
-    def to_dict(self):
-        data = {
-            'id': self.id,
-            'account_type': self.account_type,
-            'email': self.email,
-            'is_active': self.is_active,
-            'join_date': self.join_date.isoformat() + 'Z',
-            'last_login': self.last_login.isoformat() + 'Z',
-            '_links': {
-                'self': url_for('api.get_user', id=self.id),
-                'avatar': self.avatar(128)
-            }
-        }
-        return data
-
-    def from_dict(self, data):
-        for field, value in data.items():
-            if field == 'password':
-                self.set_password(value)
-            else:
-                setattr(self, field, value)
                 
     def update(self):
-        if self.is_active == True:
+        if self.is_active:
             self.last_login = datetime.utcnow
 
 
-class CompanyPicture(db.Model, Image):
-    __tablename__ = 'companypicture'
-    user_id = Column(Integer, ForeignKey('companyprofile.id'), primary_key=True)
-    user = relationship('CompanyProfile')
-
+##### PROFILES ######
 
 class CompanyProfile(db.Model):  # one to one with company-type user account
-    __tablename__ = 'companyprofile'
+    """
+    Table of profile information for Companies.
+    One to one with user account (of type company).
+
+    """
+    __tablename__ = 'company_profile'
 
     id = Column(Integer, primary_key=True)
-    company_id = Column('company_id', ForeignKey('useraccount.id'), nullable=False, unique=True)
-    name = Column(String(191), server_default=text("NULL"))
-    city = Column(String(191), server_default=text("NULL"))
-    state = Column(String(2), server_default=text("NULL"))
-    website = Column(String(191), server_default=text("NULL"))
-    picture = image_attachment('CompanyPicture')
-    job_posts = relationship("JobPost", back_populates="company")
+    user_id = Column('user_id', ForeignKey('user.id', ondelete="CASCADE"), nullable=False, unique=True)
+    name = Column(String(191), nullable=False)
+    city = Column(String(191))
+    state = Column(String(2))
+    website = Column(String(191))
+
+    _user = relationship("User", back_populates="_company")
+    _job_posts = relationship("JobPost", back_populates="_company")
 
     def __repr__(self):
         return f"CompanyProfile[{self.name}]"
@@ -122,155 +183,255 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
         acct = User.query.filter_by(id=company_id).first()
         if acct is None:
             raise ValueError(f"No account w/id={company_id}")
-        enum_company = account_types.enums[1]
-        if enum_company != 'Company':
-            raise ValueError(f"Sanity check failed. 'Company' not at enums[1].")
-        if acct.account_type != enum_company:
+        if acct.account_type != AccountTypes.c:
             raise ValueError(f"Account type is not a Company")
         return company_id
 
 
-class SeekerProfile(db.Model):  # one to one with seeker-type user account
-    __tablename__ = 'seekerprofile'
+class SeekerProfile(db.Model):
+    """
+    Table of profile information for Seekers.
+    One to one with user account (of type seeker).
+    One to many with a seeker skill.
+    One to many with a seeker attitude.
+    One to many with an entry for education history.
+    One to many with an entry for a job history.
+    One to many with a job applied to.
+    One to many with a job bookmarked.
+    """
+    __tablename__ = 'seeker_profile'
 
     id = Column(Integer, primary_key=True)
-    seeker_id = Column(ForeignKey('useraccount.id'), nullable=False, unique=True)
+    user_id = Column('user_id', ForeignKey('user.id'), nullable=False, unique=True)
     first_name = Column(String(191), nullable=False)
     last_name = Column(String(191), nullable=False)
-    phone_number = Column(Integer)
-    city = Column(String(191), server_default=text("NULL"))
-    state = Column(String(2), server_default=text("NULL"))
-    resume = Column(LargeBinary, nullable=False)
-    picture = image_attachment('SeekerPicture')
+    phone_number = Column(String(10))
+    city = Column(String(191))
+    state = Column(String(2))
+    resume = Column(LargeBinary)
+
+    _user = relationship("User", back_populates="_seeker")
+    _skills = relationship("SeekerSkill", back_populates="_seeker")
+    _attitudes = relationship("SeekerAttitude", back_populates="_seeker")
+    _history_edus = relationship("SeekerHistoryEducation", back_populates="_seeker")
+    _history_jobs = relationship("SeekerHistoryJob", back_populates="_seeker")
+    _applications = relationship("SeekerApplication", back_populates="_seeker")
+    _bookmarks = relationship('SeekerBookmark', back_populates='_seeker')
+
+    def __repr__(self):
+        return f"SeekerProfile[{self.first_name}{self.last_name}]"
 
     @validates('seeker_id')
     def validate_account(self, key, seeker_id):
         acct = User.query.filter_by(id=seeker_id).first()
         if acct is None:
             raise ValueError(f"No account w/id={seeker_id}")
-        enum_seeker = account_types.enums[0]
-        if enum_seeker != 'Seeker':
-            raise ValueError(f"Sanity check failed. 'Seeker' not at enums[0].")
-        if acct.account_type != enum_seeker:
+        if acct.account_type != AccountTypes.s:
             raise ValueError(f"Account type is not a Seeker")
         return seeker_id
 
 
+class SeekerSkill(db.Model):
+    """
+    Table of connections between seeker and skill.
+    Many to one with a seeker's profile.
+    Many to one with a skill.
+    """
+    __tablename__ = 'seeker_skill'
 
-class SeekerPicture(db.Model, Image):
-    __tablename__ = 'seekerpicture'
-    user_id = Column(Integer, ForeignKey('seekerprofile.id'), primary_key=True)
-    user = relationship('SeekerProfile')
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('seeker_profile.id', ondelete="CASCADE"), nullable=False)
+    skill_id = Column(Integer, ForeignKey('skill.id', ondelete="CASCADE"), nullable=False)
+    skill_level = Column(ENUM(SkillLevels), nullable=False)
+
+    _seeker = relationship("SeekerProfile", back_populates="_skills")
+    _skill = relationship("Skill", back_populates="_seekers")
+
+    def __repr__(self):
+        return f"Seeker{self.seeker_id}-Skill{self.skill_id}@{self.skill_level}"
 
 
 class SeekerAttitude(db.Model):
-    __tablename__ = 'seekerAttitude'
+    """
+    Table of connections between seeker and attitude.
+    Many to one with a seeker's profile.
+    Many to many with an attitude.
+    """
+    __tablename__ = 'seeker_attitude'
 
     id = Column(Integer, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('seekerprofile.seeker_id'), nullable=False)
-    attitude_id = Column(Integer, ForeignKey('attitude.id'), nullable=False)
+    seeker_id = Column(Integer, ForeignKey('seeker_profile.id', ondelete="CASCADE"), nullable=False)
+    attitude_id = Column(Integer, ForeignKey('attitude.id', ondelete="CASCADE"), nullable=False)
 
-    seekr = relationship('useraccount', back_populates= 'SeekerAttitude')
+    _seeker = relationship('SeekerProfile', back_populates='_attitudes')
+    _attitude = relationship('Attitude', back_populates="_seekers")
+
+    def __repr__(self):
+        return f"Seeker[{self.seeker_id}]-Attitude[{self.attitude_id}]"
 
 
-class JobPost(db.Model):  # many to one with company-type user account
+class SeekerHistoryEducation(db.Model):
+    """
+    Table of connections between a seeker and a past educational experience.
+    Many to one with a seeker's profile.
+    """
+    __tablename__ = 'seeker_history_education'
+
+    id = Column(Integer, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('seeker_profile.id', ondelete="CASCADE"), nullable=False)
+    school = Column(String, nullable=False)
+    education_lvl = Column(ENUM(EducationLevel), nullable=False)
+    study_field = Column(String, nullable=False)
+
+    _seeker = relationship('SeekerProfile', back_populates='_history_edus')
+
+    def __repr__(self):
+        return f"Seeker[{self.seeker_id}]-EduExp[{self.education_lvl}:{self.study_field}@{self.school}]"
+
+
+class SeekerHistoryJob(db.Model):
+    """
+    Table of connections between a seeker and a past job experience.
+    Many to one with a seeker's profile.
+    """
+    __tablename__ = 'seeker_history_job'
+
+    id = Column(Integer, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('seeker_profile.id', ondelete="CASCADE"), nullable=False)
+    job_title = Column(String(191))
+    years_employed = Column(Integer)
+
+    _seeker = relationship('SeekerProfile', back_populates='_history_jobs')
+
+    def __repr__(self):
+        return f"Seeker[{self.seeker_id}]-JobExp[{self.job_title}:{self.years_employed} years]"
+
+
+class SeekerApplication(db.Model):
+    """
+    Table of connections between a seeker and jobs applied to.
+    Many to one with a seeker's profile.
+    One to one with a job post.
+    """
+    __tablename__ = 'seeker_application'
+
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('seeker_profile.id', ondelete="CASCADE"), nullable=False)
+    job_id = Column(Integer, ForeignKey('jobpost.id', ondelete="CASCADE"), nullable=False)
+
+    _seeker = relationship('SeekerProfile', back_populates='_applications')
+    _job_post = relationship('JobPost', back_populates='_seekers_applied')
+
+    def __repr__(self):
+        return f"Seeker[{self.seeker_id}]-Application[{self.job_id}]"
+
+
+class SeekerBookmark(db.Model):
+    """
+    Table of connections between a seeker and jobs bookmarked.
+    Many to one with a seeker's profile.
+    One to one with a job post.
+    """
+    __tablename__ = 'seeker_bookmark'
+
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('seeker_profile.id', ondelete="CASCADE"), nullable=False)
+    job_id = Column(Integer, ForeignKey('jobpost.id', ondelete="CASCADE"), nullable=False)
+
+    _seeker = relationship('SeekerProfile', back_populates='_bookmarks')
+    _job_post = relationship('JobPost', back_populates='_seekers_bookmarked')
+
+    def __repr__(self):
+        return f"Seeker[{self.seeker_id}]-Bookmark[{self.job_id}]"
+
+
+##### JOB POST #####
+
+class JobPost(db.Model):
+    """
+    Table of job posts by a company.
+    Many to one with a company profile.
+    One to many with a job post skill.
+    One to many with a job post attitude.
+    """
     __tablename__ = 'jobpost'
 
     id = Column(Integer, primary_key=True)
-    company_id = Column(ForeignKey('companyprofile.company_id'), nullable=False)
+    company_id = Column(ForeignKey('company_profile.id'), nullable=False)
     job_title = Column(String(191), nullable=False)
-    is_remote = Column(Boolean, default='null')
-    city = Column(String(191), default='null')
-    state_abbv = Column(String(2), default='null')
-    description = Column(String(191))
+    city = Column(String(191))
+    state = Column(String(2))
+    description = Column(Text)
+    is_remote = Column(Boolean, default=False)
+    salary_min = Column(Integer)
+    salary_max = Column(Integer)
     created_timestamp = Column(DateTime, default=datetime.utcnow)
-    active = Column(Boolean, default=True, nullable=False)
-    company = relationship("CompanyProfile", back_populates="job_posts")
+    active = Column(Boolean, default=True)
+
+    _company = relationship("CompanyProfile", back_populates="_job_posts")
+    _skills = relationship("JobPostSkill", back_populates="_job_post")
+    _attitudes = relationship("JobPostAttitude", back_populates="_job_post")
+    _seekers_applied = relationship("SeekerApplication", back_populates="_job_post")
+    _seekers_bookmarked = relationship("SeekerBookmark", back_populates="_job_post")
 
     def __repr__(self):
         return f"JobPost[by#{self.company_id}|{self.job_title}]"
 
-      
+
 class JobPostSkill(db.Model):
-    __tablename__ = 'jobpostskill'
+    """
+    Table of entries representing a skill requirement in a job post.
+    Many to one with a job post.
+    Many to many with a skill.
+    """
+    __tablename__ = 'jobpost_skill'
 
     id = Column(Integer, nullable=False, primary_key=True)
-    jobpost_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
-    skill_id = Column(Integer, ForeignKey('skill.id'), nullable=False)
-    skill_level_min = Column(skill_levels, nullable=False)
-    importance_level = Column(important_level, nullable=False)
+    jobpost_id = Column(Integer, ForeignKey('jobpost.id', ondelete="CASCADE"), nullable=False)
+    skill_id = Column(Integer, ForeignKey('skill.id', ondelete="CASCADE"), nullable=False)
+    skill_level_min = Column(ENUM(SkillLevels), default=SkillLevels.novice)
+    importance_level = Column(ENUM(ImportanceLevel), default=ImportanceLevel.none)
 
-    company = relationship("CompanyProfile", back_populates="jobpostskill")
+    _job_post = relationship("JobPost", back_populates="_skills")
+    _skill = relationship("Skill", back_populates="_job_posts")
+
+    def __repr__(self):
+        return f"JobPost[{self.jobpost_id}]-Skill[{self.skill_id}|{self.skill_level_min}|{self.importance_level}]"
 
 
 class JobPostAttitude(db.Model):
-    __tablename__ = 'jobpostattitude'
+    """
+    Table of entries representing an attitude requirement in a job post.
+    Many to one with a job post.
+    Many to many with an attitude.
+    """
+    __tablename__ = 'jobpost_attitude'
 
     id = Column(Integer, nullable=False, primary_key=True)
-    jobpost_id = Column(Integer, ForeignKey('jobpost.id'), nullable= False)
-    attitude_id = Column(Integer, ForeignKey('attitude.id'), nullable=False)
-    importance_level = Column(important_level, nullable=False)
+    jobpost_id = Column(Integer, ForeignKey('jobpost.id', ondelete="CASCADE"), nullable= False)
+    attitude_id = Column(Integer, ForeignKey('attitude.id', ondelete="CASCADE"), nullable=False)
+    importance_level = Column(ENUM(ImportanceLevel), default=ImportanceLevel.none)
 
-    company = relationship("CompanyProfile", back_populates="jobpostattitude")
+    _job_post = relationship("JobPost", back_populates="_attitudes")
+    _attitude = relationship("Attitude", back_populates="_job_posts")
+
+    def __repr__(self):
+        return f"JobPost[{self.jobpost_id}]-Attitude[{self.attitude_id}|{self.importance_level}]"
 
 
-class SeekerHistoryEducation(db.Model):
-    __tablename__='SeekerHistoryEducation'
-    id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
-    education_lvl = Column(String, nullable=False)
-    study_field = Column(String, nullable=False)
-    school = Column(String, nullable=False)
-    city = Column(String, default=Null)
-    state_abv = Column(String, default=Null)
-    active_enrollment = Column(SMALLINT, default=Null)
-    start_date = Column(Date, default=Null)
-    
-    seekr = relationship('useraccount', back_populates= 'SeekerHistoryEducation')
-
-class SeekerHistoryJob(db.Model):
-    __tablename__='SeekerHistoryJob'
-    id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
-    city = Column(String(191), server_default=text("NULL"))
-    state = Column(String(2), server_default=text("NULL"))
-    
-    seekr = relationship('useraccount', back_populates= 'SeekerHistoryJob')
-    
-class SeekerSkill(db.Model):
-    __tablename__='SeekerSkill'
-    id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
-    seekr = relationship('useraccount', back_populates= 'SeekerSkill')
-    skill_id = Column(Integer, ForeignKey('skill.id'),nullable=False)
-    skill = relationship('Skill', back_populates= 'SeekerHistoryJob')
-    skill_level = Column(skill_levels,nullable=False)
-     
-class Applied(db.Model):
-    __tablename__='Applied'
-    id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
-    seekr = relationship('useraccount', back_populates= 'Applied')
-    job_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
-    jobpost = relationship('Skill', back_populates= 'Applied')
-    
-class Bookmark(db.Model):
-    __tablename__='Bookmarks'
-    id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
-    seekr = relationship('useraccount', back_populates= 'Bookmarks')
-    job_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
-    jobpost = relationship('Skill', back_populates= 'Bookmarks')
-    
+##### SEARCHES #####
+'''
 class SeekerSearch(db.Model):
-    __tablename__='SeekerSearch'
+    __tablename__='seeker_search'
     id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('useraccount.id'),nullable=False)
-    seekr = relationship('useraccount', back_populates= 'SeekerSearch')
+    seeker_id = Column(Integer, ForeignKey('seeker.id'),nullable=False)
     job_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
-    jobpost = relationship('Skill', back_populates= 'SeekerSearch')
     label = Column(job_lables, nullable=False)
-        
+
+    user = relationship('User')
+    skill = relationship('Skill', back_populates= 'SeekerSearch')
+'''
+
 '''
 
 class CompanySeekerSearch(db.Model):
