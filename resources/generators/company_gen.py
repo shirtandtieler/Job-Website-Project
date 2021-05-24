@@ -8,10 +8,10 @@ from faker import Faker
 
 fake = Faker()
 
-with open("companies.csv") as f:
+with open("resources/generators/companies.csv") as f:
     companies = f.read().split("\n")
 
-with open("culture_framework.csv") as f:
+with open("resources/generators/culture_framework.csv") as f:
     archetypes = f.readline().split(",")[1:]
 
 enames = ["recruiter", "hr", "info", "job", "inquiry"]
@@ -22,6 +22,8 @@ def generate_profile():
     profile['name'] = name
     email = random.choice(enames) + "@" + re.sub("[^\w]", "", name).lower() + "." + fake.tld()
     profile['email'] = email
+
+    profile['website'] = 'https://' + re.sub("[^\w]", "", name).lower() + '.com'
     
     zip_code, city, state = barnum.create_city_state_zip()
     profile['city'] = city

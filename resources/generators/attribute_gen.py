@@ -4,22 +4,43 @@
 import pandas as pd
 import random
 
-df_framework = pd.read_csv("culture_framework.csv")
+df_framework = pd.read_csv("resources/generators/culture_framework.csv")
 df_framework.set_index("Values", inplace=True)
 values = df_framework.index.to_list()
 
-df_skills = pd.read_csv("skills.csv")
+df_skills = pd.read_csv("resources/generators/skills.csv")
 biz_skills = df_skills.loc[df_skills.Type=='Biz']['Skill'].to_list()
 tech_skills = df_skills.loc[df_skills.Type=='Tech']['Skill'].to_list()
 
 def gen_values(k_range=(0,10)):
+    """
+    Generates a number of attitudes in the provided range.
+    """
     k = random.randint(*k_range)
     return random.choices(values, k=k)
 
 def gen_biz(k_range=(0,5)):
+    """
+    Generates a number of business skills in the provided range.
+    Assigns a random skill 'level'.
+    """
     k = random.randint(*k_range)
-    return random.choices(biz_skills, k=k)
+    skills = dict()
+    for s in random.choices(biz_skills, k=k):
+        skills[s] = {
+            "level": random.randint(1, 5)
+        }
+    return skills
 
 def gen_tech(k_range=(0,20)):
+    """
+    Generates a number of business skills in the provided range.
+    Assigns a random skill level.
+    """
     k = random.randint(*k_range)
-    return random.choices(tech_skills, k=k)
+    skills = dict()
+    for s in random.choices(tech_skills, k=k):
+        skills[s] = {
+            "level": random.randint(1, 5)
+        }
+    return skills

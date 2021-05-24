@@ -4,7 +4,7 @@ import pandas as pd
 from math import pi, cos, sin, sqrt
 from operator import itemgetter
 
-framework = pd.read_csv("culture_framework.csv")
+framework = pd.read_csv("resources/generators/culture_framework.csv")
 framework.set_index('Values', inplace=True)
 
 archetypes = framework.columns.to_list()
