@@ -14,8 +14,16 @@ from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost
 @bp.route("/")
 @bp.route("/index")
 def index():
-    """ Home page """
-    return render_template("index.html", title="Home")
+    """ Home page / dashboard for logged in users """
+    if current_user.is_anonymous:
+        return render_template("index.html", title="Home")
+
+    if current_user.account_type == AccountTypes.s:  # seeker
+        return render_template("seeker/dashboard.html")
+    elif current_user.account_type == AccountTypes.c:  # company
+        return render_template("company/dashboard.html")
+    else:  # admin
+        return render_template("admin/dashboard.html")
 
 
 @bp.route('/profile')
@@ -33,7 +41,7 @@ def profile():
 
     if current_user.account_type == AccountTypes.s:
         prof = current_user._seeker
-        _name = (prof.first_name or 'ERROR') + ' ' + (prof.last_name or 'ERROR')
+        _name = prof.first_name + ' ' + prof.last_name
         return render_template('seeker/profile.html', fullname=_name)
     elif current_user.account_type == AccountTypes.c:
         prof = current_user._company
