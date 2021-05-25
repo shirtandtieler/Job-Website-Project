@@ -44,8 +44,7 @@ def register():
             flash(f'User {form.email.data} is already registered!')
             return redirect(url_for('auth.login'))
         # create new user and add to the database
-        atype = AccountTypes.s if form.account_type.data.lower().startswith("s") else AccountTypes.c
-        if atype == 's':
+        if form.account_type.data.lower().startswith("s"):
             new_func = new_seeker
         else:
             new_func = new_company
