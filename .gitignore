@@ -1,3 +1,7 @@
+# Ignore migrations folder; everyone should just regenerate the database when using locally
+# ...how we'll do it unless someone wants to figure out how to easily syncronize without errors :)
+migrations/
+
 # Set of values defined by GitHub as part of the default 'python' gitignore
 
 .idea/*
