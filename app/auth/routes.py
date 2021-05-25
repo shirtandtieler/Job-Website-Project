@@ -4,7 +4,7 @@ from werkzeug.utils import redirect
 from app.auth import bp
 from app import db
 from app.auth.forms import LoginForm, RegisterForm
-from app.models import User
+from app.models import User, AccountTypes
 
 
 # TODO update last login of user if successful
@@ -43,7 +43,8 @@ def register():
             return redirect(url_for('auth.login'))
         # create new user and add to the database
         # TODO Bad practice to interface w/db directly. Replace with API
-        user = User(account_type = form.account_type.data, email = form.email.data)
+        atype = AccountTypes.s if form.account_type.data.lower().startswith("s") else AccountTypes.c
+        user = User(account_type = atype, email = form.email.data)
         user.set_password(form.password.data)  # hashes it
         db.session.add(user)
 
