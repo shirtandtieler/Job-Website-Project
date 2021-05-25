@@ -19,6 +19,8 @@
 		</div>
 		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 			<ul class="nav navbar-nav">
+				<li><a href="{{ url_for('main.seeker_search') }}">Seekers</a></li>
+				<li><a href="{{ url_for('main.job_search') }}">Jobs</a></li>
 				<li><a href="{{ url_for('main.postjob') }}">+Job Post</a></li>
 			</ul>
 			<ul class="nav navbar-nav navbar-right">
@@ -26,7 +28,7 @@
 				<li><a href="{{ url_for('auth.login') }}">Login</a></li>
 				<li><a href="{{ url_for('auth.register') }}">Register</a></li>
 				{% else %}
-				<li><a href="{{ url_for('main.profile', username=current_user.username) }}">Profile</a></li>
+				<li><a href="{{ url_for('main.profile') }}">Profile</a></li>
 				<li><a href="{{ url_for('auth.logout') }}">Logout</a></li>
 				{% endif %}
 			</ul>
