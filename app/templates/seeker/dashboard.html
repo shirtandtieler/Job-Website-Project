@@ -2,6 +2,152 @@
 
 {% block app_content %}
 
-<h2>Welcome seeker, to your dashboard.</h2>
+<head>
+    <style>
+        .vertical-align {
+            display: flex;
+            align-items: center;
+        }
+
+        .card {
+            border: 2px solid;
+        }
+
+        .section {
+            margin-top: 25px;
+            margin-bottom: 25px;
+
+            display: flex;
+            display: -webkit-flex;
+            flex-wrap: wrap;
+        }
+
+        /* Vertically center elements */
+        .display-flex-center-broken {
+            display: flex;
+            align-items: center;
+        }
+
+        .display-flex-center {
+            margin:auto;
+        }
+
+        a.card-link:link {
+           color: #000000;
+           text-decoration: none;
+        }
+        a.card-link:visited {
+           color: #000000;
+           text-decoration: none;
+        }
+        a.card-link:hover {
+           color: #000000;
+           text-decoration: none;
+        }
+        a.card-link:active {
+           color: #000000;
+           text-decoration: none;
+        }
+    </style>
+</head>
+
+<h2>Welcome, {{fullname}}!</h2>
+
+<div class="row section">
+    <div class="col-md-3 col-md-offset-2 card">
+        <!-- TODO Should link to companies page when its created-->
+        <a href="{{ url_for('main.job_search', username=current_user.username) }}" class="card-link">
+            <img src="https://img.icons8.com/carbon-copy/100/000000/company.png" height="150" class="center-block"/>
+            <h1 class="text-center">Companies</h1>
+            <h3 class="text-center">Discover Your Perfect Match</h3>
+        </a>
+    </div>
+    <div class="col-md-3 col-md-offset-2 card">
+        <a href="{{ url_for('main.job_search', username=current_user.username) }}" class="card-link">
+            <img src="https://img.icons8.com/ios/100/000000/new-job.png" height="150" class="center-block"/>
+            <h1 class="text-center">Jobs</h1>
+            <h3 class="text-center">For You page</h3>
+        </a>
+    </div>
+</div>
+<div class="row section card">
+    <div class="col-md-3 col-md-offset-1">
+        {% if first_name %}
+        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> First Name</h4>
+        {% else %}
+        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> First Name</h4>
+        {% endif %}
+
+        {% if last_name %}
+        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Last Name</h4>
+        {% else %}
+        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Last Name</h4>
+        {% endif %}
+
+        {% if email %}
+        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/>  Email</h4>
+        {% else %}
+        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Email</h4>
+        {% endif %}
+
+        {% if phone_number %}
+        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Phone Number</h4>
+        {% else %}
+        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Phone Number</h4>
+        {% endif %}
+
+        {% if city %}
+        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> City</h4>
+        {% else %}
+        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> City</h4>
+        {% endif %}
+
+        {% if city %}
+        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> State</h4>
+        {% else %}
+        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> State</h4>
+        {% endif %}
+
+        {% if resume %}
+        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Resume</h4>
+        {% else %}
+        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Resume</h4>
+        {% endif %}
+
+        {% if skills %}
+        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Skills</h4>
+        {% else %}
+        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Skills</h4>
+        {% endif %}
+
+        {% if attitudes %}
+        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Cultural Attitudes</h4>
+        {% else %}
+        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Cultural Attitudes</h4>
+        {% endif %}
+
+        {% if history_edus %}
+        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Education</h4>
+        {% else %}
+        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Education</h4>
+        {% endif %}
+
+        {% if history_jobs %}
+        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Job History</h4>
+        {% else %}
+        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Job History</h4>
+        {% endif %}
+
+        <!-- TODO If all fields are completed the page should have a different message about the user's profile -->
+
+    </div>
+    <div class="col-md-7 display-flex-center">
+        <a href="{{ url_for('main.profile', username=current_user.username) }}" class="card-link">
+            <h3 class="text-center">Your profile needs some updating.</h3>
+            <h3 class="text-center">Want to switch to editing view?</h3>
+            <img src="https://img.icons8.com/material-rounded/100/000000/arrow.png" class="center-block"/>
+        </a>
+    </div>
+</div>
 
 {% endblock %}
