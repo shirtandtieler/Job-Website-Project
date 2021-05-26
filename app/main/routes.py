@@ -81,7 +81,8 @@ def job_search():
     Navigate to the job search page.
     """
     # TODO limit access to only seekers/admins?
-    return render_template('company/browse.html')
+    posts = [(j.job_title, j.company, j.location, j.expected_salary) for j in JobPost.query.all()]
+    return render_template('company/browse.html', jobposts=posts)
 
 
 @bp.route("/job/<jid>", methods=['GET'])
@@ -105,7 +106,8 @@ def seeker_search():
     Navigate to the seeker search page.
     """
     # TODO should be only for companies/admins?
-    return render_template('seeker/browse.html')
+    seekers = [(s.full_name, s.tag_lines, s.location) for s in SeekerProfile.query.all()]
+    return render_template('seeker/browse.html', seekers=seekers)
 
 
 @bp.route("/seeker/<sid>")
