@@ -43,7 +43,9 @@
 		{% if messages %}
 		<ul>
 			{% for message in messages %}
-			<li>{{ message }}</li>
+			<div class="alert alert-info" role="alert">
+				{{ message }}
+			</div>
 			{% endfor %}
 		</ul>
 		{% endif %}
@@ -59,4 +61,10 @@
 {{ super() }}
 <script>
 </script>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<script src="https://kit.fontawesome.com/3ed42264b8.js" crossorigin="anonymous"></script>
 {% endblock %}
