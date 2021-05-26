@@ -1,0 +1,26 @@
+{# This page is for browsing job posts #}
+
+{% extends "base.html" %}
+
+{% block app_content %}
+
+{% for (title, company, location, salary) in jobposts %}
+<div class="w3-cell-row w3-padding-hor-16" style="width:75%">
+    <div class="w3-container w3-cell" style="width:5%">
+        <span class="fas fa-briefcase w3-xxlarge w3-left"></span>
+    </div>
+
+    <div class="w3-container w3-cell w3-cell-middle">
+        <span class="w3-large">{{ title }}</span><br>
+        <span class="w3-small">{{ company }}</span><br>
+        <span class="w3-tiny">{{ salary }}</span><br>
+        <p class="w3-tiny">{{ location }}</p>
+    </div>
+
+    <div class="w3-container w3-cell" style="width:10%">
+        <span class="far fa-star w3-xxlarge"></span>
+    </div>
+</div>
+{% endfor%}
+
+{% endblock %}

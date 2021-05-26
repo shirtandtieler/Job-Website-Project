@@ -1,0 +1,962 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 13.2
+-- Dumped by pg_dump version 13.2
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
+
+--
+-- Data for Name: alembic_version; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+-- REMOVED BY TYLER TO NOT MESS UP YOUR LOCAL BUILD
+--INSERT INTO public.alembic_version VALUES ('fa84170d25a3');
+
+-- ADDED BY TYLER
+-- the first two need to be deleted first to ensure reference constraints aren't violated
+DELETE FROM public.seeker_profile;
+DELETE FROM public.jobpost;
+DELETE FROM public.attitude;
+DELETE FROM public."user";
+DELETE FROM public.company_profile;
+DELETE FROM public.jobpost_attitude;
+DELETE FROM public.skill;
+DELETE FROM public.jobpost_skill;
+DELETE FROM public.seeker_application;
+DELETE FROM public.seeker_attitude;
+DELETE FROM public.seeker_bookmark;
+DELETE FROM public.seeker_history_education;
+DELETE FROM public.seeker_history_job;
+DELETE FROM public.seeker_skill;
+
+
+--
+-- Data for Name: attitude; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.attitude VALUES (1, 'Strong control');
+INSERT INTO public.attitude VALUES (2, 'Competitive work');
+INSERT INTO public.attitude VALUES (3, 'Dominant leadership');
+INSERT INTO public.attitude VALUES (4, 'Individual motivation');
+INSERT INTO public.attitude VALUES (5, 'Loyalty');
+INSERT INTO public.attitude VALUES (6, 'Collaborative work');
+INSERT INTO public.attitude VALUES (7, 'Teamwork focus');
+INSERT INTO public.attitude VALUES (8, 'Interpersonal motivation');
+INSERT INTO public.attitude VALUES (9, 'Playfulness');
+INSERT INTO public.attitude VALUES (10, 'Lighthearted environment');
+INSERT INTO public.attitude VALUES (11, 'Embraces spontaneity');
+INSERT INTO public.attitude VALUES (12, 'Stimulating environment');
+INSERT INTO public.attitude VALUES (13, 'Curiosity');
+INSERT INTO public.attitude VALUES (14, 'Innovative work');
+INSERT INTO public.attitude VALUES (15, 'Adventurous');
+INSERT INTO public.attitude VALUES (16, 'Knowledge-centric');
+INSERT INTO public.attitude VALUES (17, 'Cooperation');
+INSERT INTO public.attitude VALUES (18, 'Methodical');
+INSERT INTO public.attitude VALUES (19, 'Policy/procedure driven');
+INSERT INTO public.attitude VALUES (20, 'Strucuted environment');
+INSERT INTO public.attitude VALUES (21, 'Driving sustainability');
+INSERT INTO public.attitude VALUES (22, 'Open minded');
+INSERT INTO public.attitude VALUES (23, 'Shared ideals');
+INSERT INTO public.attitude VALUES (24, 'Global focus');
+INSERT INTO public.attitude VALUES (25, 'Success-focused');
+INSERT INTO public.attitude VALUES (26, 'Outcome-oriented');
+INSERT INTO public.attitude VALUES (27, 'Goal-driven');
+INSERT INTO public.attitude VALUES (28, 'KPI driven');
+INSERT INTO public.attitude VALUES (29, 'Security');
+INSERT INTO public.attitude VALUES (30, 'Risk-conscious');
+INSERT INTO public.attitude VALUES (31, 'Pragmaticism');
+INSERT INTO public.attitude VALUES (32, 'Careful planning');
+INSERT INTO public.attitude VALUES (33, 'Stable work');
+INSERT INTO public.attitude VALUES (34, 'Flexible work');
+INSERT INTO public.attitude VALUES (35, 'Group accountability');
+INSERT INTO public.attitude VALUES (36, 'Personal accountability');
+INSERT INTO public.attitude VALUES (37, 'Supportive environment');
+INSERT INTO public.attitude VALUES (38, 'Independent work');
+INSERT INTO public.attitude VALUES (39, 'Hierarchical structure');
+INSERT INTO public.attitude VALUES (40, 'Dynamic environment');
+INSERT INTO public.attitude VALUES (41, 'Market driven goals');
+INSERT INTO public.attitude VALUES (42, 'Cost-consciousness');
+INSERT INTO public.attitude VALUES (43, 'Teamwork');
+INSERT INTO public.attitude VALUES (44, 'Free-spirited');
+INSERT INTO public.attitude VALUES (45, 'Quality driven');
+INSERT INTO public.attitude VALUES (46, 'Quantity driven');
+
+
+--
+-- Data for Name: user; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public."user" VALUES (1, 's', 'w.hamilton@mail.com', 'pbkdf2:sha256:150000$Yy2dOeqH$f2bf6243c2b8f49acbe05f1b413663b444957657e6df070e7fa7cd57d1be916a', true, '2021-05-24 17:05:27.287683', '2021-05-24 17:05:27.287683');
+INSERT INTO public."user" VALUES (2, 's', 'daniel@me.com', 'pbkdf2:sha256:150000$fuJxbn9Z$154ae041f60ff1f0785a0d74f39e7d5dc7dbc3f91e5b5bfb2b8d5d589322664b', true, '2021-05-01 21:14:03', '2021-05-24 18:04:57.712014');
+INSERT INTO public."user" VALUES (3, 's', 'j.pratt@hotmail.com', 'pbkdf2:sha256:150000$6oYckK1h$ad58f9cad857d6369ea41090d649f888f4a4e51073a7ca71ae2054a840639878', true, '2021-01-16 03:12:25', '2021-05-24 18:06:01.979825');
+INSERT INTO public."user" VALUES (4, 's', 't.johnson@att.net', 'pbkdf2:sha256:150000$Qot0Dc4k$87f0b454034509636bdc779be3a933267abe77a65a8216caca297cbd41d09dfc', true, '2021-05-07 21:31:53', '2021-05-24 18:14:15.700463');
+INSERT INTO public."user" VALUES (5, 's', 'marie.nelson@sbcglobal.net', 'pbkdf2:sha256:150000$7RfIokPu$d9c2e42b050c49e5065b103a86d2ba4f90de796314ebe725bf67fca948f14a98', true, '2021-01-30 19:34:06', '2021-05-24 18:14:42.296917');
+INSERT INTO public."user" VALUES (6, 's', 'cynthia@aol.com', 'pbkdf2:sha256:150000$Lm20kisr$583b47aa85deca8603308863e5e65913258239130da99217837bb74b3d1d5a98', true, '2021-05-15 03:23:22', '2021-05-24 18:14:43.903081');
+INSERT INTO public."user" VALUES (7, 's', 'garrett@yahoo.com', 'pbkdf2:sha256:150000$Es5QD45j$9dcc17a38db066229ccb4caf5a8f4f0afc9575018cee20cce379e5f1aa8ad222', true, '2021-03-01 15:48:44', '2021-05-24 18:14:57.910915');
+INSERT INTO public."user" VALUES (8, 's', 'e.nelson@hotmail.com', 'pbkdf2:sha256:150000$w1yqSljk$e31f3a3e02dbafb27c04ba03eb3f8317011489f738497cbcf6c6283f18ac62ab', true, '2021-05-06 07:04:13', '2021-05-24 18:14:59.363865');
+INSERT INTO public."user" VALUES (9, 'c', 'inquiry@techtrust.biz', 'pbkdf2:sha256:150000$RlzUoDfC$e464a872927b1d0a24a3000a851a5aad46f514fcd6e055284fd168d389e4e1da', true, '2021-01-25 02:02:36', '2021-05-24 18:15:02.432259');
+INSERT INTO public."user" VALUES (10, 'c', 'recruiter@ovalsolutions.com', 'pbkdf2:sha256:150000$tvnFDIIr$94934fc29408350c6043d2a3a9ab7e42c6a51c45e1222ed6d3d40d8bce15169d', true, '2021-02-13 14:07:29', '2021-05-24 18:15:06.637756');
+INSERT INTO public."user" VALUES (11, 'c', 'inquiry@diginaturalis.biz', 'pbkdf2:sha256:150000$Aazbxtpz$d1d1e92bd300c515c1456441940bb124264ddb5b0cd106748fc1477e5aa47743', true, '2021-03-09 13:34:32', '2021-05-24 18:15:08.196004');
+INSERT INTO public."user" VALUES (12, 'c', 'hr@technokings.com', 'pbkdf2:sha256:150000$x6x7U0qF$2aef31cf5853464743745a3f0ae53a2ed6e0f26f5299107ea74da49e53caac04', true, '2021-01-27 13:03:52', '2021-05-24 18:15:09.462516');
+INSERT INTO public."user" VALUES (13, 'c', 'info@techware.com', 'pbkdf2:sha256:150000$xE9cnRXm$03397237a77ac32b02707bec4ec66c2c2c7d3ff7273a1bb867a0b56f49ea16b2', true, '2021-03-05 11:06:58', '2021-05-24 18:15:10.836511');
+INSERT INTO public."user" VALUES (14, 's', 'elaine@sbcglobal.net', 'pbkdf2:sha256:150000$mr2FAVk4$78858a8e66e4c94d8b89b5b4b20ab68c6860a17910f4c958a4540a311708a5c6', true, '2021-03-05 09:48:41', '2021-05-24 18:20:14.831008');
+INSERT INTO public."user" VALUES (15, 's', 'mark@verizon.net', 'pbkdf2:sha256:150000$6kbWw7KP$ea72b0ca8ca48ee5453c288e3a2f33c3d5017c842fd101ce7fa0ff948fcf759f', true, '2021-03-19 18:46:02', '2021-05-24 18:21:11.442833');
+INSERT INTO public."user" VALUES (16, 'c', 'hr@microstrategies.org', 'pbkdf2:sha256:150000$9ykiYheD$d685c4c15513c5cc0e3d5d86a4b7e627c5b3b081271d3cae7307f84b611e9156', true, '2021-05-13 06:00:01', '2021-05-24 19:40:27.381081');
+INSERT INTO public."user" VALUES (17, 's', 'c.cobb@gmail.com', 'pbkdf2:sha256:150000$RJscWymO$1b390de9a9b30cebee8b00fe1dfe7295228f430e511a92826b91016623d064a5', true, '2021-02-11 08:06:03', '2021-05-24 19:52:50.30278');
+INSERT INTO public."user" VALUES (18, 'a', 'admin@admin.com', 'pbkdf2:sha256:150000$njps2U7z$da4b65df90d9f64974f53d09d6da0a2461dd3833a6f9783e17dcbd96f77c968b', true, '2021-05-25 15:06:04.955452', '2021-05-25 15:06:04.955452');
+INSERT INTO public."user" VALUES (20, 's', 'seeker@seeker.com', 'pbkdf2:sha256:150000$Dnm8Qqqg$81da46d744a851d40b96e7c7ba16ccfa925c6ac7126582b6d6feb9c273437b47', true, '2021-05-25 15:15:00.375454', '2021-05-25 15:15:00.375454');
+INSERT INTO public."user" VALUES (22, 'c', 'company@company.com', 'pbkdf2:sha256:150000$5WU3Mx7m$5f2193211992df464ddba0c173672d3bfbef60bd300b31fc3d037d552246cb39', true, '2021-05-25 15:26:55.035476', '2021-05-25 15:26:55.035476');
+INSERT INTO public."user" VALUES (23, 's', 'seeker1@seeker.com', 'pbkdf2:sha256:150000$lr1Uuav2$7146916caec63cbefb7c206ed0d438cb7504ad96e2b6cd17482357ee758fd502', true, '2021-05-25 16:22:03.507932', '2021-05-25 16:22:03.507932');
+
+
+--
+-- Data for Name: company_profile; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.company_profile VALUES (1, 9, 'TechTrust', 'Hines', 'OR', NULL);
+INSERT INTO public.company_profile VALUES (2, 10, 'Oval Solutions', 'Billerica', 'MA', NULL);
+INSERT INTO public.company_profile VALUES (3, 11, 'Diginaturalis', 'Crawford', 'TN', NULL);
+INSERT INTO public.company_profile VALUES (4, 12, 'Technokings', 'Hodges', 'AL', NULL);
+INSERT INTO public.company_profile VALUES (5, 13, 'Techware', 'Fall River', 'MA', NULL);
+INSERT INTO public.company_profile VALUES (6, 16, 'Microstrategies', 'Clarksburg', 'OH', NULL);
+INSERT INTO public.company_profile VALUES (7, 22, 'company', NULL, NULL, NULL);
+
+
+--
+-- Data for Name: jobpost; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.jobpost VALUES (1, 1, 'Technical Operations Officer', 'Hines', 'OR', 'TechTrust is looking for someone to fill the role of Technical Operations Officer.
+Income: [39500, 54000]
+', false, 39500, 54000, '2021-05-14 02:17:54', true);
+INSERT INTO public.jobpost VALUES (2, 1, 'Developer', 'Hines', 'OR', 'TechTrust is looking for someone to fill the role of Developer.
+Income: Up to 72000
+', false, NULL, 72000, '2021-01-09 18:15:27', true);
+INSERT INTO public.jobpost VALUES (3, 1, 'Developer', 'Hines', 'OR', 'TechTrust is looking for someone to fill the role of Developer.
+Income: [51000, 72000]
+', false, 51000, 72000, '2021-05-12 05:43:31', true);
+INSERT INTO public.jobpost VALUES (4, 2, 'Applications Developer', 'Billerica', 'MA', 'Oval Solutions is looking for someone to fill the role of Applications Developer.
+Income: [63500, 86000]
+', false, 63500, 86000, '2021-03-25 09:29:20', true);
+INSERT INTO public.jobpost VALUES (5, 2, 'Technical Operations Officer', 'Billerica', 'MA', 'Oval Solutions is looking for someone to fill the role of Technical Operations Officer.
+Income: [39500, 54000]
+', false, 39500, 54000, '2021-01-02 13:51:17', true);
+INSERT INTO public.jobpost VALUES (6, 2, 'Scrum Master', 'Billerica', 'MA', 'Oval Solutions is looking for someone to fill the role of Scrum Master.
+Income: Up to 111000
+', true, NULL, 111000, '2021-03-14 19:44:17', true);
+INSERT INTO public.jobpost VALUES (7, 3, 'Applications Developer', 'Crawford', 'TN', 'Diginaturalis is looking for someone to fill the role of Applications Developer.
+Income: Up to 86000
+', true, NULL, 86000, '2021-01-17 20:01:29', true);
+INSERT INTO public.jobpost VALUES (8, 3, 'Developer', 'Crawford', 'TN', 'Diginaturalis is looking for someone to fill the role of Developer.
+Income: Depends on experience.
+', false, NULL, NULL, '2021-02-07 12:10:07', true);
+INSERT INTO public.jobpost VALUES (9, 4, 'Developer', 'Hodges', 'AL', 'Technokings is looking for someone to fill the role of Developer.
+Income: [51000, 72000]
+', true, 51000, 72000, '2021-05-19 13:38:41', true);
+INSERT INTO public.jobpost VALUES (10, 4, 'Technical Lead', 'Hodges', 'AL', 'Technokings is looking for someone to fill the role of Technical Lead.
+Income: Depends on experience.
+', true, NULL, NULL, '2021-04-16 06:17:21', true);
+INSERT INTO public.jobpost VALUES (11, 4, 'Project Manager', 'Hodges', 'AL', 'Technokings is looking for someone to fill the role of Project Manager.
+Income: 75000+
+', true, 75000, NULL, '2021-03-05 04:28:22', true);
+INSERT INTO public.jobpost VALUES (12, 5, 'Developer', 'Fall River', 'MA', 'Techware is looking for someone to fill the role of Developer.
+Income: [51000, 72000]
+', true, 51000, 72000, '2021-05-03 15:52:17', true);
+INSERT INTO public.jobpost VALUES (13, 5, 'Developer', 'Fall River', 'MA', 'Techware is looking for someone to fill the role of Developer.
+Income: Up to 72000
+', false, NULL, 72000, '2021-02-27 06:52:50', true);
+INSERT INTO public.jobpost VALUES (14, 5, 'Data Analyst', 'Fall River', 'MA', 'Techware is looking for someone to fill the role of Data Analyst.
+Income: 55500+
+', false, 55500, NULL, '2021-01-02 08:58:57', true);
+INSERT INTO public.jobpost VALUES (15, 5, 'Developer', 'Fall River', 'MA', 'Techware is looking for someone to fill the role of Developer.
+Income: [51000, 72000]
+', false, 51000, 72000, '2021-02-08 00:30:51', true);
+INSERT INTO public.jobpost VALUES (16, 6, 'Java Developer', 'Clarksburg', 'OH', 'Microstrategies is looking for someone to fill the role of Java Developer.
+Income: Up to 91500
+', true, NULL, 91500, '2021-04-30 12:28:09', true);
+INSERT INTO public.jobpost VALUES (17, 6, 'Developer', 'Clarksburg', 'OH', 'Microstrategies is looking for someone to fill the role of Developer.
+Income: Up to 72000
+', true, NULL, 72000, '2021-03-26 06:54:25', true);
+INSERT INTO public.jobpost VALUES (18, 6, 'Developer', 'Clarksburg', 'OH', 'Microstrategies is looking for someone to fill the role of Developer.
+Income: [51000, 72000]
+', true, 51000, 72000, '2021-02-06 11:29:26', true);
+
+
+--
+-- Data for Name: jobpost_attitude; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.jobpost_attitude VALUES (1, 1, 42, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (2, 1, 8, 'high');
+INSERT INTO public.jobpost_attitude VALUES (3, 1, 7, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (4, 1, 41, 'low');
+INSERT INTO public.jobpost_attitude VALUES (5, 1, 1, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (6, 1, 24, 'low');
+INSERT INTO public.jobpost_attitude VALUES (7, 1, 28, 'high');
+INSERT INTO public.jobpost_attitude VALUES (8, 1, 5, 'high');
+INSERT INTO public.jobpost_attitude VALUES (9, 1, 2, 'low');
+INSERT INTO public.jobpost_attitude VALUES (10, 2, 35, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (11, 2, 24, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (12, 2, 14, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (13, 2, 31, 'high');
+INSERT INTO public.jobpost_attitude VALUES (14, 2, 40, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (15, 2, 28, 'low');
+INSERT INTO public.jobpost_attitude VALUES (16, 2, 33, 'low');
+INSERT INTO public.jobpost_attitude VALUES (17, 2, 34, 'high');
+INSERT INTO public.jobpost_attitude VALUES (18, 2, 8, 'low');
+INSERT INTO public.jobpost_attitude VALUES (19, 3, 3, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (20, 3, 13, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (21, 3, 19, 'low');
+INSERT INTO public.jobpost_attitude VALUES (22, 3, 7, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (23, 3, 27, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (24, 4, 19, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (25, 4, 11, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (26, 4, 44, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (27, 4, 25, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (28, 4, 45, 'high');
+INSERT INTO public.jobpost_attitude VALUES (29, 4, 27, 'high');
+INSERT INTO public.jobpost_attitude VALUES (30, 4, 37, 'high');
+INSERT INTO public.jobpost_attitude VALUES (31, 4, 7, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (32, 5, 46, 'high');
+INSERT INTO public.jobpost_attitude VALUES (33, 5, 36, 'low');
+INSERT INTO public.jobpost_attitude VALUES (34, 5, 18, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (35, 5, 31, 'low');
+INSERT INTO public.jobpost_attitude VALUES (36, 5, 25, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (37, 5, 33, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (38, 5, 5, 'low');
+INSERT INTO public.jobpost_attitude VALUES (39, 5, 7, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (40, 6, 37, 'low');
+INSERT INTO public.jobpost_attitude VALUES (41, 6, 23, 'low');
+INSERT INTO public.jobpost_attitude VALUES (42, 6, 46, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (43, 6, 21, 'high');
+INSERT INTO public.jobpost_attitude VALUES (44, 6, 19, 'high');
+INSERT INTO public.jobpost_attitude VALUES (45, 7, 1, 'high');
+INSERT INTO public.jobpost_attitude VALUES (46, 7, 19, 'low');
+INSERT INTO public.jobpost_attitude VALUES (47, 7, 26, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (48, 7, 30, 'low');
+INSERT INTO public.jobpost_attitude VALUES (49, 7, 6, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (50, 8, 9, 'high');
+INSERT INTO public.jobpost_attitude VALUES (51, 8, 43, 'high');
+INSERT INTO public.jobpost_attitude VALUES (52, 8, 12, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (53, 8, 44, 'low');
+INSERT INTO public.jobpost_attitude VALUES (54, 8, 28, 'high');
+INSERT INTO public.jobpost_attitude VALUES (55, 8, 34, 'high');
+INSERT INTO public.jobpost_attitude VALUES (56, 8, 39, 'low');
+INSERT INTO public.jobpost_attitude VALUES (57, 8, 36, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (58, 9, 39, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (59, 9, 3, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (60, 9, 2, 'low');
+INSERT INTO public.jobpost_attitude VALUES (61, 9, 29, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (62, 9, 14, 'high');
+INSERT INTO public.jobpost_attitude VALUES (63, 9, 41, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (64, 9, 10, 'high');
+INSERT INTO public.jobpost_attitude VALUES (65, 10, 30, 'low');
+INSERT INTO public.jobpost_attitude VALUES (66, 10, 17, 'high');
+INSERT INTO public.jobpost_attitude VALUES (67, 10, 4, 'low');
+INSERT INTO public.jobpost_attitude VALUES (68, 10, 10, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (69, 10, 7, 'high');
+INSERT INTO public.jobpost_attitude VALUES (70, 10, 29, 'low');
+INSERT INTO public.jobpost_attitude VALUES (71, 10, 28, 'high');
+INSERT INTO public.jobpost_attitude VALUES (72, 10, 44, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (73, 10, 25, 'high');
+INSERT INTO public.jobpost_attitude VALUES (74, 11, 7, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (75, 11, 30, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (76, 11, 28, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (77, 11, 34, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (78, 11, 20, 'high');
+INSERT INTO public.jobpost_attitude VALUES (79, 11, 45, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (80, 11, 2, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (81, 11, 13, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (82, 12, 9, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (83, 12, 7, 'high');
+INSERT INTO public.jobpost_attitude VALUES (84, 12, 44, 'high');
+INSERT INTO public.jobpost_attitude VALUES (85, 12, 15, 'low');
+INSERT INTO public.jobpost_attitude VALUES (86, 12, 43, 'low');
+INSERT INTO public.jobpost_attitude VALUES (87, 12, 45, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (88, 12, 42, 'high');
+INSERT INTO public.jobpost_attitude VALUES (89, 13, 23, 'low');
+INSERT INTO public.jobpost_attitude VALUES (90, 13, 18, 'high');
+INSERT INTO public.jobpost_attitude VALUES (91, 13, 5, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (92, 13, 32, 'low');
+INSERT INTO public.jobpost_attitude VALUES (93, 13, 2, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (94, 14, 23, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (95, 14, 4, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (96, 14, 34, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (97, 14, 37, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (98, 14, 19, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (99, 14, 36, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (100, 14, 31, 'high');
+INSERT INTO public.jobpost_attitude VALUES (101, 14, 33, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (102, 15, 6, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (103, 15, 27, 'high');
+INSERT INTO public.jobpost_attitude VALUES (104, 15, 25, 'high');
+INSERT INTO public.jobpost_attitude VALUES (105, 15, 3, 'high');
+INSERT INTO public.jobpost_attitude VALUES (106, 15, 14, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (107, 15, 7, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (108, 15, 33, 'low');
+INSERT INTO public.jobpost_attitude VALUES (109, 15, 39, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (110, 15, 40, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (111, 16, 4, 'low');
+INSERT INTO public.jobpost_attitude VALUES (112, 16, 42, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (113, 16, 19, 'high');
+INSERT INTO public.jobpost_attitude VALUES (114, 16, 8, 'low');
+INSERT INTO public.jobpost_attitude VALUES (115, 16, 16, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (116, 16, 27, 'high');
+INSERT INTO public.jobpost_attitude VALUES (117, 16, 10, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (118, 16, 40, 'high');
+INSERT INTO public.jobpost_attitude VALUES (119, 16, 11, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (120, 17, 44, 'low');
+INSERT INTO public.jobpost_attitude VALUES (121, 17, 30, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (122, 17, 15, 'low');
+INSERT INTO public.jobpost_attitude VALUES (123, 17, 17, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (124, 17, 25, 'low');
+INSERT INTO public.jobpost_attitude VALUES (125, 17, 33, 'high');
+INSERT INTO public.jobpost_attitude VALUES (126, 17, 6, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (127, 18, 23, 'low');
+INSERT INTO public.jobpost_attitude VALUES (128, 18, 17, 'low');
+INSERT INTO public.jobpost_attitude VALUES (129, 18, 4, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (130, 18, 1, 'low');
+INSERT INTO public.jobpost_attitude VALUES (131, 18, 36, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (132, 18, 25, 'low');
+INSERT INTO public.jobpost_attitude VALUES (133, 18, 32, 'mid');
+INSERT INTO public.jobpost_attitude VALUES (134, 18, 40, 'vhigh');
+INSERT INTO public.jobpost_attitude VALUES (135, 18, 21, 'high');
+
+
+--
+-- Data for Name: skill; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.skill VALUES (1, 'Network', 't');
+INSERT INTO public.skill VALUES (2, 'SQL', 't');
+INSERT INTO public.skill VALUES (3, 'Microsoft Windows', 't');
+INSERT INTO public.skill VALUES (4, 'Active Directory', 't');
+INSERT INTO public.skill VALUES (5, 'Technical support', 't');
+INSERT INTO public.skill VALUES (6, 'Hardware', 't');
+INSERT INTO public.skill VALUES (7, 'JavaScript', 't');
+INSERT INTO public.skill VALUES (8, 'Microsoft SQL Server', 't');
+INSERT INTO public.skill VALUES (9, 'HTML', 't');
+INSERT INTO public.skill VALUES (10, 'Java', 't');
+INSERT INTO public.skill VALUES (11, 'Security', 't');
+INSERT INTO public.skill VALUES (12, 'Infrastructure', 't');
+INSERT INTO public.skill VALUES (13, 'Linux', 't');
+INSERT INTO public.skill VALUES (14, 'Database', 't');
+INSERT INTO public.skill VALUES (15, 'Networking', 't');
+INSERT INTO public.skill VALUES (16, 'Oracle', 't');
+INSERT INTO public.skill VALUES (17, 'UI', 't');
+INSERT INTO public.skill VALUES (18, 'Information security', 't');
+INSERT INTO public.skill VALUES (19, 'jQuery', 't');
+INSERT INTO public.skill VALUES (20, 'Cyber security', 't');
+INSERT INTO public.skill VALUES (21, '.NET', 't');
+INSERT INTO public.skill VALUES (22, 'Cisco', 't');
+INSERT INTO public.skill VALUES (23, 'Python', 't');
+INSERT INTO public.skill VALUES (24, 'Software development', 't');
+INSERT INTO public.skill VALUES (25, 'C#', 't');
+INSERT INTO public.skill VALUES (26, 'Cloud', 't');
+INSERT INTO public.skill VALUES (27, 'IT management', 't');
+INSERT INTO public.skill VALUES (28, 'Microsoft Exchange', 't');
+INSERT INTO public.skill VALUES (29, 'Switches', 't');
+INSERT INTO public.skill VALUES (30, 'Adobe Photoshop', 't');
+INSERT INTO public.skill VALUES (31, 'Amazon Web Services', 't');
+INSERT INTO public.skill VALUES (32, 'Automated testing', 't');
+INSERT INTO public.skill VALUES (33, 'Automation', 't');
+INSERT INTO public.skill VALUES (34, 'Data analysis', 't');
+INSERT INTO public.skill VALUES (35, 'Scripting', 't');
+INSERT INTO public.skill VALUES (36, 'Test cases', 't');
+INSERT INTO public.skill VALUES (37, 'Adobe Illustrator', 't');
+INSERT INTO public.skill VALUES (38, 'Bootstrap', 't');
+INSERT INTO public.skill VALUES (39, 'DBA', 't');
+INSERT INTO public.skill VALUES (40, 'Firewall', 't');
+INSERT INTO public.skill VALUES (41, 'Graphics', 't');
+INSERT INTO public.skill VALUES (42, 'HTML5', 't');
+INSERT INTO public.skill VALUES (43, 'Printers', 't');
+INSERT INTO public.skill VALUES (44, 'Regression testing', 't');
+INSERT INTO public.skill VALUES (45, 'Test plans', 't');
+INSERT INTO public.skill VALUES (46, 'Ajax', 't');
+INSERT INTO public.skill VALUES (47, 'Audit', 't');
+INSERT INTO public.skill VALUES (48, 'Data warehouse', 't');
+INSERT INTO public.skill VALUES (49, 'Microsoft Visual Studio', 't');
+INSERT INTO public.skill VALUES (50, 'Statistics', 't');
+INSERT INTO public.skill VALUES (51, 'VMware', 't');
+INSERT INTO public.skill VALUES (52, 'Web development', 't');
+INSERT INTO public.skill VALUES (53, 'Acceptance testing', 't');
+INSERT INTO public.skill VALUES (54, 'Analytics', 't');
+INSERT INTO public.skill VALUES (55, 'AngularJS', 't');
+INSERT INTO public.skill VALUES (56, 'ASP.NET', 't');
+INSERT INTO public.skill VALUES (57, 'Backup', 't');
+INSERT INTO public.skill VALUES (58, 'DevOps', 't');
+INSERT INTO public.skill VALUES (59, 'Git', 't');
+INSERT INTO public.skill VALUES (60, 'IT security', 't');
+INSERT INTO public.skill VALUES (61, 'Jenkins', 't');
+INSERT INTO public.skill VALUES (62, 'LAN', 't');
+INSERT INTO public.skill VALUES (63, 'Microsoft Project', 't');
+INSERT INTO public.skill VALUES (64, 'Microsoft SSIS', 't');
+INSERT INTO public.skill VALUES (65, 'Network security', 't');
+INSERT INTO public.skill VALUES (66, 'Security controls', 't');
+INSERT INTO public.skill VALUES (67, 'Software deployment', 't');
+INSERT INTO public.skill VALUES (68, 'Adobe InDesign', 't');
+INSERT INTO public.skill VALUES (69, 'Data center', 't');
+INSERT INTO public.skill VALUES (70, 'Data science', 't');
+INSERT INTO public.skill VALUES (71, 'Database design', 't');
+INSERT INTO public.skill VALUES (72, 'HP Quality Center', 't');
+INSERT INTO public.skill VALUES (73, 'ISO 9000', 't');
+INSERT INTO public.skill VALUES (74, 'Machine learning', 't');
+INSERT INTO public.skill VALUES (75, 'Microsoft SharePoint', 't');
+INSERT INTO public.skill VALUES (76, 'Microsoft SSRS', 't');
+INSERT INTO public.skill VALUES (77, 'Network engineering', 't');
+INSERT INTO public.skill VALUES (78, 'Node.js', 't');
+INSERT INTO public.skill VALUES (79, 'Prototyping', 't');
+INSERT INTO public.skill VALUES (80, 'Routers', 't');
+INSERT INTO public.skill VALUES (81, 'Stored procedures', 't');
+INSERT INTO public.skill VALUES (82, 'System administration', 't');
+INSERT INTO public.skill VALUES (83, 'UX', 't');
+INSERT INTO public.skill VALUES (84, 'Web design', 't');
+INSERT INTO public.skill VALUES (85, 'Web services', 't');
+INSERT INTO public.skill VALUES (86, 'Apache Hadoop', 't');
+INSERT INTO public.skill VALUES (87, 'Apache Hive', 't');
+INSERT INTO public.skill VALUES (88, 'Apache Spark', 't');
+INSERT INTO public.skill VALUES (89, 'Apache Sqoop', 't');
+INSERT INTO public.skill VALUES (90, 'Big data', 't');
+INSERT INTO public.skill VALUES (91, 'Border Gateway Protocol', 't');
+INSERT INTO public.skill VALUES (92, 'Business intelligence', 't');
+INSERT INTO public.skill VALUES (93, 'CISSP', 't');
+INSERT INTO public.skill VALUES (94, 'Cloud architecture', 't');
+INSERT INTO public.skill VALUES (95, 'Continuous improvement', 't');
+INSERT INTO public.skill VALUES (96, 'Continuous integration', 't');
+INSERT INTO public.skill VALUES (97, 'Data architecture', 't');
+INSERT INTO public.skill VALUES (98, 'Data modeling', 't');
+INSERT INTO public.skill VALUES (99, 'HDFS', 't');
+INSERT INTO public.skill VALUES (100, 'Hibernate', 't');
+INSERT INTO public.skill VALUES (101, 'Inventory', 't');
+INSERT INTO public.skill VALUES (102, 'ITIL', 't');
+INSERT INTO public.skill VALUES (103, 'J2EE', 't');
+INSERT INTO public.skill VALUES (104, 'JSP', 't');
+INSERT INTO public.skill VALUES (105, 'Linux administration', 't');
+INSERT INTO public.skill VALUES (106, 'Logos', 't');
+INSERT INTO public.skill VALUES (107, 'Manufacturing', 't');
+INSERT INTO public.skill VALUES (108, 'MapReduce', 't');
+INSERT INTO public.skill VALUES (109, 'MATLAB', 't');
+INSERT INTO public.skill VALUES (110, 'Microsoft Visio', 't');
+INSERT INTO public.skill VALUES (111, 'Microsoft Windows 7', 't');
+INSERT INTO public.skill VALUES (112, 'Microsoft Windows Azure', 't');
+INSERT INTO public.skill VALUES (113, 'NIST SP 800 Series', 't');
+INSERT INTO public.skill VALUES (114, 'Photography', 't');
+INSERT INTO public.skill VALUES (115, 'PL/SQL', 't');
+INSERT INTO public.skill VALUES (116, 'Presentations', 't');
+INSERT INTO public.skill VALUES (117, 'R', 't');
+INSERT INTO public.skill VALUES (118, 'Red Hat Enterprise Linux', 't');
+INSERT INTO public.skill VALUES (119, 'SDLC', 't');
+INSERT INTO public.skill VALUES (120, 'Selenium', 't');
+INSERT INTO public.skill VALUES (121, 'Selenium WebDriver', 't');
+INSERT INTO public.skill VALUES (122, 'Sketch', 't');
+INSERT INTO public.skill VALUES (123, 'Solution architecture', 't');
+INSERT INTO public.skill VALUES (124, 'Spring', 't');
+INSERT INTO public.skill VALUES (125, 'System security', 't');
+INSERT INTO public.skill VALUES (126, 'Systems engineering', 't');
+INSERT INTO public.skill VALUES (127, 'Tableau', 't');
+INSERT INTO public.skill VALUES (128, 'Telecommunications', 't');
+INSERT INTO public.skill VALUES (129, 'VoIP', 't');
+INSERT INTO public.skill VALUES (130, 'Wireframe', 't');
+INSERT INTO public.skill VALUES (131, 'XML', 't');
+INSERT INTO public.skill VALUES (132, 'ADO.NET', 't');
+INSERT INTO public.skill VALUES (133, 'Adobe Acrobat', 't');
+INSERT INTO public.skill VALUES (134, 'Adobe FrameMaker', 't');
+INSERT INTO public.skill VALUES (135, 'Ansible', 't');
+INSERT INTO public.skill VALUES (136, 'Apache HBase', 't');
+INSERT INTO public.skill VALUES (137, 'Apache Maven', 't');
+INSERT INTO public.skill VALUES (138, 'Apache Pig', 't');
+INSERT INTO public.skill VALUES (139, 'Apex', 't');
+INSERT INTO public.skill VALUES (140, 'Art', 't');
+INSERT INTO public.skill VALUES (141, 'Avaya', 't');
+INSERT INTO public.skill VALUES (142, 'C++', 't');
+INSERT INTO public.skill VALUES (143, 'Cables', 't');
+INSERT INTO public.skill VALUES (144, 'CentOS', 't');
+INSERT INTO public.skill VALUES (145, 'Configuration management database', 't');
+INSERT INTO public.skill VALUES (146, 'Data Loader', 't');
+INSERT INTO public.skill VALUES (147, 'Database architecture', 't');
+INSERT INTO public.skill VALUES (148, 'Disaster recovery', 't');
+INSERT INTO public.skill VALUES (149, 'DNS', 't');
+INSERT INTO public.skill VALUES (150, 'Enterprise architecture', 't');
+INSERT INTO public.skill VALUES (151, 'Field engineering', 't');
+INSERT INTO public.skill VALUES (152, 'Field service', 't');
+INSERT INTO public.skill VALUES (153, 'Force.com', 't');
+INSERT INTO public.skill VALUES (154, 'Illustration', 't');
+INSERT INTO public.skill VALUES (155, 'Information assurance', 't');
+INSERT INTO public.skill VALUES (156, 'ISSO', 't');
+INSERT INTO public.skill VALUES (157, 'JIRA', 't');
+INSERT INTO public.skill VALUES (158, 'JSON', 't');
+INSERT INTO public.skill VALUES (159, 'JUnit', 't');
+INSERT INTO public.skill VALUES (160, 'Lean Six Sigma', 't');
+INSERT INTO public.skill VALUES (161, 'Mathematics', 't');
+INSERT INTO public.skill VALUES (162, 'Metrics', 't');
+INSERT INTO public.skill VALUES (163, 'Microsoft InfoPath', 't');
+INSERT INTO public.skill VALUES (164, 'Microsoft SharePoint Designer', 't');
+INSERT INTO public.skill VALUES (165, 'Microsoft SQL Server DBA', 't');
+INSERT INTO public.skill VALUES (166, 'Migration', 't');
+INSERT INTO public.skill VALUES (167, 'Modeling', 't');
+INSERT INTO public.skill VALUES (168, 'MySQL', 't');
+INSERT INTO public.skill VALUES (169, 'Network design', 't');
+INSERT INTO public.skill VALUES (170, 'Network management', 't');
+INSERT INTO public.skill VALUES (171, 'Oracle Applications', 't');
+INSERT INTO public.skill VALUES (172, 'Oracle Data Guard', 't');
+INSERT INTO public.skill VALUES (173, 'Oracle DBA', 't');
+INSERT INTO public.skill VALUES (174, 'Oracle EBS', 't');
+INSERT INTO public.skill VALUES (175, 'Oracle RMAN', 't');
+INSERT INTO public.skill VALUES (176, 'PBX', 't');
+INSERT INTO public.skill VALUES (177, 'Performance tuning', 't');
+INSERT INTO public.skill VALUES (178, 'PHP', 't');
+INSERT INTO public.skill VALUES (179, 'PMO', 't');
+INSERT INTO public.skill VALUES (180, 'Process engineering', 't');
+INSERT INTO public.skill VALUES (181, 'RAC', 't');
+INSERT INTO public.skill VALUES (182, 'Red Hat Linux', 't');
+INSERT INTO public.skill VALUES (183, 'Replication', 't');
+INSERT INTO public.skill VALUES (184, 'RESTful', 't');
+INSERT INTO public.skill VALUES (185, 'Security architecture', 't');
+INSERT INTO public.skill VALUES (186, 'Security engineering', 't');
+INSERT INTO public.skill VALUES (187, 'Security officer', 't');
+INSERT INTO public.skill VALUES (188, 'ServiceNow', 't');
+INSERT INTO public.skill VALUES (189, 'SIP', 't');
+INSERT INTO public.skill VALUES (190, 'Six Sigma', 't');
+INSERT INTO public.skill VALUES (191, 'Software engineering', 't');
+INSERT INTO public.skill VALUES (192, 'SOQL', 't');
+INSERT INTO public.skill VALUES (193, 'Splunk', 't');
+INSERT INTO public.skill VALUES (194, 'Sprint', 't');
+INSERT INTO public.skill VALUES (195, 'Systems architecture', 't');
+INSERT INTO public.skill VALUES (196, 'Transact-SQL', 't');
+INSERT INTO public.skill VALUES (197, 'Unix', 't');
+INSERT INTO public.skill VALUES (198, 'Usability testing', 't');
+INSERT INTO public.skill VALUES (199, 'Verification and validation', 't');
+INSERT INTO public.skill VALUES (200, 'Visualforce', 't');
+INSERT INTO public.skill VALUES (201, 'VPN', 't');
+INSERT INTO public.skill VALUES (202, 'Web applications', 't');
+INSERT INTO public.skill VALUES (203, 'Web parts', 't');
+INSERT INTO public.skill VALUES (204, 'QA', 'b');
+INSERT INTO public.skill VALUES (205, 'Project management', 'b');
+INSERT INTO public.skill VALUES (206, 'Agile', 'b');
+INSERT INTO public.skill VALUES (207, 'Customer service', 'b');
+INSERT INTO public.skill VALUES (208, 'Operations', 'b');
+INSERT INTO public.skill VALUES (209, 'Sales', 'b');
+INSERT INTO public.skill VALUES (210, 'Risk assessment', 'b');
+INSERT INTO public.skill VALUES (211, 'Business analysis', 'b');
+INSERT INTO public.skill VALUES (212, 'Finance', 'b');
+INSERT INTO public.skill VALUES (213, 'Change management', 'b');
+INSERT INTO public.skill VALUES (214, 'Marketing', 'b');
+INSERT INTO public.skill VALUES (215, 'Research', 'b');
+INSERT INTO public.skill VALUES (216, 'Help desk', 'b');
+INSERT INTO public.skill VALUES (217, 'Senior management', 'b');
+INSERT INTO public.skill VALUES (218, 'Program management', 'b');
+INSERT INTO public.skill VALUES (219, 'Security analysis', 'b');
+INSERT INTO public.skill VALUES (220, 'Workflow', 'b');
+INSERT INTO public.skill VALUES (221, 'Corrective and preventive action', 'b');
+INSERT INTO public.skill VALUES (222, 'Process improvement', 'b');
+INSERT INTO public.skill VALUES (223, 'QA management', 'b');
+INSERT INTO public.skill VALUES (224, 'Scrum', 'b');
+INSERT INTO public.skill VALUES (225, 'Strategic planning', 'b');
+INSERT INTO public.skill VALUES (226, 'Advertising', 'b');
+INSERT INTO public.skill VALUES (227, 'Art director', 'b');
+INSERT INTO public.skill VALUES (228, 'Billing', 'b');
+INSERT INTO public.skill VALUES (229, 'Business development', 'b');
+INSERT INTO public.skill VALUES (230, 'Business process', 'b');
+INSERT INTO public.skill VALUES (231, 'Business rules', 'b');
+INSERT INTO public.skill VALUES (232, 'Customer support', 'b');
+INSERT INTO public.skill VALUES (233, 'Editing', 'b');
+INSERT INTO public.skill VALUES (234, 'IT project management', 'b');
+INSERT INTO public.skill VALUES (235, 'Operations management', 'b');
+INSERT INTO public.skill VALUES (236, 'Organizational change management', 'b');
+INSERT INTO public.skill VALUES (237, 'Policies and procedures', 'b');
+INSERT INTO public.skill VALUES (238, 'Product development', 'b');
+INSERT INTO public.skill VALUES (239, 'Product management', 'b');
+INSERT INTO public.skill VALUES (240, 'Product owner', 'b');
+INSERT INTO public.skill VALUES (241, 'Project coordination', 'b');
+INSERT INTO public.skill VALUES (242, 'Quality control', 'b');
+INSERT INTO public.skill VALUES (243, 'Quality management', 'b');
+INSERT INTO public.skill VALUES (244, 'Risk management', 'b');
+INSERT INTO public.skill VALUES (245, 'Roadmaps', 'b');
+INSERT INTO public.skill VALUES (246, 'Salesforce.com', 'b');
+INSERT INTO public.skill VALUES (247, 'Scrum master', 'b');
+INSERT INTO public.skill VALUES (248, 'Security management', 'b');
+INSERT INTO public.skill VALUES (249, 'Systems analysis', 'b');
+INSERT INTO public.skill VALUES (250, 'Team leadership', 'b');
+INSERT INTO public.skill VALUES (251, 'Technical writing', 'b');
+INSERT INTO public.skill VALUES (252, 'Tutoring', 'b');
+INSERT INTO public.skill VALUES (253, 'Use cases', 'b');
+INSERT INTO public.skill VALUES (254, 'User guides', 'b');
+INSERT INTO public.skill VALUES (255, 'User stories', 'b');
+INSERT INTO public.skill VALUES (256, 'WordPress', 'b');
+INSERT INTO public.skill VALUES (257, 'Writing', 'b');
+
+
+--
+-- Data for Name: jobpost_skill; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.jobpost_skill VALUES (1, 1, 205, 'expert', 'high');
+INSERT INTO public.jobpost_skill VALUES (2, 1, 1, 'proficient', 'mid');
+INSERT INTO public.jobpost_skill VALUES (3, 1, 2, 'competent', 'mid');
+INSERT INTO public.jobpost_skill VALUES (4, 1, 5, 'novice', 'low');
+INSERT INTO public.jobpost_skill VALUES (5, 2, 7, 'proficient', 'mid');
+INSERT INTO public.jobpost_skill VALUES (6, 2, 25, 'proficient', 'mid');
+INSERT INTO public.jobpost_skill VALUES (7, 2, 10, 'competent', 'mid');
+INSERT INTO public.jobpost_skill VALUES (8, 2, 206, 'proficient', 'mid');
+INSERT INTO public.jobpost_skill VALUES (9, 2, 21, 'novice', 'mid');
+INSERT INTO public.jobpost_skill VALUES (10, 2, 8, 'familiar', 'low');
+INSERT INTO public.jobpost_skill VALUES (11, 3, 8, 'proficient', 'high');
+INSERT INTO public.jobpost_skill VALUES (12, 3, 10, 'expert', 'mid');
+INSERT INTO public.jobpost_skill VALUES (13, 3, 9, 'expert', 'mid');
+INSERT INTO public.jobpost_skill VALUES (14, 3, 24, 'competent', 'mid');
+INSERT INTO public.jobpost_skill VALUES (15, 3, 7, 'expert', 'low');
+INSERT INTO public.jobpost_skill VALUES (16, 3, 21, 'expert', 'mid');
+INSERT INTO public.jobpost_skill VALUES (17, 3, 2, 'novice', 'low');
+INSERT INTO public.jobpost_skill VALUES (18, 4, 25, 'proficient', 'high');
+INSERT INTO public.jobpost_skill VALUES (19, 4, 19, 'proficient', 'mid');
+INSERT INTO public.jobpost_skill VALUES (20, 4, 2, 'familiar', 'mid');
+INSERT INTO public.jobpost_skill VALUES (21, 4, 7, 'novice', 'mid');
+INSERT INTO public.jobpost_skill VALUES (22, 4, 9, 'novice', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (23, 4, 21, 'novice', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (24, 5, 207, 'expert', 'high');
+INSERT INTO public.jobpost_skill VALUES (25, 5, 1, 'expert', 'low');
+INSERT INTO public.jobpost_skill VALUES (26, 5, 6, 'expert', 'low');
+INSERT INTO public.jobpost_skill VALUES (27, 5, 204, 'competent', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (28, 5, 3, 'competent', 'low');
+INSERT INTO public.jobpost_skill VALUES (29, 6, 206, 'expert', 'high');
+INSERT INTO public.jobpost_skill VALUES (30, 6, 240, 'expert', 'high');
+INSERT INTO public.jobpost_skill VALUES (31, 6, 205, 'novice', 'low');
+INSERT INTO public.jobpost_skill VALUES (32, 6, 157, 'novice', 'mid');
+INSERT INTO public.jobpost_skill VALUES (33, 6, 194, 'proficient', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (34, 7, 7, 'expert', 'mid');
+INSERT INTO public.jobpost_skill VALUES (35, 7, 14, 'proficient', 'vhigh');
+INSERT INTO public.jobpost_skill VALUES (36, 7, 25, 'novice', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (37, 7, 24, 'competent', 'mid');
+INSERT INTO public.jobpost_skill VALUES (38, 7, 9, 'competent', 'low');
+INSERT INTO public.jobpost_skill VALUES (39, 8, 204, 'proficient', 'high');
+INSERT INTO public.jobpost_skill VALUES (40, 8, 2, 'expert', 'mid');
+INSERT INTO public.jobpost_skill VALUES (41, 8, 9, 'familiar', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (42, 8, 10, 'expert', 'low');
+INSERT INTO public.jobpost_skill VALUES (43, 8, 8, 'proficient', 'low');
+INSERT INTO public.jobpost_skill VALUES (44, 9, 206, 'proficient', 'vhigh');
+INSERT INTO public.jobpost_skill VALUES (45, 9, 7, 'novice', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (46, 9, 9, 'proficient', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (47, 9, 25, 'expert', 'mid');
+INSERT INTO public.jobpost_skill VALUES (48, 9, 2, 'proficient', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (49, 9, 204, 'proficient', 'low');
+INSERT INTO public.jobpost_skill VALUES (50, 9, 8, 'expert', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (51, 10, 10, 'expert', 'vhigh');
+INSERT INTO public.jobpost_skill VALUES (52, 10, 16, 'novice', 'mid');
+INSERT INTO public.jobpost_skill VALUES (53, 10, 27, 'proficient', 'low');
+INSERT INTO public.jobpost_skill VALUES (54, 10, 8, 'expert', 'low');
+INSERT INTO public.jobpost_skill VALUES (55, 11, 204, 'expert', 'high');
+INSERT INTO public.jobpost_skill VALUES (56, 11, 212, 'expert', 'high');
+INSERT INTO public.jobpost_skill VALUES (57, 11, 211, 'proficient', 'mid');
+INSERT INTO public.jobpost_skill VALUES (58, 11, 206, 'expert', 'mid');
+INSERT INTO public.jobpost_skill VALUES (59, 12, 2, 'proficient', 'vhigh');
+INSERT INTO public.jobpost_skill VALUES (60, 12, 204, 'proficient', 'mid');
+INSERT INTO public.jobpost_skill VALUES (61, 12, 9, 'expert', 'low');
+INSERT INTO public.jobpost_skill VALUES (62, 12, 10, 'proficient', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (63, 12, 8, 'competent', 'mid');
+INSERT INTO public.jobpost_skill VALUES (64, 13, 206, 'proficient', 'high');
+INSERT INTO public.jobpost_skill VALUES (65, 13, 9, 'familiar', 'low');
+INSERT INTO public.jobpost_skill VALUES (66, 13, 25, 'competent', 'mid');
+INSERT INTO public.jobpost_skill VALUES (67, 13, 2, 'familiar', 'low');
+INSERT INTO public.jobpost_skill VALUES (68, 13, 204, 'proficient', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (69, 13, 21, 'proficient', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (70, 14, 8, 'expert', 'vhigh');
+INSERT INTO public.jobpost_skill VALUES (71, 14, 34, 'familiar', 'mid');
+INSERT INTO public.jobpost_skill VALUES (72, 14, 2, 'familiar', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (73, 14, 92, 'expert', 'low');
+INSERT INTO public.jobpost_skill VALUES (74, 15, 24, 'expert', 'high');
+INSERT INTO public.jobpost_skill VALUES (75, 15, 25, 'expert', 'high');
+INSERT INTO public.jobpost_skill VALUES (76, 15, 8, 'expert', 'high');
+INSERT INTO public.jobpost_skill VALUES (77, 16, 131, 'expert', 'mid');
+INSERT INTO public.jobpost_skill VALUES (78, 16, 85, 'expert', 'high');
+INSERT INTO public.jobpost_skill VALUES (79, 16, 7, 'familiar', 'low');
+INSERT INTO public.jobpost_skill VALUES (80, 16, 10, 'competent', 'low');
+INSERT INTO public.jobpost_skill VALUES (81, 17, 2, 'proficient', 'vhigh');
+INSERT INTO public.jobpost_skill VALUES (82, 17, 24, 'proficient', 'vhigh');
+INSERT INTO public.jobpost_skill VALUES (83, 17, 9, 'expert', 'low');
+INSERT INTO public.jobpost_skill VALUES (84, 17, 8, 'novice', 'low');
+INSERT INTO public.jobpost_skill VALUES (85, 18, 206, 'proficient', 'high');
+INSERT INTO public.jobpost_skill VALUES (86, 18, 21, 'familiar', 'mid');
+INSERT INTO public.jobpost_skill VALUES (87, 18, 7, 'competent', 'vlow');
+INSERT INTO public.jobpost_skill VALUES (88, 18, 10, 'novice', 'low');
+INSERT INTO public.jobpost_skill VALUES (89, 18, 204, 'familiar', 'vlow');
+
+
+--
+-- Data for Name: seeker_profile; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.seeker_profile VALUES (1, 1, 'William', 'Hamilton', '9374066513', 'Bethesda', 'OH', NULL);
+INSERT INTO public.seeker_profile VALUES (2, 4, 'Tiffany', 'Johnson', '2627838684', 'Milwaukee', 'WI', NULL);
+INSERT INTO public.seeker_profile VALUES (3, 5, 'Marie', 'Nelson', '5208388525', 'Teec Nos Pos', 'AZ', NULL);
+INSERT INTO public.seeker_profile VALUES (4, 6, 'Cynthia', 'Stanley', '7752747511', 'The Lakes', 'NV', NULL);
+INSERT INTO public.seeker_profile VALUES (5, 7, 'Garrett', 'Rodriguez', '2538668531', 'Paterson', 'WA', NULL);
+INSERT INTO public.seeker_profile VALUES (6, 8, 'Erin', 'Nelson', '3159683692', 'Acra', 'NY', NULL);
+INSERT INTO public.seeker_profile VALUES (8, 15, 'Mark', 'Brown', '7134499830', 'Missouri City', 'TX', NULL);
+INSERT INTO public.seeker_profile VALUES (9, 17, 'Carolyn', 'Cobb', '3346641822', 'Newton', 'AL', NULL);
+INSERT INTO public.seeker_profile VALUES (11, 20, 'seeker', 'Seeker', NULL, NULL, NULL, NULL);
+
+
+--
+-- Data for Name: seeker_application; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.seeker_application VALUES (1, 9, 9);
+INSERT INTO public.seeker_application VALUES (2, 2, 6);
+
+
+--
+-- Data for Name: seeker_attitude; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.seeker_attitude VALUES (1, 1, 17);
+INSERT INTO public.seeker_attitude VALUES (2, 1, 34);
+INSERT INTO public.seeker_attitude VALUES (3, 1, 22);
+INSERT INTO public.seeker_attitude VALUES (4, 1, 24);
+INSERT INTO public.seeker_attitude VALUES (5, 1, 9);
+INSERT INTO public.seeker_attitude VALUES (6, 2, 9);
+INSERT INTO public.seeker_attitude VALUES (7, 2, 24);
+INSERT INTO public.seeker_attitude VALUES (8, 2, 17);
+INSERT INTO public.seeker_attitude VALUES (9, 2, 28);
+INSERT INTO public.seeker_attitude VALUES (10, 2, 3);
+INSERT INTO public.seeker_attitude VALUES (11, 2, 44);
+INSERT INTO public.seeker_attitude VALUES (12, 3, 4);
+INSERT INTO public.seeker_attitude VALUES (13, 3, 40);
+INSERT INTO public.seeker_attitude VALUES (14, 3, 1);
+INSERT INTO public.seeker_attitude VALUES (15, 3, 37);
+INSERT INTO public.seeker_attitude VALUES (16, 3, 12);
+INSERT INTO public.seeker_attitude VALUES (17, 4, 17);
+INSERT INTO public.seeker_attitude VALUES (18, 4, 24);
+INSERT INTO public.seeker_attitude VALUES (19, 4, 16);
+INSERT INTO public.seeker_attitude VALUES (20, 4, 45);
+INSERT INTO public.seeker_attitude VALUES (21, 4, 5);
+INSERT INTO public.seeker_attitude VALUES (22, 4, 42);
+INSERT INTO public.seeker_attitude VALUES (23, 5, 24);
+INSERT INTO public.seeker_attitude VALUES (24, 5, 42);
+INSERT INTO public.seeker_attitude VALUES (25, 5, 31);
+INSERT INTO public.seeker_attitude VALUES (26, 5, 43);
+INSERT INTO public.seeker_attitude VALUES (27, 5, 40);
+INSERT INTO public.seeker_attitude VALUES (28, 6, 26);
+INSERT INTO public.seeker_attitude VALUES (29, 6, 9);
+INSERT INTO public.seeker_attitude VALUES (30, 8, 13);
+INSERT INTO public.seeker_attitude VALUES (31, 8, 26);
+INSERT INTO public.seeker_attitude VALUES (32, 8, 33);
+INSERT INTO public.seeker_attitude VALUES (33, 8, 19);
+INSERT INTO public.seeker_attitude VALUES (34, 8, 6);
+INSERT INTO public.seeker_attitude VALUES (35, 9, 18);
+INSERT INTO public.seeker_attitude VALUES (36, 9, 28);
+INSERT INTO public.seeker_attitude VALUES (37, 9, 19);
+INSERT INTO public.seeker_attitude VALUES (38, 9, 31);
+INSERT INTO public.seeker_attitude VALUES (39, 9, 32);
+INSERT INTO public.seeker_attitude VALUES (40, 9, 14);
+
+
+--
+-- Data for Name: seeker_bookmark; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.seeker_bookmark VALUES (1, 9, 10);
+INSERT INTO public.seeker_bookmark VALUES (2, 1, 17);
+
+
+--
+-- Data for Name: seeker_history_education; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.seeker_history_education VALUES (1, 1, 'DePaul', 'bachelor', 'Computer Science');
+INSERT INTO public.seeker_history_education VALUES (2, 8, 'DePaul', 'bachelor', 'Computer Science');
+INSERT INTO public.seeker_history_education VALUES (3, 3, 'DePaul University', 'bachelor', 'Computer Science');
+
+
+--
+-- Data for Name: seeker_history_job; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.seeker_history_job VALUES (1, 8, 'Programmer', 3);
+INSERT INTO public.seeker_history_job VALUES (2, 2, 'Lead Developer', 3);
+INSERT INTO public.seeker_history_job VALUES (3, 6, 'Junior Julia Dev', 1);
+
+
+--
+-- Data for Name: seeker_skill; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+INSERT INTO public.seeker_skill VALUES (1, 1, 254, 'expert');
+INSERT INTO public.seeker_skill VALUES (2, 1, 227, 'novice');
+INSERT INTO public.seeker_skill VALUES (3, 1, 220, 'competent');
+INSERT INTO public.seeker_skill VALUES (4, 1, 96, 'novice');
+INSERT INTO public.seeker_skill VALUES (5, 1, 4, 'competent');
+INSERT INTO public.seeker_skill VALUES (6, 1, 57, 'novice');
+INSERT INTO public.seeker_skill VALUES (7, 2, 255, 'expert');
+INSERT INTO public.seeker_skill VALUES (8, 2, 240, 'proficient');
+INSERT INTO public.seeker_skill VALUES (9, 2, 227, 'competent');
+INSERT INTO public.seeker_skill VALUES (10, 2, 66, 'novice');
+INSERT INTO public.seeker_skill VALUES (11, 2, 63, 'familiar');
+INSERT INTO public.seeker_skill VALUES (12, 2, 203, 'expert');
+INSERT INTO public.seeker_skill VALUES (13, 2, 3, 'proficient');
+INSERT INTO public.seeker_skill VALUES (14, 2, 52, 'familiar');
+INSERT INTO public.seeker_skill VALUES (15, 2, 55, 'competent');
+INSERT INTO public.seeker_skill VALUES (16, 2, 58, 'expert');
+INSERT INTO public.seeker_skill VALUES (17, 2, 35, 'novice');
+INSERT INTO public.seeker_skill VALUES (18, 3, 209, 'proficient');
+INSERT INTO public.seeker_skill VALUES (19, 3, 44, 'competent');
+INSERT INTO public.seeker_skill VALUES (20, 3, 178, 'competent');
+INSERT INTO public.seeker_skill VALUES (21, 3, 109, 'novice');
+INSERT INTO public.seeker_skill VALUES (22, 3, 111, 'novice');
+INSERT INTO public.seeker_skill VALUES (23, 4, 224, 'novice');
+INSERT INTO public.seeker_skill VALUES (24, 4, 246, 'competent');
+INSERT INTO public.seeker_skill VALUES (25, 4, 248, 'competent');
+INSERT INTO public.seeker_skill VALUES (26, 4, 128, 'expert');
+INSERT INTO public.seeker_skill VALUES (27, 4, 103, 'proficient');
+INSERT INTO public.seeker_skill VALUES (28, 4, 88, 'novice');
+INSERT INTO public.seeker_skill VALUES (29, 5, 209, 'proficient');
+INSERT INTO public.seeker_skill VALUES (30, 5, 239, 'novice');
+INSERT INTO public.seeker_skill VALUES (31, 5, 216, 'expert');
+INSERT INTO public.seeker_skill VALUES (32, 5, 159, 'familiar');
+INSERT INTO public.seeker_skill VALUES (33, 5, 34, 'familiar');
+INSERT INTO public.seeker_skill VALUES (34, 5, 107, 'familiar');
+INSERT INTO public.seeker_skill VALUES (35, 5, 96, 'expert');
+INSERT INTO public.seeker_skill VALUES (36, 5, 5, 'expert');
+INSERT INTO public.seeker_skill VALUES (37, 5, 82, 'competent');
+INSERT INTO public.seeker_skill VALUES (38, 6, 246, 'familiar');
+INSERT INTO public.seeker_skill VALUES (39, 6, 137, 'familiar');
+INSERT INTO public.seeker_skill VALUES (40, 6, 23, 'competent');
+INSERT INTO public.seeker_skill VALUES (41, 6, 122, 'competent');
+INSERT INTO public.seeker_skill VALUES (42, 6, 194, 'competent');
+INSERT INTO public.seeker_skill VALUES (43, 8, 215, 'novice');
+INSERT INTO public.seeker_skill VALUES (44, 8, 223, 'familiar');
+INSERT INTO public.seeker_skill VALUES (45, 8, 254, 'familiar');
+INSERT INTO public.seeker_skill VALUES (46, 8, 169, 'expert');
+INSERT INTO public.seeker_skill VALUES (47, 8, 171, 'familiar');
+INSERT INTO public.seeker_skill VALUES (48, 8, 58, 'familiar');
+INSERT INTO public.seeker_skill VALUES (49, 8, 167, 'novice');
+INSERT INTO public.seeker_skill VALUES (50, 8, 35, 'expert');
+INSERT INTO public.seeker_skill VALUES (51, 8, 41, 'proficient');
+INSERT INTO public.seeker_skill VALUES (52, 8, 22, 'proficient');
+INSERT INTO public.seeker_skill VALUES (53, 8, 66, 'novice');
+INSERT INTO public.seeker_skill VALUES (54, 9, 226, 'expert');
+INSERT INTO public.seeker_skill VALUES (55, 9, 234, 'proficient');
+INSERT INTO public.seeker_skill VALUES (56, 9, 204, 'proficient');
+INSERT INTO public.seeker_skill VALUES (57, 9, 256, 'novice');
+INSERT INTO public.seeker_skill VALUES (58, 9, 30, 'novice');
+INSERT INTO public.seeker_skill VALUES (59, 9, 160, 'competent');
+INSERT INTO public.seeker_skill VALUES (60, 9, 86, 'novice');
+
+
+--
+-- Data for Name: user_picture; Type: TABLE DATA; Schema: public; Owner: user
+--
+
+
+--
+-- Name: attitude_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.attitude_id_seq', 46, true);
+
+
+--
+-- Name: company_profile_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.company_profile_id_seq', 7, true);
+
+
+--
+-- Name: jobpost_attitude_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.jobpost_attitude_id_seq', 135, true);
+
+
+--
+-- Name: jobpost_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.jobpost_id_seq', 18, true);
+
+
+--
+-- Name: jobpost_skill_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.jobpost_skill_id_seq', 89, true);
+
+
+--
+-- Name: seeker_application_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.seeker_application_id_seq', 2, true);
+
+
+--
+-- Name: seeker_attitude_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.seeker_attitude_id_seq', 40, true);
+
+
+--
+-- Name: seeker_bookmark_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.seeker_bookmark_id_seq', 2, true);
+
+
+--
+-- Name: seeker_history_education_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.seeker_history_education_id_seq', 3, true);
+
+
+--
+-- Name: seeker_history_job_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.seeker_history_job_id_seq', 3, true);
+
+
+--
+-- Name: seeker_profile_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.seeker_profile_id_seq', 11, true);
+
+
+--
+-- Name: seeker_skill_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.seeker_skill_id_seq', 60, true);
+
+
+--
+-- Name: skill_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.skill_id_seq', 257, true);
+
+
+--
+-- Name: user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: user
+--
+
+SELECT pg_catalog.setval('public.user_id_seq', 23, true);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
