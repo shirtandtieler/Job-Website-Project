@@ -104,7 +104,9 @@ def job_search():
     Navigate to the job search page.
     """
     # TODO limit access to only seekers/admins?
-    posts = [(j.job_title, j.company, j.location, j.expected_salary) for j in JobPost.query.all()]
+
+    posts = [(j.job_title, j.company, f"/company/{j.company_id}", j.location, j.expected_salary)
+             for j in JobPost.query.all()]
     return render_template('company/browse.html', jobposts=posts)
 
 
