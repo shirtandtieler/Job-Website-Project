@@ -21,7 +21,12 @@ def index():
     if current_user.account_type == AccountTypes.s:  # seeker
         return render_template("seeker/dashboard.html")
     elif current_user.account_type == AccountTypes.c:  # company
-        return render_template("company/dashboard.html")
+        profile = current_user._company
+        _name = profile.name
+        _city = profile.city
+        _state = profile.state
+        _website = profile.website
+        return render_template("company/dashboard.html",name=_name, city=_city,state=_state,website=_website)
     else:  # admin
         return render_template("admin/dashboard.html")
 
