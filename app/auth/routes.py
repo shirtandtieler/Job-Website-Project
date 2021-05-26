@@ -7,6 +7,8 @@ from app.auth.forms import LoginForm, RegisterForm
 from app.models import User
 
 
+# TODO update last login of user if successful
+
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     """ Handles the login page by showing and submitting the form """
