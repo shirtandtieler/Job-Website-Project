@@ -75,6 +75,7 @@ class EducationLevel(enum.IntEnum):
 
 ##### SHARED TYPES #####
 
+## TODO add admin profile (will service as the page with the cards for actions)
 
 class Attitude(db.Model):
     """
@@ -90,6 +91,13 @@ class Attitude(db.Model):
 
     def __repr__(self):
         return f"Attitude[{self.title}]"
+
+    def to_dict(self):  ## TODO do this with the others
+        return {
+            "title": self.title,
+            "_seekers": [x.id for x in self._seekers],
+            "_job_posts": [x.id for x in self._job_posts]
+        }
 
 
 class Skill(db.Model):
@@ -229,6 +237,53 @@ class SeekerProfile(db.Model):
         if acct.account_type != AccountTypes.s:
             raise ValueError(f"Account type is not a Seeker")
         return seeker_id
+
+    @property
+    def full_name(self):
+        return f"{self.first_name} {self.last_name}"
+
+    @property
+    def location(self):
+        if self.city and self.state:
+            return f"{self.city}, {self.state}"
+        elif self.city or self.state:
+            return f"{self.city}{self.state}"
+        else:
+            return "USA"
+
+    @property
+    def tag_lines(self):
+        """ Return a list of things this seeker can boast about."""
+        lines = []
+        # get a line about a number of their highest skills
+        skill_highest_lvl, skill_highest_count = 0, 0
+        for skl in self._skills:
+            lvl = int(skl.skill_level)
+            if lvl > skill_highest_lvl:
+                skill_highest_lvl = lvl
+                skill_highest_count = 1
+            elif lvl == skill_highest_lvl:
+                skill_highest_count += 1
+        if skill_highest_lvl > 0:  # make sure seeker has some skills
+            skill_lvl = str(SkillLevels(skill_highest_lvl))
+            lvl_name = skill_lvl[skill_lvl.index('.')+1:].capitalize()
+            s = "skills" if skill_highest_count > 1 else "skill"
+            lines.append(f"{lvl_name} in {skill_highest_count} {s}")
+        # get a line about their past experience
+        if len(self._history_edus) > 0 and len(self._history_jobs) > 0:
+            total_years = sum([job.years_employed for job in self._history_jobs])
+            d = "degrees" if len(self._history_edus) > 1 else "degree"
+            y = "years" if total_years > 1 else "year"
+            lines.append(f"Holds {len(self._history_edus)} {d} and {total_years} {y} of job experience.")
+        elif len(self._history_edus) > 0:
+            d = "degrees" if len(self._history_edus) > 1 else "degree"
+            lines.append(f"Holds {len(self._history_edus)} {d}")  # TODO maybe add highest level/give example?
+        elif len(self._history_jobs) > 0:
+            total_years = sum([job.years_employed for job in self._history_jobs])
+            y = "years" if total_years > 1 else "year"
+            lines.append(f"Has {total_years} {y} of job experience.")  # TODO maybe add example title?
+        return lines
+
 
 
 class SeekerSkill(db.Model):
@@ -376,6 +431,35 @@ class JobPost(db.Model):
 
     def __repr__(self):
         return f"JobPost[by#{self.company_id}|{self.job_title}]"
+
+    @property
+    def company(self):
+        return self._company.name
+
+    @property
+    def location(self):
+        if self.city and self.state:
+            loc = f"{self.city}, {self.state}"
+        elif self.city or self.state:
+            loc = f"{self.city}{self.state}"
+        else:
+            loc = "USA"
+
+        if self.is_remote:
+            loc += " (remote available)"
+        return loc
+
+    @property
+    def expected_salary(self):
+        if self.salary_min and self.salary_max:
+            sal = f"Between ${self.salary_min} and ${self.salary_max}"
+        elif self.salary_min:
+            sal = f"${self.salary_min}+"
+        elif self.salary_max:
+            sal = f"Up to ${self.salary_max}"
+        else:
+            sal = f"Salary depends on experience"
+        return sal
 
 
 class JobPostSkill(db.Model):
