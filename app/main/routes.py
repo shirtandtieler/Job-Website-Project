@@ -19,7 +19,24 @@ def index():
         return render_template("index.html", title="Home")
 
     if current_user.account_type == AccountTypes.s:  # seeker
-        return render_template("seeker/dashboard.html")
+        prof = current_user._seeker
+        _first_name = prof.first_name
+        _last_name = prof.last_name
+        _name = _first_name + ' ' + _last_name
+        _email = current_user.email  # cannot reference prof because seeker doesn't have email attribute
+        _phone_number = prof.phone_number
+        _city = prof.city
+        _state = prof.state
+        _resume = prof.resume
+        _skills = prof._skills
+        _attitudes = prof._attitudes
+        _history_edus = prof._history_edus
+        _history_jobs = prof._history_jobs
+        return render_template("seeker/dashboard.html",
+                               fullname=_name, first_name=_first_name, last_name=_last_name,
+                               email=_email, phone_number=_phone_number, city=_city, state=_state,
+                               resume=_resume, skills=_skills, attitudes=_attitudes,
+                               history_edus=_history_edus, history_jobs=_history_jobs)
     elif current_user.account_type == AccountTypes.c:  # company
         profile = current_user._company
         _name = profile.name
@@ -80,7 +97,7 @@ def postjob():
 
 
 @bp.route("/jobs")
-#@login_required
+# @login_required
 def job_search():
     """
     Navigate to the job search page.
@@ -91,7 +108,7 @@ def job_search():
 
 
 @bp.route("/job/<jid>", methods=['GET'])
-#@login_required
+# @login_required
 def job_page(jid: int):
     """
     Navigate to the job page with the specified id.
@@ -105,7 +122,7 @@ def job_page(jid: int):
 
 
 @bp.route("/seekers")
-#@login_required
+# @login_required
 def seeker_search():
     """
     Navigate to the seeker search page.
@@ -116,7 +133,7 @@ def seeker_search():
 
 
 @bp.route("/seeker/<sid>")
-#@login_required
+# @login_required
 def seeker_profile(seeker_id):
     """
     Navigate to a specific seeker's profile page.
@@ -151,4 +168,7 @@ def company_profile(company_id: int):
     else:  # none provided
         _loc = "USA"
     _url = prof.website
-    return render_template('company/profile.html', name=_name, citystate=_loc, url=_url)
+
+    _job_posts = JobPost.query.filter_by(company_id=company_id).all()
+
+    return render_template('company/profile_public.html', company_name=_name, citystate=_loc, url=_url, job_posts=_job_posts)
