@@ -1,5 +1,106 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-<h1>This is the homepage!</h1>
+
+<head>
+    <title>Homepage</title>
+    <style>
+        .hr1 {
+            border: 2px solid black;
+            border-radius: 1px;
+            font-weight: bold;
+        }
+
+        .hr2 {
+          border: 1px solid black;
+          border-radius: 1px;
+        }
+
+          li {
+            float: left;
+          }
+
+          li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+          }
+
+          li a:hover {
+            background-color: #111;
+          }
+
+          .p1 {
+              text-align: center;
+              font-weight: bold;
+          }
+    </style>
+</head>
+
+<br>
+<br>
+<br>
+
+<hr class="hr1">
+<br>
+
+<p class="p1">
+    The #1 Place for jobs
+    <br>
+    In IT, IS, software development...
+    <br>
+    <br>
+    Find your perfect
+    <br>
+    job!
+    <br>
+    <br>
+    <br>
+    <br>
+    <button type="button"> <a href="{{ url_for('auth.register') }}">Sign up for free</a></button>
+</p>
+
+
+
+<br>
+<br>
+<br>
+<br>
+
+<hr class="hr2">
+
+<p class="p1">
+    More than 10,000
+    <br>
+    current job postings
+    <br>
+    <br>
+    <br>
+    <br>
+    <button type="button">See who's hiring</button>
+</p>
+
+<br>
+<br>
+<br>
+<br>
+
+<hr class="hr2">
+
+<p class="p1">
+    Let employers find
+    <br>
+    YOU!
+    <br>
+    <br>
+    Our proprietary algorithm
+    <br>
+    matches you with top
+    <br>
+    companies
+</p>
+
+
 {% endblock %}
