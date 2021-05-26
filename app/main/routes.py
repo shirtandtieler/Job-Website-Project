@@ -161,4 +161,7 @@ def company_profile(company_id: int):
     else:  # none provided
         _loc = "USA"
     _url = prof.website
-    return render_template('company/profile.html', name=_name, citystate=_loc, url=_url)
+
+    _job_posts = JobPost.query.filter_by(company_id=company_id).all()
+
+    return render_template('company/profile_public.html', company_name=_name, citystate=_loc, url=_url, job_posts=_job_posts)
