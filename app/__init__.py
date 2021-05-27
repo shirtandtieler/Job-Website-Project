@@ -2,9 +2,10 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask
-from flask_bootstrap import Bootstrap
+from flask import Flask, Blueprint
+from wtforms import HiddenField
 
+from app.form_renderer import render_form
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -15,7 +16,22 @@ db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
 login.login_view = 'auth.login'
-bootstrap = Bootstrap()
+
+
+def init_bootstrap(app):
+    blueprint = Blueprint(
+        'bootstrap',
+        __name__,
+        template_folder='templates',
+        static_folder='static',
+        static_url_path=app.static_url_path + '/bootstrap')
+
+    # add the form rendering template filter
+    blueprint.add_app_template_filter(render_form)
+
+    app.register_blueprint(blueprint)
+    app.jinja_env.globals['bootstrap_is_hidden_field'] = \
+        lambda field: isinstance(field, HiddenField)
 
 
 def create_app(config_class=Config):
@@ -25,7 +41,7 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
-    bootstrap.init_app(app)
+    init_bootstrap(app)
 
     from app.errors import bp as errors_bp
     app.register_blueprint(errors_bp)

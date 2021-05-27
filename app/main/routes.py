@@ -8,7 +8,6 @@ from app.main.forms import JobPostForm
 from flask_login import current_user, login_required
 from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost
 
-
 ## TODO Routes needed for editing profile page, searching, sending messages, etc.
 
 @bp.route("/")
@@ -137,15 +136,15 @@ def seeker_search():
 
 @bp.route("/seeker/<sid>")
 # @login_required
-def seeker_profile(seeker_id):
+def seeker_profile(sid):
     """
     Navigate to a specific seeker's profile page.
     """
     # TODO limit access?
-    prof = SeekerProfile.query.filter_by(id=seeker_id).first()
+    prof = SeekerProfile.query.filter_by(id=sid).first()
     if prof is None:
         # could not find profile with that id
-        flash(f'No seeker with the id {seeker_id}.')
+        flash(f'No seeker with the id {sid}.')
         return redirect(url_for('main.index'))
 
     _name = f'{prof.first_name} {prof.last_name}'
