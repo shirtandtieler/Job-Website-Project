@@ -3,5 +3,130 @@
 {% block app_content %}
 
 <h2>{{fullname}}'s Seeker Profile</h2>
+    <style>
+    .heading {
+    overflow: hidden;
+  }
+
+  .heading a {
+    float: center;
+    margin-top: 0px;
+    margin-bottom: 100px;
+    margin-right: 0%;
+    margin-left: 77%;
+    color: blue;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+
+  }
+.gridcontainer {
+  display: grid;
+    grid-gap: 50px;
+  grid-template-columns: auto auto auto;
+  padding: 10px;
+}
+.griditem {
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  padding: 20px 0;
+  font-size: 20px;
+  text-align: center;
+}
+
+.first {
+  display: grid;
+    grid-gap: 20px;
+  grid-template-columns: auto auto auto;
+  padding: 10px;
+}
+.firstitem {
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  padding: 20px 0;
+  font-size: 17px;
+  text-align: center;
+}
+
+
+
+.logo{
+    width: 8%;
+    height: auto;
+    float: left
+}
+.Profile{
+    width: 5%;
+    height: auto;
+    float:right;
+
+    border-radius: 50%;
+}
+.topnav {
+    overflow: hidden;
+  }
+
+  .topnav a {
+    float: left;
+    color: blue;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    font-size: 17px;
+  }
+
+  .topnav a.active {
+    color: blue;
+  }
+    </style>
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    
+</head>
+<body>
+
+<div class="first">
+    <img src="https://img.icons8.com/ios-glyphs/30/000000/test-account.png"/>
+    <div class="firstitem">
+        <b>About Seeker Description</b>
+        
+    </div>
+
+
+
+</div>
+
+<div class="gridcontainer">
+    <div class="griditem"> <b>Past Experience </b>
+    <p>Item One</p>
+    <p>Item Two</p>
+    <p>Item Three</p>
+    <p>Item Four</p>
+    </div>
+    <div class="griditem"> <b>Skills List </b>
+    <p>Item One</p>
+    <p>Item Two</p>
+    <p>Item Three</p>
+    <p>Item Four</p>
+    </div>
+
+    <div class="griditem">
+        <b> Download {{fullname}} Resume?</b>
+    </div>
+    <div class="griditem">
+        <b>Contact Information</b>
+        <p>Email: johndoe@gmail.com</p>
+        <p>Optional Phone: (847)-123-1234 </p>
+        <p>etc</p>
+    </div>
+
+
+
+
+</div>
+
+
+
+</body>
 
 {% endblock %}
