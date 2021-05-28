@@ -93,18 +93,9 @@ def postjob():
         flash(f'You cannot access this page.')
         return redirect(url_for('main.index'))
     form = JobPostForm()
-    print(f"Submitted? {form.is_submitted()}")
-    print(f"Validted? {form.validate()}")
-    print(f"Validated on submit? {form.validate_on_submit()}")
-    print(f"Errors: {form.errors}")
     if form.validate_on_submit():
-        # TODO Add new job post to database
-        # TODO redirect to page for newly created job posting
-
-        ## TODO not capturing state
-        ## TODO not capturing options chosen for skills/attitudes!
-        # # convert the fields to None that would otherwise just be empty string.
-        # # (to preserve the default values of the new job function)
+        # convert the fields to None that would otherwise just be empty string.
+        # (to preserve the default values of the new job function)
         _city = form.city.data if form.city.data else None
         _state = form.state.data if form.state.data else None
         _desc = form.description.data if form.description.data else None
@@ -117,14 +108,6 @@ def postjob():
                     salary_range=_sal,
                     skills=_skills, attitudes=_atts)
 
-        # print(f"SUBMISSION\n\tTitle: {form.title.data}")
-        # print(f"\tLocation: {form.city.data}, {form.state.data}")
-        # print(f"\tSalary: [{form.salary_min.data} - {form.salary_max.data}]")
-        # print(f"\tRemote? {form.remote.data}; description: {form.description.data}")
-        # print("\tSkills:", form.req_skills.data)
-        # print("\tAttitudes:", form.req_attitudes.data)
-        # print("\tERRORS", form.errors)
-        # print("=", current_user._company.id)
         flash(f"Created job post with ID {post_id}")
         return redirect(url_for('main.company_profile', company_id=current_user._company.id))
     return render_template('company/newjobpost.html',
