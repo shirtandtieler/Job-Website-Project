@@ -3,133 +3,78 @@
 
 {% block app_content %}
 <h1>Create new job posting</h1>
-<div class="row">
-    <div class="col">
-        <h4>Basic information</h4>
-        <form action="" method="post" class="form" role="form">
+<form action="" method="post" class="form" role="form">
+    <div class="row">
+        <div class="col">
+            <h4>Basic information</h4>
             {{ form.hidden_tag() }}
             <div class="form-group required">
-                <label class="control-label" for="title">Job Title</label>
-                <input class="form-control" id="title" name="title" required type="text" value="">
+                <label class="control-label">Job Title</label>
+                {{ form.title(class_="form-control") }}
             </div>
 
             <div class="form-row">
                 <div class="form-group col-md-6">
-                    <label for="city">City</label>
-                    <input class="form-control" id="city" name="city" type="text" value="">
+                    <label>City</label>
+                    {{ form.city(class_="form-control") }}
                 </div>
                 <div class="form-group col-md-4">
-                    <label for="state">State</label>
-                    <select id="state" class="form-control">
-                        <option selected>Choose...</option>
-                        <option value="Alabama">AL</option>
-                        <option value="Alaska">AK</option>
-                        <option value="Arizona">AZ</option>
-                        <option value="Arkansas">AR</option>
-                        <option value="California">CA</option>
-                        <option value="Colorado">CO</option>
-                        <option value="Connecticut">CT</option>
-                        <option value="Delaware">DE</option>
-                        <option value="District Of Columbia">DC</option>
-                        <option value="Florida">FL</option>
-                        <option value="Georgia">GA</option>
-                        <option value="Hawaii">HI</option>
-                        <option value="Idaho">ID</option>
-                        <option value="Illinois">IL</option>
-                        <option value="Indiana">IN</option>
-                        <option value="Iowa">IA</option>
-                        <option value="Kansas">KS</option>
-                        <option value="Kentucky">KY</option>
-                        <option value="Louisiana">LA</option>
-                        <option value="Maine">ME</option>
-                        <option value="Maryland">MD</option>
-                        <option value="Massachusetts">MA</option>
-                        <option value="Michigan">MI</option>
-                        <option value="Minnesota">MN</option>
-                        <option value="Mississippi">MS</option>
-                        <option value="Missouri">MO</option>
-                        <option value="Montana">MT</option>
-                        <option value="Nebraska">NE</option>
-                        <option value="Nevada">NV</option>
-                        <option value="New Hampshire">NH</option>
-                        <option value="New Jersey">NJ</option>
-                        <option value="New Mexico">NM</option>
-                        <option value="New York">NY</option>
-                        <option value="North Carolina">NC</option>
-                        <option value="North Dakota">ND</option>
-                        <option value="Ohio">OH</option>
-                        <option value="Oklahoma">OK</option>
-                        <option value="Oregon">OR</option>
-                        <option value="Pennsylvania">PA</option>
-                        <option value="Rhode Island">RI</option>
-                        <option value="South Carolina">SC</option>
-                        <option value="South Dakota">SD</option>
-                        <option value="Tennessee">TN</option>
-                        <option value="Texas">TX</option>
-                        <option value="Utah">UT</option>
-                        <option value="Vermont">VT</option>
-                        <option value="Virginia">VA</option>
-                        <option value="Washington">WA</option>
-                        <option value="West Virginia">WV</option>
-                        <option value="Wisconsin">WI</option>
-                        <option value="Wyoming">WY</option>
-                    </select>
+                    <label>{{ form.state.label }}</label>
+                    {{ form.state(class_="form-control") }}
                 </div>
             </div>
 
             <div class="checkbox">
                 <label>
-                    <input id="remote" name="remote" type="checkbox" value="y"> Remote available
+                    {{ form.remote }} Remote available
                 </label>
             </div>
 
             <div class="form-row">
                 <div class="form-group col-md-6">
-                    <label for="salary_min">Min</label>
-                    <input class="form-control" id="salary_min" name="salary_min" type="text" value="" placeholder="$">
+                    <label>Min</label>
+                    {{ form.salary_min(class_="form-control") }}
                 </div>
 
                 <div class="form-group col-md-6">
-                    <label for="salary_max">Max</label>
-                    <input class="form-control" id="salary_max" name="salary_max" type="text" value="" placeholder="$">
+                    <label>Max</label>
+                    {{ form.salary_max(class_="form-control") }}
                 </div>
             </div>
 
-            <div class="form-group "><label class="control-label" for="description">Description</label>
-                <textarea class="form-control" id="description" name="description">
-				</textarea>
+            <div class="form-group "><label class="control-label">Description</label>
+                {{ form.description(class_="form-control") }}
             </div>
 
-<!--            <div class="form-group ">-->
-<!--                <label class="control-label" for="req_skills">Req Skills</label>-->
-<!--                <ul class="form-control" id="req_skills"></ul>-->
+            <br/>
+
+            {{ form.submit(class_="btn btn-primary btn-lg") }}
+        </div>
+        <div class="col">
+            <h4>Seeker Attributes</h4>
+            <div class="row">
+                <div class="col form-group">
+                    <input type="text" id="skill_selector" placeholder="Search skills...">
+                    <ul class="form-control" id="req_skills">
+
+                    </ul>
+
+                </div>
+                <div class="col">
+                    <input type="text" id="attitude_selector" placeholder="Search attitudes/values...">
+                    <ul class="form-control" id="req_attitudes">
+
+                    </ul>
+                </div>
+            </div>
+<!--            <div class="row">-->
+<!--                {{ form.req_skills }}-->
+<!--                {{ form.req_attitudes }}-->
 <!--            </div>-->
-<!--            <div class="form-group ">-->
-<!--                <label class="control-label" for="req_attitudes">Req Attitudes</label>-->
-<!--                <ul class="form-control" id="req_attitudes"></ul>-->
-<!--            </div>-->
-            <input class="btn btn-default" id="submit" name="submit" type="submit" value="Post it!">
-        </form>
-    </div>
-    <div class="col">
-        <h4>Seeker Attributes</h4>
-        <div class="row">
-            <div class="col form-group">
-                <input type="text" id="skill_selector" placeholder="Search skills...">
-                <ul class="form-control" id="req_skills">
-
-                </ul>
-
-            </div>
-            <div class="col">
-                <input type="text" id="attitude_selector" placeholder="Search attitudes/values...">
-                <ul class="form-control" id="req_attitudes">
-
-                </ul>
-            </div>
         </div>
     </div>
-</div>
+</form>
+
 
 
 {% endblock %}
@@ -164,6 +109,7 @@
             ul = document.getElementById("req_attitudes");
             pfx = "req_attitudes-" + count_attitudes;
             sfx = "att";
+            count_attitudes++;
         }
 
         // dynamically create new entry.
@@ -171,11 +117,23 @@
         //  of entries.
         var li = document.createElement("li");
         var tbl = document.createElement("table");
-        tbl.setAttribute("name", pfx);
+        //tbl.setAttribute("name", pfx);
+        tbl.setAttribute("id", pfx);
 
         // first row displays chosen skill/attitude
         var tr1 = document.createElement("tr");
         var td1 = document.createElement("td");
+        var sel1 = document.createElement("select");
+        sel1.setAttribute("id", pfx + "-" + sfx);
+        sel1.setAttribute("name", pfx + "-" + sfx);
+        var opt1 = document.createElement("option");
+        opt1.setAttribute("value", name);
+        opt1.appendChild(document.createTextNode(name));
+        sel1.appendChild(opt1);
+        td1.appendChild(sel1);
+        /*
+        // APPARENTLY CANT CREATE A DIFFERENT ELEMENT TYPE.
+        // So just recreated a select with only 1 option.
         var inp1 = document.createElement("input");
         inp1.setAttribute("type", "text");
         inp1.setAttribute("readonly", "");
@@ -183,9 +141,10 @@
         inp1.setAttribute("id", pfx + "-" + sfx);
         inp1.setAttribute("value", name);
         td1.appendChild(inp1);
+        */
         tr1.appendChild(td1);
 
-        // try adding icon to second column for deleting this cell
+        // add icon to second column for deleting this cell
         var td11 = document.createElement("td");
         var i1 = document.createElement("i");
         i1.setAttribute("class", "fas fa-trash invicon");
@@ -194,16 +153,17 @@
         td11.appendChild(i1);
         tr1.appendChild(td11);
 
+        // add row to table; move onto next option
         tbl.appendChild(tr1);
 
-        // row for skill only that asks minimum level required
+        // have row minimum level required (only applicable to skills)
         if (is_skill) {
             var tr2 = document.createElement("tr");
             // header for displaying label
             var th2 = document.createElement("th");
             var lbl2 = document.createElement("label");
             lbl2.setAttribute("for", pfx+"-min_lvl");
-            lbl2.appendChild(document.createTextNode("Minimum required competency"));
+            lbl2.appendChild(document.createTextNode("Min. competency required"));
             th2.appendChild(lbl2);
             tr2.appendChild(th2);
             // data col for displaying competancy level
