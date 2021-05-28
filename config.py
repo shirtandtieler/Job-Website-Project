@@ -27,6 +27,7 @@ def build_db_url(user=None, pw=None, host=None, port=None, db=None):
     url += f"/{db}"
     return url
 
+
 def get_database_url():
     url = os.environ.get('DATABASE_URL')
     if url:
@@ -45,3 +46,4 @@ class Config:
     SQLALCHEMY_DATABASE_URI = get_database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT')
+    SQLALCHEMY_ECHO = False

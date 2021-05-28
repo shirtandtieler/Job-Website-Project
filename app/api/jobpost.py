@@ -40,7 +40,6 @@ def new_jobpost(company_id: int, title: str,
                 sid = Skill.query.filter_by(title=skl).first().id
             else:
                 sid = skl
-            print(f"DEBUG: Creating job post skill for pid {post.id}, attitude id {sid}, skl lvl {slvl}, imp lvl {simp}")
             post_skill = JobPostSkill(jobpost_id=post.id,
                                       skill_id=sid,
                                       skill_level_min=SkillLevels(slvl),
@@ -52,7 +51,6 @@ def new_jobpost(company_id: int, title: str,
                 aid = Attitude.query.filter_by(title=att).first().id
             else:
                 aid = att
-            print(f"DEBUG: Creating job post attitude for pid {post.id}, attitude id {aid}, imp lvl {aimp}")
             post_attitude = JobPostAttitude(jobpost_id=post.id,
                                             attitude_id=aid,
                                             importance_level=ImportanceLevel(aimp))

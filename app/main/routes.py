@@ -4,14 +4,15 @@
 from flask import render_template, flash, redirect, url_for
 
 from app import constants
+from app.api.jobpost import new_jobpost
 from app.main import bp
 from app.main.forms import JobPostForm, SkillRequirementForm, AttitudeRequirementForm
 from flask_login import current_user, login_required
 from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
 
-
 ## TODO Routes needed for editing profile page, searching, sending messages, etc.
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
+from test.test_newjobpost import plain_post_w_attributes
 
 
 @bp.route("/")
@@ -46,8 +47,8 @@ def index():
         _city = profile.city
         _state = profile.state
         _website = profile.website
-        
-        return render_template("company/dashboard.html",name=_name, city=_city,state=_state,website=_website)
+
+        return render_template("company/dashboard.html", name=_name, city=_city, state=_state, website=_website)
     else:  # admin
         return render_template("admin/dashboard.html")
 
@@ -92,22 +93,40 @@ def postjob():
         flash(f'You cannot access this page.')
         return redirect(url_for('main.index'))
     form = JobPostForm()
-    if form.is_submitted():
+    print(f"Submitted? {form.is_submitted()}")
+    print(f"Validted? {form.validate()}")
+    print(f"Validated on submit? {form.validate_on_submit()}")
+    print(f"Errors: {form.errors}")
+    if form.validate_on_submit():
         # TODO Add new job post to database
         # TODO redirect to page for newly created job posting
 
         ## TODO not capturing state
         ## TODO not capturing options chosen for skills/attitudes!
-        print(form.title.data, form.city.data, form.state.data, form.salary_min.data, form.salary_max.data)
-        print(form.remote.data, form.description.data)
-        print(form.req_skills.data)
-        print(form.req_attitudes.data)
-        return redirect(url_for('main.index'))
-    else:
-        print(form.validate_on_submit())
-        print(form.validate())
-        print(form.is_submitted())
-        print(form.errors)
+        # # convert the fields to None that would otherwise just be empty string.
+        # # (to preserve the default values of the new job function)
+        _city = form.city.data if form.city.data else None
+        _state = form.state.data if form.state.data else None
+        _desc = form.description.data if form.description.data else None
+        _sal = (form.salary_min.data, form.salary_max.data)
+        # convert the passed skills and attitudes to the expected format
+        _skills = [(s['skill'], int(s['min_lvl']), int(s['importance'])) for s in form.req_skills.data]
+        _atts = [(a['att'], int(a['importance'])) for a in form.req_attitudes.data]
+        post_id = new_jobpost(current_user._company.id, form.title.data,
+                    city=_city, state=_state, description=_desc, remote=form.remote.data,
+                    salary_range=_sal,
+                    skills=_skills, attitudes=_atts)
+
+        # print(f"SUBMISSION\n\tTitle: {form.title.data}")
+        # print(f"\tLocation: {form.city.data}, {form.state.data}")
+        # print(f"\tSalary: [{form.salary_min.data} - {form.salary_max.data}]")
+        # print(f"\tRemote? {form.remote.data}; description: {form.description.data}")
+        # print("\tSkills:", form.req_skills.data)
+        # print("\tAttitudes:", form.req_attitudes.data)
+        # print("\tERRORS", form.errors)
+        # print("=", current_user._company.id)
+        flash(f"Created job post with ID {post_id}")
+        return redirect(url_for('main.company_profile', company_id=current_user._company.id))
     return render_template('company/newjobpost.html',
                            form=form, skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES)
 
@@ -189,4 +208,5 @@ def company_profile(company_id: int):
 
     _job_posts = JobPost.query.filter_by(company_id=company_id).all()
 
-    return render_template('company/profile_public.html', company_name=_name, citystate=_loc, url=_url, job_posts=_job_posts)
+    return render_template('company/profile_public.html', company_name=_name, citystate=_loc, url=_url,
+                           job_posts=_job_posts)

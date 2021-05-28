@@ -120,7 +120,7 @@ class Skill(db.Model):
     _job_posts = relationship("JobPostSkill", back_populates="_skill")
 
     def __repr__(self):
-        return f"{self.type.capitalize()}Skill[{self.title}]"
+        return f"{self.type.name.capitalize()}Skill[{self.title}]"
 
     @staticmethod
     def get_skill_names():
