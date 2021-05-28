@@ -1,16 +1,11 @@
-
-class AccountType:
-    SEEKER, COMPANY, ADMIN = "Seeker", "Company", "Admin"
-
-    @staticmethod
-    def value_of(type_name: str):
-        """ Expands a guessed name to the actual one """
-        guess = type_name.lower()
-        actual = None
-        if guess[0] == "s" or guess.startswith("cand"):  # seeker / candidate
-            actual = AccountType.SEEKER
-        elif guess[0] == "c" or guess.startswith("emp"):  # company / employee
-            actual = AccountType.COMPANY
-        elif guess[0] == "a" or guess.startswith("super"):  # admin / superuser
-            actual = AccountType.ADMIN
-        return actual
+STATE_CHOICES = [('Alabama', 'AL'), ('Alaska', 'AK'), ('Arizona', 'AZ'), ('Arkansas', 'AR'), ('California', 'CA'),
+                 ('Colorado', 'CO'), ('Connecticut', 'CT'), ('Delaware', 'DE'), ('District Of Columbia', 'DC'),
+                 ('Florida', 'FL'), ('Georgia', 'GA'), ('Hawaii', 'HI'), ('Idaho', 'ID'), ('Illinois', 'IL'),
+                 ('Indiana', 'IN'), ('Iowa', 'IA'), ('Kansas', 'KS'), ('Kentucky', 'KY'), ('Louisiana', 'LA'),
+                 ('Maine', 'ME'), ('Maryland', 'MD'), ('Massachusetts', 'MA'), ('Michigan', 'MI'), ('Minnesota', 'MN'),
+                 ('Mississippi', 'MS'), ('Missouri', 'MO'), ('Montana', 'MT'), ('Nebraska', 'NE'), ('Nevada', 'NV'),
+                 ('New Hampshire', 'NH'), ('New Jersey', 'NJ'), ('New Mexico', 'NM'), ('New York', 'NY'),
+                 ('North Carolina', 'NC'), ('North Dakota', 'ND'), ('Ohio', 'OH'), ('Oklahoma', 'OK'), ('Oregon', 'OR'),
+                 ('Pennsylvania', 'PA'), ('Rhode Island', 'RI'), ('South Carolina', 'SC'), ('South Dakota', 'SD'),
+                 ('Tennessee', 'TN'), ('Texas', 'TX'), ('Utah', 'UT'), ('Vermont', 'VT'), ('Virginia', 'VA'),
+                 ('Washington', 'WA'), ('West Virginia', 'WV'), ('Wisconsin', 'WI'), ('Wyoming', 'WY')]
