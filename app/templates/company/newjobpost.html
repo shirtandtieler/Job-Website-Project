@@ -4,8 +4,282 @@
 {% block app_content %}
 <h1>Create new job posting</h1>
 <div class="row">
-    <div class="col-md-4">
-        {{ wtf.quick_form(form) }}
+    <div class="col">
+        <h4>Basic information</h4>
+        <form action="" method="post" class="form" role="form">
+            {{ form.hidden_tag() }}
+            <div class="form-group required">
+                <label class="control-label" for="title">Job Title</label>
+                <input class="form-control" id="title" name="title" required type="text" value="">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="city">City</label>
+                    <input class="form-control" id="city" name="city" type="text" value="">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="state">State</label>
+                    <select id="state" class="form-control">
+                        <option selected>Choose...</option>
+                        <option value="Alabama">AL</option>
+                        <option value="Alaska">AK</option>
+                        <option value="Arizona">AZ</option>
+                        <option value="Arkansas">AR</option>
+                        <option value="California">CA</option>
+                        <option value="Colorado">CO</option>
+                        <option value="Connecticut">CT</option>
+                        <option value="Delaware">DE</option>
+                        <option value="District Of Columbia">DC</option>
+                        <option value="Florida">FL</option>
+                        <option value="Georgia">GA</option>
+                        <option value="Hawaii">HI</option>
+                        <option value="Idaho">ID</option>
+                        <option value="Illinois">IL</option>
+                        <option value="Indiana">IN</option>
+                        <option value="Iowa">IA</option>
+                        <option value="Kansas">KS</option>
+                        <option value="Kentucky">KY</option>
+                        <option value="Louisiana">LA</option>
+                        <option value="Maine">ME</option>
+                        <option value="Maryland">MD</option>
+                        <option value="Massachusetts">MA</option>
+                        <option value="Michigan">MI</option>
+                        <option value="Minnesota">MN</option>
+                        <option value="Mississippi">MS</option>
+                        <option value="Missouri">MO</option>
+                        <option value="Montana">MT</option>
+                        <option value="Nebraska">NE</option>
+                        <option value="Nevada">NV</option>
+                        <option value="New Hampshire">NH</option>
+                        <option value="New Jersey">NJ</option>
+                        <option value="New Mexico">NM</option>
+                        <option value="New York">NY</option>
+                        <option value="North Carolina">NC</option>
+                        <option value="North Dakota">ND</option>
+                        <option value="Ohio">OH</option>
+                        <option value="Oklahoma">OK</option>
+                        <option value="Oregon">OR</option>
+                        <option value="Pennsylvania">PA</option>
+                        <option value="Rhode Island">RI</option>
+                        <option value="South Carolina">SC</option>
+                        <option value="South Dakota">SD</option>
+                        <option value="Tennessee">TN</option>
+                        <option value="Texas">TX</option>
+                        <option value="Utah">UT</option>
+                        <option value="Vermont">VT</option>
+                        <option value="Virginia">VA</option>
+                        <option value="Washington">WA</option>
+                        <option value="West Virginia">WV</option>
+                        <option value="Wisconsin">WI</option>
+                        <option value="Wyoming">WY</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="checkbox">
+                <label>
+                    <input id="remote" name="remote" type="checkbox" value="y"> Remote available
+                </label>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="salary_min">Min</label>
+                    <input class="form-control" id="salary_min" name="salary_min" type="text" value="" placeholder="$">
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="salary_max">Max</label>
+                    <input class="form-control" id="salary_max" name="salary_max" type="text" value="" placeholder="$">
+                </div>
+            </div>
+
+            <div class="form-group "><label class="control-label" for="description">Description</label>
+                <textarea class="form-control" id="description" name="description">
+				</textarea>
+            </div>
+
+<!--            <div class="form-group ">-->
+<!--                <label class="control-label" for="req_skills">Req Skills</label>-->
+<!--                <ul class="form-control" id="req_skills"></ul>-->
+<!--            </div>-->
+<!--            <div class="form-group ">-->
+<!--                <label class="control-label" for="req_attitudes">Req Attitudes</label>-->
+<!--                <ul class="form-control" id="req_attitudes"></ul>-->
+<!--            </div>-->
+            <input class="btn btn-default" id="submit" name="submit" type="submit" value="Post it!">
+        </form>
+    </div>
+    <div class="col">
+        <h4>Seeker Attributes</h4>
+        <div class="row">
+            <div class="col form-group">
+                <input type="text" id="skill_selector" placeholder="Search skills...">
+                <ul class="form-control" id="req_skills">
+
+                </ul>
+
+            </div>
+            <div class="col">
+                <input type="text" id="attitude_selector" placeholder="Search attitudes/values...">
+                <ul class="form-control" id="req_attitudes">
+
+                </ul>
+            </div>
+        </div>
     </div>
 </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    var count_skills = 0; // global counters for how many items in the skills list
+    var count_attitudes = 0; // global counters for how many items in the att. list
+
+    var skill_lvls = ["Novice", "Familiar", "Competent", "Proficient", "Expert"];
+    var importance_lvls = ["None", "Very Low", "Low", "Medium", "High", "Very High"];
+
+    function on_trash_req() { // TODO DO YOU NEED TO DECREMENT THE COUNTER?
+        // event.target will be the input element.
+        var td = event.target.parentNode.parentNode.parentNode;
+        var tr = td.parentNode; // the row to be removed
+        tr.parentNode.removeChild(tr);
+    }
+
+    function new_req(name, is_skill) {
+        // setup references and ids
+        var ul = null;
+        var pfx = null; // id reference prefix
+        var sfx = null; // id reference suffix
+        if (is_skill) {
+            ul = document.getElementById("req_skills");
+            pfx = "req_skills-" + count_skills;
+            sfx = "skill";
+            count_skills++;
+        } else {
+            ul = document.getElementById("req_attitudes");
+            pfx = "req_attitudes-" + count_attitudes;
+            sfx = "att";
+        }
+
+        // dynamically create new entry.
+        // based on code generated from rendering the form with a fixed number
+        //  of entries.
+        var li = document.createElement("li");
+        var tbl = document.createElement("table");
+        tbl.setAttribute("name", pfx);
+
+        // first row displays chosen skill/attitude
+        var tr1 = document.createElement("tr");
+        var td1 = document.createElement("td");
+        var inp1 = document.createElement("input");
+        inp1.setAttribute("type", "text");
+        inp1.setAttribute("readonly", "");
+        inp1.setAttribute("class", "form-control-plaintext");
+        inp1.setAttribute("id", pfx + "-" + sfx);
+        inp1.setAttribute("value", name);
+        td1.appendChild(inp1);
+        tr1.appendChild(td1);
+
+        // try adding icon to second column for deleting this cell
+        var td11 = document.createElement("td");
+        var i1 = document.createElement("i");
+        i1.setAttribute("class", "fas fa-trash invicon");
+        i1.setAttribute("style", "margin-left: 75%;");
+        i1.setAttribute("onclick", "on_trash_req()");
+        td11.appendChild(i1);
+        tr1.appendChild(td11);
+
+        tbl.appendChild(tr1);
+
+        // row for skill only that asks minimum level required
+        if (is_skill) {
+            var tr2 = document.createElement("tr");
+            // header for displaying label
+            var th2 = document.createElement("th");
+            var lbl2 = document.createElement("label");
+            lbl2.setAttribute("for", pfx+"-min_lvl");
+            lbl2.appendChild(document.createTextNode("Minimum required competency"));
+            th2.appendChild(lbl2);
+            tr2.appendChild(th2);
+            // data col for displaying competancy level
+            var td2 = document.createElement("td");
+            var select2 = document.createElement("select");
+            select2.setAttribute("id", pfx+"-min_lvl");
+            select2.setAttribute("name", pfx+"-min_lvl");
+            for (i = 0; i < 5; i++) {
+                var opt2 = document.createElement("option");
+                opt2.setAttribute("value", (i+1).toString());
+                opt2.appendChild(document.createTextNode(skill_lvls[i]));
+                select2.appendChild(opt2);
+            }
+            td2.appendChild(select2);
+            tr2.appendChild(td2);
+            tbl.appendChild(tr2);
+        }
+
+        // row for importance level
+        var tr3 = document.createElement("tr");
+        // header for displaying label
+        var th3 = document.createElement("th");
+        var lbl3 = document.createElement("label");
+        lbl3.setAttribute("for", pfx+"-importance");
+        lbl3.appendChild(document.createTextNode("Importance to position"));
+        th3.appendChild(lbl3);
+        tr3.appendChild(th3);
+        // data col for displaying importance level
+        var td3 = document.createElement("td");
+        var select3 = document.createElement("select");
+        select3.setAttribute("id", pfx+"-importance");
+        select3.setAttribute("name", pfx+"-importance");
+        for (i = 0; i < 5; i++) {
+            var opt3 = document.createElement("option");
+            opt3.setAttribute("value", (i+1).toString());
+            opt3.appendChild(document.createTextNode(importance_lvls[i]));
+            select3.appendChild(opt3);
+        }
+        td3.appendChild(select3);
+        tr3.appendChild(td3);
+        tbl.appendChild(tr3);
+
+        li.appendChild(tbl);
+        ul.appendChild(li);
+    }
+
+    var available_skills = {{ skill_list|safe }};
+    var available_attitudes = {{ attitude_list|safe}};
+
+    $("#skill_selector").autocomplete({
+	    autoFocus: true,
+        source: available_skills,
+        select: function (event, ui) {
+            new_req(ui.item.label, true);
+            document.getElementById('skill_selector').value = '';
+            return false;
+  	    },
+    });
+
+    $("#attitude_selector").autocomplete({
+	    autoFocus: true,
+        source: available_attitudes,
+        select: function (event, ui) {
+            new_req(ui.item.label, false);
+            document.getElementById('attitude_selector').value = '';
+            return false;
+  	    },
+    });
+</script>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+	.invicon:hover {
+		color: red;
+	}
+</style>
 {% endblock %}

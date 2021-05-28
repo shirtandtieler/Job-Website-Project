@@ -3,12 +3,16 @@
 
 from flask import render_template, flash, redirect, url_for
 
+from app import constants
 from app.main import bp
-from app.main.forms import JobPostForm
+from app.main.forms import JobPostForm, SkillRequirementForm, AttitudeRequirementForm
 from flask_login import current_user, login_required
-from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost
+from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
+
 
 ## TODO Routes needed for editing profile page, searching, sending messages, etc.
+from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
+
 
 @bp.route("/")
 @bp.route("/index")
@@ -88,12 +92,24 @@ def postjob():
         flash(f'You cannot access this page.')
         return redirect(url_for('main.index'))
     form = JobPostForm()
-    if form.validate_on_submit():
+    if form.is_submitted():
         # TODO Add new job post to database
         # TODO redirect to page for newly created job posting
-        flash(f'Mock-created job post: {form.title.data}')
+
+        ## TODO not capturing state
+        ## TODO not capturing options chosen for skills/attitudes!
+        print(form.title.data, form.city.data, form.state.data, form.salary_min.data, form.salary_max.data)
+        print(form.remote.data, form.description.data)
+        print(form.req_skills.data)
+        print(form.req_attitudes.data)
         return redirect(url_for('main.index'))
-    return render_template('company/newjobpost.html', form=form)
+    else:
+        print(form.validate_on_submit())
+        print(form.validate())
+        print(form.is_submitted())
+        print(form.errors)
+    return render_template('company/newjobpost.html',
+                           form=form, skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES)
 
 
 @bp.route("/jobs")

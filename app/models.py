@@ -1,5 +1,7 @@
 from datetime import datetime
 from hashlib import md5
+from typing import List, Tuple
+
 from sqlalchemy.sql.elements import Null
 from flask import url_for
 from sqlalchemy.sql.elements import Null
@@ -92,6 +94,10 @@ class Attitude(db.Model):
     def __repr__(self):
         return f"Attitude[{self.title}]"
 
+    @staticmethod
+    def get_attitude_names():
+        return [[a.title for a in Attitude.query.all()]]
+
     def to_dict(self):  ## TODO do this with the others
         return {
             "title": self.title,
@@ -115,6 +121,10 @@ class Skill(db.Model):
 
     def __repr__(self):
         return f"{self.type.capitalize()}Skill[{self.title}]"
+
+    @staticmethod
+    def get_skill_names():
+        return [[s.title for s in Skill.query.all()]]
 
 
 class UserPicture(db.Model, Image):
@@ -460,6 +470,21 @@ class JobPost(db.Model):
         else:
             sal = f"Salary depends on experience"
         return sal
+
+    @property
+    def skills_data(self) -> List[Tuple[int, int, int]]:
+        """
+        Gets a list of skills, where each entry contains:
+            1. the id of the skill
+            2. the minimum skill level (1-5)
+            3. the importance level (0-5)
+        """
+        return [(s.skill_id, s.skill_level_min, s.importance_level) for s in self._skills]
+
+    @property
+    def attitude_data(self) -> List[Tuple[int, int]]:
+        return [(a.attitude_id, a.importance_level) for a in self._attitudes]
+
 
 
 class JobPostSkill(db.Model):
