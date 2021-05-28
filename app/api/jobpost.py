@@ -1,3 +1,4 @@
+import traceback
 from typing import Tuple, Union, List
 
 from app import db
@@ -8,7 +9,7 @@ def new_jobpost(company_id: int, title: str,
                 city: str = None, state: str = None, description: str = None, remote: bool = None,
                 salary_range: Tuple[int, int] = None,
                 skills: List[Tuple[Union[str, int], int, int]] = None, 
-                attitudes: List[Tuple[Union[str, int], int, int]] = None) -> int:
+                attitudes: List[Tuple[Union[str, int], int]] = None) -> int:
     """
     Create a new job post, passing - at minimum - the company ID and job post title.
     Can also pass other fields of the job post, including a list of skill and attitude requirements.
@@ -21,9 +22,9 @@ def new_jobpost(company_id: int, title: str,
         2. the importance level (0-5)
     Returns the id of the added job post.
     """
-    post = JobPost(company_id=company_id, title=title,
+    post = JobPost(company_id=company_id, job_title=title,
                    city=city, state=state, description=description,
-                   remote=remote)
+                   is_remote=remote)
     if salary_range is not None:
         post.salary_min = salary_range[0]
         post.salary_max = salary_range[1]
@@ -36,9 +37,10 @@ def new_jobpost(company_id: int, title: str,
     if skills is not None:
         for (skl, slvl, simp) in skills:
             if isinstance(skl, str):  # convert to int id
-                sid = Skill.query.filter_by(title=skl).first()
+                sid = Skill.query.filter_by(title=skl).first().id
             else:
                 sid = skl
+            print(f"DEBUG: Creating job post skill for pid {post.id}, attitude id {sid}, skl lvl {slvl}, imp lvl {simp}")
             post_skill = JobPostSkill(jobpost_id=post.id,
                                       skill_id=sid,
                                       skill_level_min=SkillLevels(slvl),
@@ -47,15 +49,21 @@ def new_jobpost(company_id: int, title: str,
     if attitudes is not None:
         for (att, aimp) in attitudes:
             if isinstance(att, str):  # convert to int id
-                aid = Attitude.query.filter_by(title=att).first()
+                aid = Attitude.query.filter_by(title=att).first().id
             else:
                 aid = att
+            print(f"DEBUG: Creating job post attitude for pid {post.id}, attitude id {aid}, imp lvl {aimp}")
             post_attitude = JobPostAttitude(jobpost_id=post.id,
                                             attitude_id=aid,
                                             importance_level=ImportanceLevel(aimp))
             db.session.add(post_attitude)
     if skills or attitudes:
-        db.session.commit()
+        try:
+            db.session.commit()
+        except:
+            traceback.print_exc()
+            print("<<<< ROLLING BACK! >>>>")
+            db.session.rollback()
         
     return post.id
 
@@ -64,7 +72,7 @@ def edit_jobpost(post_id: int,
                  title: str = None, city: str = None, state: str = None, description: str = None, 
                  remote: bool = None, salary_range: Tuple[Union[None, int], Union[None, int]] = None,
                  skills: List[Tuple[Union[str, int], int, int]] = None,
-                 attitudes: List[Tuple[Union[str, int], int, int]] = None):
+                 attitudes: List[Tuple[Union[str, int], int]] = None):
     """
     Update the provided job post with the specified values.
     If updating salary range, can pass None for any value in the 2-tuple that you don't want to update.
@@ -88,6 +96,8 @@ def edit_jobpost(post_id: int,
         post.city = city
     if state:
         post.state = state
+    if description:
+        post.description = description
     if remote:
         post.is_remote = remote
     if salary_range:
