@@ -1,7 +1,7 @@
 # Routes are the different URLs that the application implements.
 # The functions below handle the routing/behavior.
 
-from flask import render_template, flash, redirect, url_for
+from flask import render_template, flash, redirect, url_for, request
 
 from app import constants
 from app.api.jobpost import new_jobpost
@@ -56,38 +56,69 @@ def index():
 @bp.route('/profile')
 def profile():
     """
-    Displays the user's view of their profile
+    Displays the user's own profile (the same as the public view, but with some extra logic)
     """
-    # XXX Subject to change soon.
-    # Should eventually go to the user's view of their profile. Just goes to the public view for now.
-    # (Maybe both will go to the same page but if/else's will show edit buttons or w/e)
 
     if current_user.is_anonymous:
         flash('Login required for this operation')
         return redirect(url_for('main.login'))
 
     if current_user.account_type == AccountTypes.s:
-        prof = current_user._seeker
-        _name = prof.first_name + ' ' + prof.last_name
-        return render_template('seeker/profile.html', fullname=_name)
+        # Show seeker's public profile page
+        return seeker_profile(current_user._seeker.id)
     elif current_user.account_type == AccountTypes.c:
-        prof = current_user._company
-        _name = prof.name
-        if prof.city and prof.state:  # both provided
-            _loc = f"{prof.city}, {prof.state}"
-        elif prof.city or prof.state:  # one provided
-            _loc = prof.city if prof.city else prof.state
-        else:  # none provided
-            _loc = "USA"
-        _url = prof.website
-        return render_template('company/profile.html', name=_name, citystate=_loc, url=_url)
+        # Show company's public profile page
+        return company_profile(current_user._company.id)
     else:  # admins
         return render_template('admin/profile.html')
 
 
-@bp.route("/postjob", methods=['GET', 'POST'])
+@bp.route("/seeker/<seeker_id>")
+# @login_required
+def seeker_profile(seeker_id):
+    """
+    Navigate to a specific seeker's profile page.
+    """
+    # TODO limit access?
+    prof = SeekerProfile.query.filter_by(id=seeker_id).first()
+    if prof is None:
+        # could not find profile with that id
+        flash(f'No seeker with the id {seeker_id}.')
+        return redirect(url_for('main.index'))
+
+    _name = f'{prof.first_name} {prof.last_name}'
+    return render_template('seeker/profile.html', fullname=_name)
+
+
+@bp.route("/company/<company_id>")
+def company_profile(company_id: int):
+    """
+    Navigate to a specific company's profile page.
+    """
+    prof = CompanyProfile.query.filter_by(id=company_id).first()
+    if prof is None:
+        # could not find profile with that id
+        flash(f'No company with the id {company_id}')
+        return redirect(url_for('main.index'))
+
+    _name = prof.name
+    if prof.city and prof.state:  # both provided
+        _loc = f"{prof.city}, {prof.state}"
+    elif prof.city or prof.state:  # one provided
+        _loc = prof.city if prof.city else prof.state
+    else:  # none provided
+        _loc = "USA"
+    _url = prof.website
+
+    _job_posts = JobPost.query.filter_by(company_id=company_id).all()
+
+    return render_template('company/profile.html', company_name=_name, citystate=_loc, url=_url,
+                           job_posts=_job_posts)
+
+
+@bp.route("/job/new", methods=['GET', 'POST'])
 @login_required
-def postjob():
+def new_job():
     """ New job page; non-company users will be redirected to the homepage. """
     if current_user.account_type != AccountTypes.c:
         flash(f'You cannot access this page.')
@@ -112,6 +143,36 @@ def postjob():
         return redirect(url_for('main.company_profile', company_id=current_user._company.id))
     return render_template('company/newjobpost.html',
                            form=form, skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES)
+
+
+@bp.route("/job/edit/<jid>", methods=['GET', 'POST'])
+def edit_job(jid):
+    job_post = JobPost.query.filter_by(id=jid).first()
+    # Don't allow to editor if ID not found, if user isn't a company, or if the post doesn't belong to the company.
+    if job_post is None or current_user.account_type != AccountTypes.c or \
+            job_post.company_id != current_user._company.id:
+        flash(f'You cannot access this page.')
+        return redirect(url_for('main.index'))
+    form = JobPostForm()
+    # init_skills/attitudes
+    # fill out form with job post information
+    form.title.data = job_post.job_title
+    form.city.data = job_post.city
+    form.state.data = job_post.state
+    form.description.data = job_post.description
+    form.remote.data = job_post.is_remote
+    form.salary_min.data = job_post.salary_min
+    form.salary_max.data = job_post.salary_max
+    # skills/attitudes need to be passed as arguments
+    _skls = [(s._skill.title, int(s.skill_level_min), int(s.importance_level)) for s in job_post._skills]
+    _atts = [(a._attitude.title, int(a.importance_level)) for a in job_post._attitudes]
+    if form.validate_on_submit():
+        print("okay")
+        return redirect(url_for('main.company_profile', company_id=current_user._company.id))
+    return render_template('company/newjobpost.html',
+                           form=form, skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES,
+                           init_skills=_skls, init_attitudes=_atts
+                           )
 
 
 @bp.route("/jobs")
@@ -150,46 +211,3 @@ def seeker_search():
     # TODO should be only for companies/admins?
     seekers = [(s.full_name, s.tag_lines, s.location) for s in SeekerProfile.query.all()]
     return render_template('seeker/browse.html', seekers=seekers)
-
-
-@bp.route("/seeker/<sid>")
-# @login_required
-def seeker_profile(sid):
-    """
-    Navigate to a specific seeker's profile page.
-    """
-    # TODO limit access?
-    prof = SeekerProfile.query.filter_by(id=sid).first()
-    if prof is None:
-        # could not find profile with that id
-        flash(f'No seeker with the id {sid}.')
-        return redirect(url_for('main.index'))
-
-    _name = f'{prof.first_name} {prof.last_name}'
-    return render_template('seeker/profile.html', fullname=_name)
-
-
-@bp.route("/company/<company_id>")
-def company_profile(company_id: int):
-    """
-    Navigate to a specific company's profile page.
-    """
-    prof = CompanyProfile.query.filter_by(id=company_id).first()
-    if prof is None:
-        # could not find profile with that id
-        flash(f'No company with the id {company_id}')
-        return redirect(url_for('main.index'))
-
-    _name = prof.name
-    if prof.city and prof.state:  # both provided
-        _loc = f"{prof.city}, {prof.state}"
-    elif prof.city or prof.state:  # one provided
-        _loc = prof.city if prof.city else prof.state
-    else:  # none provided
-        _loc = "USA"
-    _url = prof.website
-
-    _job_posts = JobPost.query.filter_by(company_id=company_id).all()
-
-    return render_template('company/profile_public.html', company_name=_name, citystate=_loc, url=_url,
-                           job_posts=_job_posts)
