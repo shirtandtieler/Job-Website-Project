@@ -2,8 +2,82 @@
 
 {% block app_content %}
 
-<h2>Job Post</h2>
+<div class="container-sm">
+<div class="row">
+    <!--    Job info    -->
+    <div class="col-9">
+        <h2> {{ job.job_title }} </h2>
+        <p>
+            <i class="fas fa-map-marker-alt"></i>
+            {{ job.location }}
+            {% if job.is_remote %}
+            <br/>Remote available
+            {% endif %}
+        </p>
+        <p>
+            <i class="fas fa-money-bill"></i>
+            {{ job.expected_salary }}
+        </p>
 
-<p>Apply today!</p>
+        {% if job.n_tech_skills() > 0 %}
+        <h4>Technical skill requirements</h4>
+        <ul>
+            {% for name, lvl, _ in job.get_skills_data('t', True) %}
+            <li>{{ name }} : {{ lvl.name.title() }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if job.n_biz_skills() > 0 %}
+        <h4>Business skill requirements</h4>
+        <ul>
+            {% for name, lvl, imp in job.get_skills_data('b', True) %}
+            <li>{{ name }} : {{ lvl.name.title() }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if job.n_attitudes() > 0 %}
+        <h5>Work attitudes and values</h5>
+        <ul>
+            {% for name, imp in job.get_attitude_data(True) %}
+            <li>{{ name }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        {% if job.description %}
+        <p>
+            {{ job.description }}
+        </p>
+        {% endif %}
+    </div>
+
+    <!--    Company info (sidebar)    -->
+    <div class="col-3">
+        <div class="card shadow" style="width: 18rem;">
+            <img src="{{url_for('static', filename='images/blue_company.jpg')}}" class="card-img-top">
+            <div class="card-body">
+                <h5 class="card-title">{{ job._company.name }}</h5>
+<!--                <p class="card-text"></p>-->
+            </div>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    {{ job._company.location }}
+                </li>
+            </ul>
+            <div class="card-body">
+                <a href="{{ url_for('main.company_profile', company_id=job._company.id) }}">Our Profile</a>
+            </div>
+            {% if job._company.website %}
+            <div class="card-body">
+                <a href="{{ job._company.website }}" class="card-link">Our website</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
 
 {% endblock %}
