@@ -5,9 +5,25 @@ from app import db
 from app.models import JobPost, JobPostSkill, SkillLevels, ImportanceLevel, Skill, JobPostAttitude, Attitude
 
 
+def extract_details(form):
+    # convert the fields to None that would otherwise just be empty string.
+    # (to preserve the default values of the new job function)
+    details = dict()
+    details['title'] = form.title.data
+    details['city'] = form.city.data if form.city.data else None
+    details['state'] = form.state.data if form.state.data else None
+    details['description'] = form.description.data if form.description.data else None
+    details['remote'] = form.remote.data
+    details['salary'] = (form.salary_min.data, form.salary_max.data)
+    # convert the passed skills and attitudes to the expected format
+    details['skills'] = [(s['skill'], int(s['min_lvl']), int(s['importance'])) for s in form.req_skills.data]
+    details['attitudes'] = [(a['att'], int(a['importance'])) for a in form.req_attitudes.data]
+    return details
+
+
 def new_jobpost(company_id: int, title: str,
                 city: str = None, state: str = None, description: str = None, remote: bool = None,
-                salary_range: Tuple[int, int] = None,
+                salary: Tuple[int, int] = None,
                 skills: List[Tuple[Union[str, int], int, int]] = None, 
                 attitudes: List[Tuple[Union[str, int], int]] = None) -> int:
     """
@@ -25,9 +41,9 @@ def new_jobpost(company_id: int, title: str,
     post = JobPost(company_id=company_id, job_title=title,
                    city=city, state=state, description=description,
                    is_remote=remote)
-    if salary_range is not None:
-        post.salary_min = salary_range[0]
-        post.salary_max = salary_range[1]
+    if salary is not None:
+        post.salary_min = salary[0]
+        post.salary_max = salary[1]
 
     # before skills/attitudes can be added, commit changes
     # so that the id is loaded
@@ -68,7 +84,7 @@ def new_jobpost(company_id: int, title: str,
 
 def edit_jobpost(post_id: int,
                  title: str = None, city: str = None, state: str = None, description: str = None, 
-                 remote: bool = None, salary_range: Tuple[Union[None, int], Union[None, int]] = None,
+                 remote: bool = None, salary: Tuple[Union[None, int], Union[None, int]] = None,
                  skills: List[Tuple[Union[str, int], int, int]] = None,
                  attitudes: List[Tuple[Union[str, int], int]] = None):
     """
@@ -98,17 +114,17 @@ def edit_jobpost(post_id: int,
         post.description = description
     if remote:
         post.is_remote = remote
-    if salary_range:
-        if salary_range[0]:
-            post.salary_min = salary_range[0]
-        if salary_range[1]:
-            post.salary_max = salary_range[1]
+    if salary:
+        if salary[0]:
+            post.salary_min = salary[0]
+        if salary[1]:
+            post.salary_max = salary[1]
     if skills:
         # make a dictionary mapping new ids to their level/importance
         # to make it easy to query differences.
         new_skill_lookup = dict()
         for skl, slvl, simp in skills:
-            sid = skl if isinstance(skl, int) else Skill.query.filter_by(title=skl).first()
+            sid = skl if isinstance(skl, int) else Skill.query.filter_by(title=skl).first().id
             new_skill_lookup[sid] = (slvl, simp)
         # compare existing skills with new proposed list, editing or deleting as necessary
         for jp_skill in post._skills:
@@ -128,7 +144,7 @@ def edit_jobpost(post_id: int,
         # to make it easy to query differences
         new_att_lookup = dict()
         for att, aimp in attitudes:
-            aid = att if isinstance(att, int) else Attitude.query.filter_by(title=att).first()
+            aid = att if isinstance(att, int) else Attitude.query.filter_by(title=att).first().id
             new_att_lookup[aid] = aimp
         # compare existing attitudes with new proposed list, editing or deleting as necessary
         for jp_att in post._attitudes:

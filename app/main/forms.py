@@ -26,13 +26,22 @@ class AttitudeRequirementForm(Form):
                                                                 enumerate(ImportanceLevel.__members__.keys())])
 
 
+class FlexibleIntegerField(IntegerField):
+
+    def process_formdata(self, valuelist):
+        """ valuelist is a list of string values representing the data in the form """
+        if valuelist:  # something provided
+            valuelist[0] = valuelist[0].replace(",", "")
+        return super(FlexibleIntegerField, self).process_formdata(valuelist)
+
+
 class JobPostForm(FlaskForm):  ## TODO expand me
     title = StringField('Job Title', validators=[DataRequired()])
     city = StringField('City')
     state = SelectField('State', choices=[""] + STATE_ABBVS)
     remote = BooleanField('Remote')
-    salary_min = IntegerField('Min. Salary', validators=[Optional()])
-    salary_max = IntegerField('Max. Salary', validators=[Optional()])
+    salary_min = FlexibleIntegerField('Min. Salary', validators=[Optional()])
+    salary_max = FlexibleIntegerField('Max. Salary', validators=[Optional()])
     description = TextAreaField('Description', default="")
     req_skills = FieldList(FormField(SkillRequirementForm), min_entries=0, max_entries=None)
     req_attitudes = FieldList(FormField(AttitudeRequirementForm), min_entries=0, max_entries=None)

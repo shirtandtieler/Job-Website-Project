@@ -4,7 +4,7 @@
 from flask import render_template, flash, redirect, url_for, request
 
 from app import constants
-from app.api.jobpost import new_jobpost
+from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
 from app.main import bp
 from app.main.forms import JobPostForm, SkillRequirementForm, AttitudeRequirementForm
 from flask_login import current_user, login_required
@@ -12,8 +12,6 @@ from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Ski
 
 ## TODO Routes needed for editing profile page, searching, sending messages, etc.
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
-from test.test_newjobpost import plain_post_w_attributes
-
 
 @bp.route("/")
 @bp.route("/index")
@@ -125,37 +123,32 @@ def new_job():
         return redirect(url_for('main.index'))
     form = JobPostForm()
     if form.validate_on_submit():
-        # convert the fields to None that would otherwise just be empty string.
-        # (to preserve the default values of the new job function)
-        _city = form.city.data if form.city.data else None
-        _state = form.state.data if form.state.data else None
-        _desc = form.description.data if form.description.data else None
-        _sal = (form.salary_min.data, form.salary_max.data)
-        # convert the passed skills and attitudes to the expected format
-        _skills = [(s['skill'], int(s['min_lvl']), int(s['importance'])) for s in form.req_skills.data]
-        _atts = [(a['att'], int(a['importance'])) for a in form.req_attitudes.data]
-        post_id = new_jobpost(current_user._company.id, form.title.data,
-                    city=_city, state=_state, description=_desc, remote=form.remote.data,
-                    salary_range=_sal,
-                    skills=_skills, attitudes=_atts)
-
+        deets = extract_details(form)
+        post_id = new_jobpost(current_user._company.id, deets.pop('title'), **deets)
         flash(f"Created job post with ID {post_id}")
-        return redirect(url_for('main.company_profile', company_id=current_user._company.id))
-    return render_template('company/newjobpost.html',
-                           form=form, skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES)
+        return redirect(url_for('main.job_page', job_id=post_id))
+    return render_template('company/jobpost_editor.html',
+                           form=form, skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES
+                           )
 
 
-@bp.route("/job/edit/<jid>", methods=['GET', 'POST'])
-def edit_job(jid):
-    job_post = JobPost.query.filter_by(id=jid).first()
-    # Don't allow to editor if ID not found, if user isn't a company, or if the post doesn't belong to the company.
-    if job_post is None or current_user.account_type != AccountTypes.c or \
-            job_post.company_id != current_user._company.id:
+@bp.route("/job/edit/<job_id>", methods=['GET', 'POST'])
+@login_required
+def edit_job(job_id):
+    job_post = JobPost.query.filter_by(id=job_id).first_or_404()
+
+    # Don't allow to editor if user isn't a company or if the post doesn't belong to the company.
+    if current_user.account_type != AccountTypes.c or job_post.company_id != current_user._company.id:
         flash(f'You cannot access this page.')
         return redirect(url_for('main.index'))
+
     form = JobPostForm()
-    # init_skills/attitudes
-    # fill out form with job post information
+    if form.validate_on_submit():  # using POST; push changes
+        deets = extract_details(form)
+        edit_jobpost(job_id, **deets)
+        return redirect(url_for('main.job_page', job_id=job_id))
+
+    # using GET; fill out form with current job post information
     form.title.data = job_post.job_title
     form.city.data = job_post.city
     form.state.data = job_post.state
@@ -164,12 +157,9 @@ def edit_job(jid):
     form.salary_min.data = job_post.salary_min
     form.salary_max.data = job_post.salary_max
     # skills/attitudes need to be passed as arguments
-    _skls = [(s._skill.title, int(s.skill_level_min), int(s.importance_level)) for s in job_post._skills]
-    _atts = [(a._attitude.title, int(a.importance_level)) for a in job_post._attitudes]
-    if form.validate_on_submit():
-        print("okay")
-        return redirect(url_for('main.company_profile', company_id=current_user._company.id))
-    return render_template('company/newjobpost.html',
+    _skls = [[s._skill.title, int(s.skill_level_min), int(s.importance_level)] for s in job_post._skills]
+    _atts = [[a._attitude.title, int(a.importance_level)] for a in job_post._attitudes]
+    return render_template('company/jobpost_editor.html',
                            form=form, skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES,
                            init_skills=_skls, init_attitudes=_atts
                            )
@@ -188,18 +178,15 @@ def job_search():
     return render_template('company/browse.html', jobposts=posts)
 
 
-@bp.route("/job/<jid>", methods=['GET'])
+@bp.route("/job/<job_id>")
 # @login_required
-def job_page(jid: int):
+def job_page(job_id: int):
     """
     Navigate to the job page with the specified id.
     """
     # TODO limit access?
-    post = JobPost.query.filter_by(id=jid).first()
-    if post is None:
-        flash(f'No job listing with ID #{jid}')
-        return redirect(url_for('main.index'))
-    return render_template('company/jobpost.html')
+    job_post = JobPost.query.filter_by(id=job_id).first_or_404()
+    return render_template('company/jobpost.html', job=job_post)
 
 
 @bp.route("/seekers")
