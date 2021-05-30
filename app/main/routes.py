@@ -198,5 +198,5 @@ def seeker_search():
     Navigate to the seeker search page.
     """
     # TODO should be only for companies/admins?
-    seekers = [(s.full_name, s.tag_lines, s.location) for s in SeekerProfile.query.all()]
-    return render_template('seeker/browse.html', seekers=seekers)
+    # seekers = [(s.full_name, s.tag_lines, s.location) for s in ]
+    return render_template('seeker/browse.html', seeker_profiles=SeekerProfile.query.all())
