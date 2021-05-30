@@ -112,7 +112,7 @@ def company_profile(company_id: int):
 
     _job_posts = JobPost.query.filter_by(company_id=company_id).order_by(JobPost.created_timestamp).all()
 
-    return render_template('company/profile.html', company_name=_name, citystate=_loc, url=_url,
+    return render_template('company/profile.html', company=prof,
                            job_posts=_job_posts)
 
 

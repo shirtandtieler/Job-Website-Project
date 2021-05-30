@@ -1,5 +1,8 @@
+import colorsys
+import re
 from datetime import datetime
 from hashlib import md5
+from random import random
 from typing import List, Tuple, Union
 
 from sqlalchemy.sql.elements import Null
@@ -20,6 +23,8 @@ from sqlalchemy.dialects.postgresql import ENUM
 
 metadata = MetaData()
 
+TINYGRAPH_THEMES = ["sugarsweets", "heatwave", "daisygarden", "seascape", "summerwarmth",
+                    "bythepool", "duskfalling", "frogideas", "berrypie"]
 
 class AccountTypes(enum.Enum):
     """
@@ -171,8 +176,7 @@ class User(UserMixin, db.Model):
 
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
-            digest, size)
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
 
     def update(self):
         if self.is_active:
@@ -227,6 +231,23 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
         if acct.account_type != AccountTypes.c:
             raise ValueError(f"Account type is not a Company")
         return company_id
+
+    def avatar(self, size=128):
+        _hashstr = re.sub("\W", "", self.name)
+        # choose "random" attributes (theme and number of colors) based on lazy encoding
+        _hashint = sum([ord(x) for x in self.name])
+        _theme = TINYGRAPH_THEMES[_hashint % len(TINYGRAPH_THEMES)]
+        _ncolors = 3 + (_hashint % 2)
+        return f"http://www.tinygraphs.com/spaceinvaders/{_hashstr}?theme={_theme}&numcolors={_ncolors}&size={size}"
+
+    def banner(self, dims=(100, 20)):
+        _hashstr = re.sub("\W", "", self.name)
+        # choose "random" attributes (theme and number of colors) based on lazy encoding
+        _hashint = sum([ord(x) for x in self.name])
+        _theme = TINYGRAPH_THEMES[_hashint % len(TINYGRAPH_THEMES)]
+        _ncolors = 3 + (_hashint % 2)
+        _ntris = 40 + (_hashint % 20)
+        return f"https://www.tinygraphs.com/isogrids/banner/random/gradient?w={dims[0]}&h={dims[1]}&xt={_ntris}&theme={_theme}&numcolors={_ncolors}"
 
 
 class SeekerProfile(db.Model):
@@ -316,6 +337,12 @@ class SeekerProfile(db.Model):
             y = "years" if total_years > 1 else "year"
             lines.append(f"Has {total_years} {y} of job experience.")  # TODO maybe add example title?
         return lines
+
+    def avatar(self, size=128):
+        rand_bg_hex = "".join([hex(int(round(255*x)))[2:] for x in colorsys.hsv_to_rgb(random(), 0.25, 1.0)])
+        url = f"https://ui-avatars.com/api/?rounded=true&bold=true&color=00000" \
+              f"&size={size}&background={rand_bg_hex}&name={self.first_name}+{self.last_name}"
+        return url
 
 
 

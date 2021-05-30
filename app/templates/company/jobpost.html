@@ -61,7 +61,7 @@
     <!--    Company info (sidebar)    -->
     <div class="col-3">
         <div class="card shadow" style="width: 18rem;">
-            <img src="{{url_for('static', filename='images/blue_company.jpg')}}" class="card-img-top">
+            <img src="{{ job._company.avatar() }}" class="card-img-top">
             <div class="card-body">
                 <h5 class="card-title">{{ job._company.name }}</h5>
 <!--                <p class="card-text"></p>-->

@@ -10,10 +10,11 @@
         <div class="col-md-2 d-flex justify-content-center align-items-center">
 <!--            <i class="fas fa-smile fa-5x"></i>-->
             <div class="avatar-container">
-                <img src="{{ seeker._user.avatar(96) }}" style="filter:saturate(0%);">
-                <div class="avatar-overlay">
-                    <span>{{ seeker.first_name[0].upper() + seeker.last_name[0].upper() }}</span>
-                </div>
+                <img src="{{ seeker.avatar() }}">
+<!--                <img src="{{ seeker._user.avatar(96) }}" style="filter:saturate(0%);">-->
+<!--                <div class="avatar-overlay">-->
+<!--                    <span>{{ seeker.first_name[0].upper() + seeker.last_name[0].upper() }}</span>-->
+<!--                </div>-->
             </div>
         </div>
 <!--        https://stackoverflow.com/questions/26148740/how-to-add-text-over-the-image-in-bootstrap-->
