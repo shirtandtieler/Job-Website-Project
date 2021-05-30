@@ -1,6 +1,6 @@
 from datetime import datetime
 from hashlib import md5
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from sqlalchemy.sql.elements import Null
 from flask import url_for
@@ -122,6 +122,12 @@ class Skill(db.Model):
     def __repr__(self):
         return f"{self.type.name.capitalize()}Skill[{self.title}]"
 
+    def is_tech(self):
+        return self.type == SkillTypes.t
+
+    def is_biz(self):
+        return self.type == SkillTypes.b
+
     @staticmethod
     def get_skill_names():
         return [[s.title for s in Skill.query.all()]]
@@ -167,7 +173,7 @@ class User(UserMixin, db.Model):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
             digest, size)
-                
+
     def update(self):
         if self.is_active:
             self.last_login = datetime.utcnow
@@ -190,11 +196,23 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
     state = Column(String(2))
     website = Column(String(191))
 
+    # TODO add logo (and banner?) then replace instances that use 'blue_company' image
+    # TODO add slogan or description?
+
     _user = relationship("User", back_populates="_company")
     _job_posts = relationship("JobPost", back_populates="_company")
 
     def __repr__(self):
         return f"CompanyProfile[{self.name}]"
+
+    @property
+    def location(self):
+        if self.city and self.state:
+            return f"{self.city}, {self.state}"
+        elif self.city or self.state:
+            return f"{self.city}{self.state}"
+        else:
+            return "USA"
 
     @validates('company_id')
     def validate_account(self, key, company_id):
@@ -471,19 +489,48 @@ class JobPost(db.Model):
             sal = f"Salary depends on experience"
         return sal
 
-    @property
-    def skills_data(self) -> List[Tuple[int, int, int]]:
+    def n_tech_skills(self):
+        n = 0
+        for skl in self._skills:
+            if skl._skill.is_tech():
+                n += 1
+        return n
+
+    def n_biz_skills(self):
+        n = 0
+        for skl in self._skills:
+            if skl._skill.is_biz():
+                n += 1
+        return n
+
+    def n_skills(self):
+        return len(self._skills)
+
+    def get_skills_data(self, type='all', name=False) -> List[Tuple[Union[str, int], int, int]]:
         """
         Gets a list of skills, where each entry contains:
-            1. the id of the skill
+            1. the id or name of the skill (depends on the value of `name`)
             2. the minimum skill level (1-5)
             3. the importance level (0-5)
+        Can filter skills to either [t]ech, [b]iz, or [a]ll
         """
-        return [(s.skill_id, s.skill_level_min, s.importance_level) for s in self._skills]
+        matches_type = lambda skl: type == 'all' or \
+                                   (type.startswith('t') and skl._skill.is_tech()) or \
+                                   (type.startswith('b') and skl._skill.is_biz())
+        return [(s._skill.title if name else s.skill_id, s.skill_level_min, s.importance_level)
+                for s in self._skills if matches_type(s)]
 
-    @property
-    def attitude_data(self) -> List[Tuple[int, int]]:
-        return [(a.attitude_id, a.importance_level) for a in self._attitudes]
+    def n_attitudes(self):
+        return len(self._attitudes)
+
+    def get_attitude_data(self, name=False) -> List[Tuple[Union[str, int], int]]:
+        """
+        Get a list of attitudes, where each entry contains:
+            1. the id or name of the attitude (depends on the value of `name`)
+            2. the importance level (0-5)
+        """
+        return [(a._attitude.title if name else a.attitude_id, a.importance_level)
+                for a in self._attitudes]
 
 
 
