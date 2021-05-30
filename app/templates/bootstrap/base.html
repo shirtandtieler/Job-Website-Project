@@ -11,8 +11,9 @@
     {%- endblock metas %}
 
     {%- block styles %}
-    <!-- Bootstrap -->
-    <link href="../static/css/bootstrap.css" rel="stylesheet">
+    <!-- Bootstrap/jQuery -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}" >
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui.css') }}">
     {%- endblock styles %}
     {%- endblock head %}
   </head>
@@ -24,8 +25,10 @@
     {%- endblock content %}
 
     {% block scripts %}
-    <script src="../static/js/jquery.js"></script>
-    <script src="../static/js/bootstrap.bundle.js"></script>
+    <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-ui.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.js') }}"></script>
+
     {%- endblock scripts %}
     {%- endblock body %}
   </body>
