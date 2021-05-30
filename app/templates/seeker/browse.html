@@ -29,6 +29,26 @@
     </div>
 </div>
 {% endfor%}
+
+<nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+        <li class="page-item {{ dprev }}">
+            <a class="page-link" href="{{ prev_url }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% for i in range(plwr, pupr+1) %}
+        <li class="page-item {{ 'active' if i == page else '' }}">
+            <a class="page-link" href="{{ url_for('main.seeker_search', page=i) }}">{{ i }}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item  {{ dnext }}">
+            <a class="page-link" href="{{ next_url }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+    </ul>
+</nav>
 {% endblock %}
 
 {% block styles %}

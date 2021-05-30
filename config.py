@@ -47,3 +47,4 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT')
     SQLALCHEMY_ECHO = False
+    RESULTS_PER_PAGE = 20

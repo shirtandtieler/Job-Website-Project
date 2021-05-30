@@ -3,6 +3,7 @@
 
 from flask import render_template, flash, redirect, url_for, request
 
+import app
 from app import constants
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
 from app.main import bp
@@ -12,6 +13,7 @@ from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Ski
 
 ## TODO Routes needed for editing profile page, searching, sending messages, etc.
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
+
 
 @bp.route("/")
 @bp.route("/index")
@@ -198,5 +200,31 @@ def seeker_search():
     Navigate to the seeker search page.
     """
     # TODO should be only for companies/admins?
-    # seekers = [(s.full_name, s.tag_lines, s.location) for s in ]
-    return render_template('seeker/browse.html', seeker_profiles=SeekerProfile.query.all())
+    # `request` is a global value that lets you check the URL request.
+    page = request.args.get('page', 1, type=int)
+
+    # query.all can be replaced with query.paginate to iteratively get that page's results.
+    # https://flask-sqlalchemy.palletsprojects.com/en/2.x/api/#flask_sqlalchemy.BaseQuery.paginate
+    pager = SeekerProfile.query.paginate(
+        page, app.Config.RESULTS_PER_PAGE, False)
+
+    prev_url = url_for('main.seeker_search', page=pager.prev_num) if pager.has_prev else "#"
+    prev_link_clz = "disabled" if not pager.has_prev else ""
+
+    next_url = url_for('main.seeker_search', page=pager.next_num) if pager.has_next else "#"
+    next_link_clz = "disabled" if not pager.has_next else ""
+
+    # get lower and upper page count for up to 5 surrounding pages
+    max_window = min(5, pager.pages)
+    pg_lower = pg_upper = page
+    while pg_upper-pg_lower+1 < max_window:
+        pg_lower = max(1, pg_lower-1)
+        pg_upper = min(pager.pages, pg_upper+1)
+
+    return render_template('seeker/browse.html',
+                           seeker_profiles=pager.items,  # .items gets the list of profiles
+                           page=page,
+                           plwr=pg_lower, pupr=pg_upper,
+                           dprev=prev_link_clz, prev_url=prev_url,
+                           dnext=next_link_clz, next_url=next_url,
+                           )
