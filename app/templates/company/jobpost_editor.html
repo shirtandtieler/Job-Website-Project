@@ -1,8 +1,18 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-<h1>Create new job posting</h1>
+
+{# NOTE: 'request' is a global var; shows an edit button when this is the user's profile #}
+{% if 'new' in request.path %}
+<h1>Create new job post</h1>
+{% else %}
+<h1>Edit job post</h1>
+{% endif %}
 <form action="" method="post" class="form" role="form">
+    {% for error,msg in form.errors.items() %}
+    <div class="alert alert-danger" role="alert">[{{ error }}: {{ msg }}]</div>
+    {% endfor %}
+
     <div class="row">
         <div class="col">
             <h4>Basic information</h4>
@@ -94,10 +104,10 @@
 
     function new_req(name, is_skill, chosen_skill_lvl, chosen_imp_lvl) {
         // setup default values
-        if (chosen_skill_lvl == nil) {
+        if (!chosen_skill_lvl) {
             chosen_skill_lvl = 0;
         }
-        if (chosen_imp_lvl == nil) {
+        if (!chosen_imp_lvl) {
             chosen_imp_lvl = 0;
         }
 
@@ -223,8 +233,8 @@
 
     var available_skills = {{ skill_list|safe }};
     var available_attitudes = {{ attitude_list|safe}};
-    var init_skills_added = {{ init_skills|safe }};
-    var init_attitudes_added = {{ init_attitudes|safe }};
+    var init_skills_added = {{ init_skills|safe or "null" }};
+    var init_attitudes_added = {{ init_attitudes|safe or "null"}};
 
     $("#skill_selector").autocomplete({
 	    autoFocus: true,
@@ -280,12 +290,12 @@
 
     $(document).ready(function(){
         $('[data-toggle="tooltip"]').tooltip();
-        if (init_skills_added != nil) {
+        if (init_skills_added) {
             for (i = 0; i < init_skills_added.length; i++) {
                 new_req(init_skills_added[i][0], true, init_skills_added[i][1], init_skills_added[i][2]);
             }
         }
-        if (init_attitudes_added != nil) {
+        if (init_attitudes_added) {
             for (i = 0; i < init_attitudes_added.length; i++) {
                 new_req(init_attitudes_added[i][0], false, init_attitudes_added[i][1], init_attitudes_added[i][2]);
             }
