@@ -328,14 +328,14 @@ class SeekerProfile(db.Model):
             total_years = sum([job.years_employed for job in self._history_jobs])
             d = "degrees" if len(self._history_edus) > 1 else "degree"
             y = "years" if total_years > 1 else "year"
-            lines.append(f"Holds {len(self._history_edus)} {d} and {total_years} {y} of job experience.")
+            lines.append(f"Holds {len(self._history_edus)} {d} and {total_years} {y} of job experience")
         elif len(self._history_edus) > 0:
             d = "degrees" if len(self._history_edus) > 1 else "degree"
             lines.append(f"Holds {len(self._history_edus)} {d}")  # TODO maybe add highest level/give example?
         elif len(self._history_jobs) > 0:
             total_years = sum([job.years_employed for job in self._history_jobs])
             y = "years" if total_years > 1 else "year"
-            lines.append(f"Has {total_years} {y} of job experience.")  # TODO maybe add example title?
+            lines.append(f"Has {total_years} {y} of job experience")  # TODO maybe add example title?
         return lines
 
     def avatar(self, size=128):
