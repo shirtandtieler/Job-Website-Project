@@ -15,6 +15,7 @@ def extract_details(form):
     details['description'] = form.description.data if form.description.data else None
     details['remote'] = form.remote.data
     details['salary'] = (form.salary_min.data, form.salary_max.data)
+    details['active'] = form.active.data
     # convert the passed skills and attitudes to the expected format
     details['skills'] = [(s['skill'], int(s['min_lvl']), int(s['importance'])) for s in form.req_skills.data]
     details['attitudes'] = [(a['att'], int(a['importance'])) for a in form.req_attitudes.data]
@@ -23,7 +24,7 @@ def extract_details(form):
 
 def new_jobpost(company_id: int, title: str,
                 city: str = None, state: str = None, description: str = None, remote: bool = None,
-                salary: Tuple[int, int] = None,
+                salary: Tuple[int, int] = None, active: bool = True,
                 skills: List[Tuple[Union[str, int], int, int]] = None, 
                 attitudes: List[Tuple[Union[str, int], int]] = None) -> int:
     """
@@ -40,7 +41,7 @@ def new_jobpost(company_id: int, title: str,
     """
     post = JobPost(company_id=company_id, job_title=title,
                    city=city, state=state, description=description,
-                   is_remote=remote)
+                   is_remote=remote, active=active)
     if salary is not None:
         post.salary_min = salary[0]
         post.salary_max = salary[1]
@@ -84,7 +85,7 @@ def new_jobpost(company_id: int, title: str,
 
 def edit_jobpost(post_id: int,
                  title: str = None, city: str = None, state: str = None, description: str = None, 
-                 remote: bool = None, salary: Tuple[Union[None, int], Union[None, int]] = None,
+                 remote: bool = None, salary: Tuple[Union[None, int], Union[None, int]] = None, active: bool = None,
                  skills: List[Tuple[Union[str, int], int, int]] = None,
                  attitudes: List[Tuple[Union[str, int], int]] = None):
     """
@@ -119,6 +120,8 @@ def edit_jobpost(post_id: int,
             post.salary_min = salary[0]
         if salary[1]:
             post.salary_max = salary[1]
+    if active is not None:
+        post.active = active
     if skills:
         # make a dictionary mapping new ids to their level/importance
         # to make it easy to query differences.

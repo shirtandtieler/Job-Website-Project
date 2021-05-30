@@ -31,14 +31,14 @@
     {% for job_post in job_posts %}
     <div class="blog-card">
         <div class="meta">
-            <div class="photo"
+            <div class="photo {% if not job_post.active %}tint{% endif %}"
                 style="background-image: url(https://storage.googleapis.com/chydlx/codepen/blog-cards/image-1.jpg)">
             </div>
         </div>
         <div class="description">
             <div class="title-line">
                 {# NOTE: 'request' is a global var; shows an edit button when this is the user's profile #}
-                {% if request.path == "/profile" %}
+                {% if current_user._company and job_post._company.id == current_user._company.id %}
                 <p>
                     <a href="/job/edit/{{ job_post.id }}">Edit <i class="fas fa-edit"></i></a>
                 </p>
@@ -47,7 +47,7 @@
                 <h1>{{ job_post.job_title }}</h1>
             </div>
             <h2>{{ company_name }}</h2>
-            <p class="descriptiontxt"> {{ job_post.description }}</p>
+            <p class="descriptiontxt"> {{ job_post.description or "" }}</p>
             <p class="read-more">
                 <a href="/job/{{ job_post.id }}">Read More</a>
             </p>
@@ -62,6 +62,10 @@
 {% block styles %}
 {{ super() }}
 <style>
+
+        .tint {
+            filter: sepia(100%);
+        }
         .main {
             width: 65em;
             display: flex;

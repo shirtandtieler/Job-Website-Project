@@ -6,6 +6,11 @@
 <div class="row">
     <!--    Job info    -->
     <div class="col-9">
+        {% if not job.active %}
+        <div class="alert alert-warning" role="alert">
+            This job is currently inactive; the company is not taking applications at this time.
+        </div>
+        {% endif %}
         <h2> {{ job.job_title }} </h2>
         <p>
             <i class="fas fa-map-marker-alt"></i>

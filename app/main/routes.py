@@ -108,7 +108,7 @@ def company_profile(company_id: int):
         _loc = "USA"
     _url = prof.website
 
-    _job_posts = JobPost.query.filter_by(company_id=company_id).all()
+    _job_posts = JobPost.query.filter_by(company_id=company_id).order_by(JobPost.created_timestamp).all()
 
     return render_template('company/profile.html', company_name=_name, citystate=_loc, url=_url,
                            job_posts=_job_posts)
@@ -146,6 +146,7 @@ def edit_job(job_id):
     if form.validate_on_submit():  # using POST; push changes
         deets = extract_details(form)
         edit_jobpost(job_id, **deets)
+        flash(f"Edited job successfully.")
         return redirect(url_for('main.job_page', job_id=job_id))
 
     # using GET; fill out form with current job post information
@@ -156,6 +157,7 @@ def edit_job(job_id):
     form.remote.data = job_post.is_remote
     form.salary_min.data = job_post.salary_min
     form.salary_max.data = job_post.salary_max
+    form.active.data = job_post.active
     # skills/attitudes need to be passed as arguments
     _skls = [[s._skill.title, int(s.skill_level_min), int(s.importance_level)] for s in job_post._skills]
     _atts = [[a._attitude.title, int(a.importance_level)] for a in job_post._attitudes]

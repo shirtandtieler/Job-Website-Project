@@ -27,7 +27,6 @@ class AttitudeRequirementForm(Form):
 
 
 class FlexibleIntegerField(IntegerField):
-
     def process_formdata(self, valuelist):
         """ valuelist is a list of string values representing the data in the form """
         if valuelist:  # something provided
@@ -36,6 +35,7 @@ class FlexibleIntegerField(IntegerField):
 
 
 class JobPostForm(FlaskForm):  ## TODO expand me
+    active = BooleanField('Active', default=True)
     title = StringField('Job Title', validators=[DataRequired()])
     city = StringField('City')
     state = SelectField('State', choices=[""] + STATE_ABBVS)

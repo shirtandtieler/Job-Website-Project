@@ -179,6 +179,11 @@ class User(UserMixin, db.Model):
             self.last_login = datetime.utcnow
 
 
+@login.user_loader
+def load_user(id):
+    print(f"Loading user w/id {id}")
+    return User.query.get(int(id))
+
 ##### PROFILES ######
 
 class CompanyProfile(db.Model):  # one to one with company-type user account
@@ -533,7 +538,6 @@ class JobPost(db.Model):
                 for a in self._attitudes]
 
 
-
 class JobPostSkill(db.Model):
     """
     Table of entries representing a skill requirement in a job post.
@@ -604,7 +608,3 @@ class CompanySeekerSearch(db.Model):
     company = relationship("CompanyProfile", back_populates="companyseekersearch")
 '''
 
-@login.user_loader
-def load_user(id):
-    print(f"Loading user w/id {id}")
-    return User.query.get(int(id))
