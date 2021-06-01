@@ -3,53 +3,340 @@
 {% extends "base.html" %}
 
 {% block app_content %}
+<div class="container">
+    <div class="row">
+        <div class="col-3">
+            <!-- filter panel-->
+            <div class="container"><div class="row g-0 align-items-center">
+                <!-- header -->
+                <div class="col-md-4">
+                    <!-- Filter title/icon -->
+                    <div class="d-inline fw-bold">
+                        <i class="fas fa-filter"></i>
+                        Filter
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <!-- Apply current filter button -->
+                    <form>
+                        <input class="btn btn-sm btn-success" type="submit" id="applyFilter">
+                    </form>
 
-{% for seeker in seeker_profiles %}
-<div class="card mb-3">
-    <div class="row g-0 ">
-        <div class="col-md-2 d-flex justify-content-center align-items-center">
-<!--            <i class="fas fa-smile fa-5x"></i>-->
-            <div class="avatar-container">
-                <img src="{{ seeker.avatar() }}">
-<!--                <img src="{{ seeker._user.avatar(96) }}" style="filter:saturate(0%);">-->
-<!--                <div class="avatar-overlay">-->
-<!--                    <span>{{ seeker.first_name[0].upper() + seeker.last_name[0].upper() }}</span>-->
-<!--                </div>-->
+                </div>
+                <div class="col-md-3">
+                    <!-- save/load searches button -->
+                    <div class="btn-group btn-sm">
+                        <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Save/load...
+                        </button>
+                        <div class="dropdown-menu">
+                            <form class="px-3 py-3">
+                                <div class="mb-3">
+                                    <label for="query_saveas" class="form-label">Save as...</label>
+                                    <input type="text" class="form-control" id="query_saveas" placeholder="Seeker search" required>
+                                </div>
+                                <button type="button" class="btn btn-primary">Save</button>
+                            </form>
+                            <div class="dropdown-divider"></div>
+                            <form class="px-3 py-3">
+                                <label class="form-label">Load</label>
+                                {% for s in current_user._company._searches %}
+                                <div class="d-inline">
+                                    <a class="dropdown-item" href="{{ s.query }}">{{ s.label }}</a>
+                                    <button type="button" class="btn-close" style="margin-left:100%"></button>
+                                </div>
+                                {% endfor %}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div></div>
+
+
+            <div class="accordion">
+                <!--"Looking for" Work type section-->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="lf_header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#lf_panel"
+                                aria-expanded="true" aria-controls="lf_panel">
+                            Looking for...
+                        </button>
+                    </h2>
+                    <div id="lf_panel" class="accordion-collapse collapse show" aria-labelledby="lf_header">
+                        <div class="accordion-body">
+                            <div class="form-check">
+                                <label class="form-check-label" for="lf_ft">
+                                    Full time
+                                </label>
+                                <input class="form-check-input" type="checkbox" value="" id="lf_ft" checked>
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label" for="lf_pt">
+                                    Part time
+                                </label>
+                                <input class="form-check-input" type="checkbox" value="" id="lf_pt" checked>
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label" for="lf_contract">
+                                    Contract
+                                </label>
+                                <input class="form-check-input" type="checkbox" value="" id="lf_contract" checked>
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label" for="lf_remote">
+                                    Remote
+                                </label>
+                                <input class="form-check-input" type="checkbox" value="" id="lf_remote" checked>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Experience section-->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="edu_header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#edu_panel"
+                                aria-expanded="true" aria-controls="edu_panel">
+                            Experiences
+                        </button>
+                    </h2>
+                    <div id="edu_panel" class="accordion-collapse collapse show" aria-labelledby="edu_header">
+                        <div class="accordion-body">
+                            <h6 class="text-center" style="margin-bottom: 0px;">Education</h6>
+                            <label id="rng-edulvl" for="slider-edulvl"
+                                   style="font-weight:bold; font-size:12px;">
+                                X to Y
+                            </label>
+                            <div id="slider-edulvl"></div>
+
+                            <br/>
+
+                            <h6 class="text-center" style="margin-bottom: 0px;">Work</h6>
+                            <label id="rng-workyrs" for="slider-workyrs"
+                                   style="font-weight:bold; font-size:12px;">
+                                X to Y years
+                            </label>
+                            <div id="slider-workyrs"></div>
+                        </div>
+                    </div>
+                </div>
+                <!--Distance section-->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="dist_header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#dist_panel"
+                                aria-expanded="true" aria-controls="dist_panel">
+                            Distance
+                        </button>
+                    </h2>
+                    <div id="dist_panel" class="accordion-collapse collapse show" aria-labelledby="dist_header">
+                        <div class="accordion-body">
+                            <div class="form-check">
+                                <label class="form-check-label" for="dist_any">
+                                    Anywhere
+                                </label>
+                                <input class="form-check-input" type="radio" value="" name="dist_choice" id="dist_any" checked
+                                       data-bs-toggle="collapse" data-bs-target="#dist_within_input">
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label" for="dist_within">
+                                    Within...
+                                </label>
+                                <input class="form-check-input" type="radio" value="" name="dist_choice" id="dist_within"
+                                       data-bs-toggle="collapse" data-bs-target="#dist_within_input">
+                            </div>
+                            <div id="dist_within_input" class="accordion-collapse collapse" aria-expanded="false">
+                                <div class="input-group input-group-sm">
+                                    <input type="number" class="form-control" placeholder="#" aria-label="Miles" value="50" id="dist_miles">
+                                    <span class="input-group-text">miles of</span>
+                                </div>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" placeholder="City" style="flex-grow: 2.25;" id="dist_city">
+                                    <span class="input-group-text">, </span>
+                                    <select class="form-select" aria-label="Locations" id="dist_state">
+                                        <option selected>State</option>
+                                        <option value="AL">AL</option>
+                                        <option value="AK">AK</option>
+                                        <option value="AZ">AZ</option>
+                                        <option value="AR">AR</option>
+                                        <option value="CA">CA</option>
+                                        <option value="CO">CO</option>
+                                        <option value="CT">CT</option>
+                                        <option value="DE">DE</option>
+                                        <option value="DC">DC</option>
+                                        <option value="FL">FL</option>
+                                        <option value="GA">GA</option>
+                                        <option value="HI">HI</option>
+                                        <option value="ID">ID</option>
+                                        <option value="IL">IL</option>
+                                        <option value="IN">IN</option>
+                                        <option value="IA">IA</option>
+                                        <option value="KS">KS</option>
+                                        <option value="KY">KY</option>
+                                        <option value="LA">LA</option>
+                                        <option value="ME">ME</option>
+                                        <option value="MD">MD</option>
+                                        <option value="MA">MA</option>
+                                        <option value="MI">MI</option>
+                                        <option value="MN">MN</option>
+                                        <option value="MS">MS</option>
+                                        <option value="MO">MO</option>
+                                        <option value="MT">MT</option>
+                                        <option value="NE">NE</option>
+                                        <option value="NV">NV</option>
+                                        <option value="NH">NH</option>
+                                        <option value="NJ">NJ</option>
+                                        <option value="NM">NM</option>
+                                        <option value="NY">NY</option>
+                                        <option value="NC">NC</option>
+                                        <option value="ND">ND</option>
+                                        <option value="OH">OH</option>
+                                        <option value="OK">OK</option>
+                                        <option value="OR">OR</option>
+                                        <option value="PA">PA</option>
+                                        <option value="RI">RI</option>
+                                        <option value="SC">SC</option>
+                                        <option value="SD">SD</option>
+                                        <option value="TN">TN</option>
+                                        <option value="TX">TX</option>
+                                        <option value="UT">UT</option>
+                                        <option value="VT">VT</option>
+                                        <option value="VA">VA</option>
+                                        <option value="WA">WA</option>
+                                        <option value="WV">WV</option>
+                                        <option value="WI">WI</option>
+                                        <option value="WY">WY</option>
+                                    </select>
+<!--                                    {% if current_user._company %}-->
+<!--                                    <select class="form-select" aria-label="Locations">-->
+<!--                                        <option selected>HQ</option>-->
+<!--                                        {% for job in current_user._company._job_posts %}-->
+<!--                                        <option value="{{ job.id }}">{{ job.location }}</option>-->
+<!--                                        {% endfor %}-->
+<!--                                    </select>-->
+<!--                                    {% else %}-->
+
+<!--                                    {% endif %}-->
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--Tech skills-->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="tskill_header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#tskill_panel"
+                                aria-expanded="true" aria-controls="tskill_panel">
+                            Tech Skills
+                        </button>
+                    </h2>
+                    <div id="tskill_panel" class="accordion-collapse collapse show" aria-labelledby="tskill_header">
+                        <div class="accordion-body">
+                            <label class="form-check-label" for="sel_techs">
+                                Select one or more skills
+                            </label>
+                            <select id="sel_techs" class="form-select" multiple>
+                                <option value="1">One</option>
+                                <option value="2">Two</option>
+                                <option value="3">Three</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!--Biz skills-->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="bskill_header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#bskill_panel"
+                                aria-expanded="true" aria-controls="bskill_panel">
+                            Biz Skills
+                        </button>
+                    </h2>
+                    <div id="bskill_panel" class="accordion-collapse collapse show" aria-labelledby="bskill_header">
+                        <div class="accordion-body">
+                            <label class="form-check-label" for="sel_bizs">
+                                Select one or more skills
+                            </label>
+                            <select id="sel_bizs" class="form-select" multiple>
+                                <option value="1">One</option>
+                                <option value="2">Two</option>
+                                <option value="3">Three</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <!--Attitudes-->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="att_header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#att_panel"
+                                aria-expanded="true" aria-controls="att_panel">
+                            Attitudes
+                        </button>
+                    </h2>
+                    <div id="att_panel" class="accordion-collapse collapse show" aria-labelledby="att_header">
+                        <div class="accordion-body">
+                            <label class="form-check-label" for="sel_atts">
+                                Select one or more attitudes
+                            </label>
+                            <select id="sel_atts" class="form-select" multiple>
+                                <option value="1">One</option>
+                                <option value="2">Two</option>
+                                <option value="3">Three</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-<!--        https://stackoverflow.com/questions/26148740/how-to-add-text-over-the-image-in-bootstrap-->
-        <div class="col-md-10">
-            <div class="card-body">
-                <h5 class="card-title">{{ seeker.full_name }}</h5>
-                {% for line in seeker.tag_lines %}
-                {{ line }}<br/>
-                {% endfor%}
-                <p class="card-text"><small class="text-muted">{{ seeker.location }}</small></p>
+        <div class="col">
+            <!-- seeker listing/pagination -->
+            {% for seeker in seeker_profiles %}
+            <div class="card mb-3">
+                <div class="row g-0 ">
+                    <div class="col-md-2 d-flex justify-content-center align-items-center">
+            <!--            <i class="fas fa-smile fa-5x"></i>-->
+                        <div class="avatar-container">
+                            <img src="{{ seeker.avatar() }}">
+            <!--                <img src="{{ seeker._user.avatar(96) }}" style="filter:saturate(0%);">-->
+            <!--                <div class="avatar-overlay">-->
+            <!--                    <span>{{ seeker.first_name[0].upper() + seeker.last_name[0].upper() }}</span>-->
+            <!--                </div>-->
+                        </div>
+                    </div>
+            <!--        https://stackoverflow.com/questions/26148740/how-to-add-text-over-the-image-in-bootstrap-->
+                    <div class="col-md-10">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ seeker.full_name }}</h5>
+                            {% for line in seeker.tag_lines %}
+                            {{ line }}<br/>
+                            {% endfor%}
+                            <p class="card-text"><small class="text-muted">{{ seeker.location }}</small></p>
+                        </div>
+                    </div>
+                </div>
             </div>
+            {% endfor%}
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {{ dprev }}">
+                        <a class="page-link" href="{{ prev_url }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% for i in range(plwr, pupr+1) %}
+                    <li class="page-item {{ 'active' if i == page else '' }}">
+                        <a class="page-link" href="{{ url_for('main.seeker_search', page=i) }}">{{ i }}</a>
+                    </li>
+                    {% endfor %}
+                    <li class="page-item  {{ dnext }}">
+                        <a class="page-link" href="{{ next_url }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 </div>
-{% endfor%}
-
-<nav aria-label="Page navigation">
-    <ul class="pagination justify-content-center">
-        <li class="page-item {{ dprev }}">
-            <a class="page-link" href="{{ prev_url }}" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-            </a>
-        </li>
-        {% for i in range(plwr, pupr+1) %}
-        <li class="page-item {{ 'active' if i == page else '' }}">
-            <a class="page-link" href="{{ url_for('main.seeker_search', page=i) }}">{{ i }}</a>
-        </li>
-        {% endfor %}
-        <li class="page-item  {{ dnext }}">
-            <a class="page-link" href="{{ next_url }}" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-            </a>
-        </li>
-    </ul>
-</nav>
 {% endblock %}
 
 {% block styles %}
@@ -70,5 +357,85 @@
       font-family: monospace;
       filter: drop-shadow(0px 0px 1px white) drop-shadow(0px 0px 3px white);
     }
+
+    .custom-blue { background: #3a99fc; }
+
 </style>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script>
+    var eduLvls = ["None", "Certification", "Associate", "Bachelor", "Master", "Doctor"];
+
+    function getEduLvlText(val0, val1) {
+        if (val0 == val1) {
+            // same value, display "only"
+            return "Only " + eduLvls[val0];
+        } else if ( val1-val0 == 5 ) {
+            // covers full range
+            return "Any education level";
+        }
+
+        return eduLvls[val0] + " to " + eduLvls[val1];
+    }
+
+    function getWorkYearsText(val0, val1) {
+        // handle specific case when val1 is at 11 (interpreted as "10+")
+        if (val1 == 11) {
+            if (val0 == 0) {
+                // lower bound is min
+                return "Any work experience";
+            } else if (val0 == 11) {
+                // lower bound is also max
+                return "Over 10 years";
+            }
+            // e.g., 3 - 10+ years == 3+ years
+            return "Over " + val0 + " years";
+        }
+
+        if (val0 == val1) {
+            // same value
+            return "Exactly " + val0 + " years";
+        }
+        return val0 + " to " + val1 + " years";
+    }
+
+    $( "#slider-edulvl" ).slider({
+        min: 0,
+        max: 5,
+        range: true,
+        values: [0, 5],
+        slide: function(event, ui) {
+            $( "#rng-edulvl" ).html( getEduLvlText(ui.values[ 0 ], ui.values[ 1 ]) );
+        },
+        classes: {
+            "ui-slider-range": "custom-blue"
+        }
+    });
+
+    $( "#slider-workyrs" ).slider({
+        min: 0,
+        max: 11,
+        range: true,
+        values: [0, 11],
+        slide: function(event, ui) {
+            $( "#rng-workyrs" ).html( getWorkYearsText(ui.values[ 0 ], ui.values[ 1 ]) );
+        },
+        classes: {
+            "ui-slider-range": "custom-blue"
+        }
+    });
+
+    $( document ).ready(function() {
+        // setup initial text for sliders
+
+        var s1 = $( "#slider-edulvl" );
+        $( "#rng-edulvl" ).html( getEduLvlText(s1.slider( "values", 0 ), s1.slider("values", 1)) );
+
+        var s2 = $( "#slider-workyrs" );
+        $( "#rng-workyrs" ).html( getWorkYearsText(s2.slider( "values", 0 ), s2.slider("values", 1)) );
+    });
+</script>
 {% endblock %}
