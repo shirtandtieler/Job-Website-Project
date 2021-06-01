@@ -5,16 +5,18 @@ from hashlib import md5
 from random import random
 from typing import List, Tuple, Union
 
+from geopy.distance import geodesic
+from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
 from sqlalchemy.sql.elements import Null
 from flask import url_for
 from sqlalchemy.sql.elements import Null
 from sqlalchemy import Boolean, CheckConstraint, Column, Date, ForeignKey, Integer, SmallInteger, String, \
-    Sequence, Table, Text, UniqueConstraint, text, MetaData, DateTime
+    Sequence, Table, Text, UniqueConstraint, text, MetaData, DateTime, select
 from sqlalchemy.orm import relationship, validates
-from sqlalchemy.sql.functions import current_timestamp
-from sqlalchemy.sql.sqltypes import LargeBinary, SMALLINT, TIMESTAMP
+from sqlalchemy.sql.functions import current_timestamp, func
+from sqlalchemy.sql.sqltypes import LargeBinary, SMALLINT, TIMESTAMP, Numeric
 from sqlalchemy_imageattach.entity import Image, image_attachment
-from app import db, login
+from app import db, login, geolocator
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from sqlalchemy.sql.sqltypes import SMALLINT, TIMESTAMP
@@ -25,6 +27,7 @@ metadata = MetaData()
 
 TINYGRAPH_THEMES = ["sugarsweets", "heatwave", "daisygarden", "seascape", "summerwarmth",
                     "bythepool", "duskfalling", "frogideas", "berrypie"]
+
 
 class AccountTypes(enum.Enum):
     """
@@ -78,6 +81,21 @@ class EducationLevel(enum.IntEnum):
     bachelor = 2
     master = 3
     doctoral = 4
+
+
+class WorkTypes(enum.IntEnum):
+    """
+    An enumeration for declaring what work type is desired.
+    Main 3 types are powers of two to allow for combinations.
+    """
+    full = 1
+    part = 2
+    contract = 4
+
+    full_or_part = 3
+    full_or_contract = 5
+    part_or_contract = 6
+    any = 7
 
 
 ##### SHARED TYPES #####
@@ -135,7 +153,15 @@ class Skill(db.Model):
 
     @staticmethod
     def get_skill_names():
-        return [[s.title for s in Skill.query.all()]]
+        return [s.title for s in Skill.query.all()]
+
+    @staticmethod
+    def get_tech_skill_names():
+        return [s.title for s in Skill.query.all() if s.is_tech()]
+
+    @staticmethod
+    def get_biz_skill_names():
+        return [s.title for s in Skill.query.all() if s.is_biz()]
 
 
 class UserPicture(db.Model, Image):
@@ -204,12 +230,15 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
     city = Column(String(191))
     state = Column(String(2))
     website = Column(String(191))
+    tagline = Column(String(100))
+    summary = Column(String)
 
     # TODO add logo (and banner?) then replace instances that use 'blue_company' image
     # TODO add slogan or description?
 
     _user = relationship("User", back_populates="_company")
     _job_posts = relationship("JobPost", back_populates="_company")
+    _searches = relationship("CompanySeekerSearch", back_populates="_company")
 
     def __repr__(self):
         return f"CompanyProfile[{self.name}]"
@@ -270,6 +299,10 @@ class SeekerProfile(db.Model):
     phone_number = Column(String(10))
     city = Column(String(191))
     state = Column(String(2))
+    work_wanted = Column(ENUM(WorkTypes), default=WorkTypes.any)
+    remote_wanted = Column(Boolean, default=False)
+    tagline = Column(String(100))
+    summary = Column(String)
     resume = Column(LargeBinary)
 
     _user = relationship("User", back_populates="_seeker")
@@ -279,6 +312,9 @@ class SeekerProfile(db.Model):
     _history_jobs = relationship("SeekerHistoryJob", back_populates="_seeker")
     _applications = relationship("SeekerApplication", back_populates="_seeker")
     _bookmarks = relationship('SeekerBookmark', back_populates='_seeker')
+    _searches = relationship("SeekerJobSearch", back_populates='_seeker')
+
+    coordinates = None
 
     def __repr__(self):
         return f"SeekerProfile[{self.first_name}{self.last_name}]"
@@ -310,19 +346,22 @@ class SeekerProfile(db.Model):
         """ Return a list of things this seeker can boast about."""
         lines = []
         # get a line about a number of their highest skills
-        skill_highest_lvl, skill_highest_count = 0, 0
+        skill_highest_lvl, skill_highest_count, skill_highest_names = 0, 0, []
         for skl in self._skills:
             lvl = int(skl.skill_level)
             if lvl > skill_highest_lvl:
                 skill_highest_lvl = lvl
                 skill_highest_count = 1
+                skill_highest_names = [skl._skill.title]
             elif lvl == skill_highest_lvl:
                 skill_highest_count += 1
+                skill_highest_names.append(skl._skill.title)
         if skill_highest_lvl > 0:  # make sure seeker has some skills
             skill_lvl = str(SkillLevels(skill_highest_lvl))
             lvl_name = skill_lvl[skill_lvl.index('.')+1:].capitalize()
-            s = "skills" if skill_highest_count > 1 else "skill"
-            lines.append(f"{lvl_name} in {skill_highest_count} {s}")
+            s_names = ", ".join(skill_highest_names)
+            # s = "skills" if skill_highest_count > 1 else "skill"
+            lines.append(f"{lvl_name} in {s_names}")
         # get a line about their past experience
         if len(self._history_edus) > 0 and len(self._history_jobs) > 0:
             total_years = sum([job.years_employed for job in self._history_jobs])
@@ -337,6 +376,123 @@ class SeekerProfile(db.Model):
             y = "years" if total_years > 1 else "year"
             lines.append(f"Has {total_years} {y} of job experience")  # TODO maybe add example title?
         return lines
+
+
+
+    # @hybrid_property
+    # def min_edu_level(self):
+    #     """
+    #     Converts the education experience to a single int representing the minimum qualifications held.
+    #     """
+    #     if len(self._history_edus) == 0:
+    #         return 0
+    #     # add one since allocating 0 for 'none'
+    #     return int(max([e.education_lvl for e in self._history_edus])) + 1
+
+    # @min_edu_level.expression
+    # def min_edu_level(cls):
+    #     ## TODO WHAT
+    #     return -1
+
+    # @hybrid_property
+    # def years_job_experience(self):
+    #     """
+    #     Calculates the number of years of job experience held.
+    #     """
+    #     return sum([job.years_employed for job in self._history_jobs])
+
+    # @years_job_experience.expression
+    # def years_job_experience(cls):
+    #     ## TODO WHAT
+    #     x = select([SeekerHistoryJob.years_employed]).where(SeekerHistoryJob.seeker_id == cls.id)
+    #     print(x)
+    #     y = func.sum(x)
+    #     print(y)
+    #     z = y.as_scalar()
+    #     print(z)
+    #     return z
+
+    # @hybrid_method
+    # def is_within(self, distance_limit_mi, city, state):
+    #     if not self.city and not self.state:
+    #         # always return true if user does not have a city or a state
+    #         return True
+    #     elif not self.city and self.state:
+    #         # return based on state matching if the user only has a state
+    #         return state == self.state
+    #
+    #     # TODO is this persisted? maybe should cache
+    #     if self.coordinates is None:
+    #         print(f"CHECKING FOR {self.city}, {self.state}")
+    #         loc = geolocator.geocode(f"{self.city}, {self.state} USA")
+    #         self.coordinates = [loc.latitude, loc.longitude]
+    #     loc = geolocator.geocode(f"{city}, {state or ''} USA")
+    #     dist_mi = geodesic(self.coordinates, loc).miles
+    #     return dist_mi <= distance_limit_mi
+
+    # @is_within.expression
+    # def is_within(cls, distance_limit_mi, city, state):
+    #     # TODO WHAT
+    #     print(type(cls.first_name))
+    #     print(cls.first_name.key)
+    #     print(cls.first_name.label())
+    #     print(cls.first_name.prop)
+    #     print("OPTIONS IN FNAME: ", dir(cls.first_name))
+    #     return True
+
+    # @hybrid_property
+    # def encode_tech_skills(self):
+    #     """
+    #     Converts technical skills possessed to an integer.
+    #     Only looks at whether the seeker added it to their profile.
+    #     """
+    #     # skill_id skill_level
+    #     tskill_ids = [s.skill_id for s in self._skills if s.is_tech]
+    #     enc = ['0' for _ in range( db.query(func.max(Skill.column)) )]
+    #     for _id in tskill_ids:
+    #         enc[_id] = '1'
+    #     return int(''.join(enc), base=2)
+
+    # @encode_tech_skills.expression
+    # def encode_tech_skills(cls):
+    #     ## TODO WHAT
+    #     return 0
+
+    # @hybrid_property
+    # def encode_biz_skills(self):
+    #     """
+    #     Converts business skills possessed to an integer.
+    #     Only looks at whether the seeker added it to their profile.
+    #     """
+    #     # skill_id skill_level
+    #     bskill_ids = [s.skill_id for s in self._skills if s.is_biz]
+    #     enc = ['0' for _ in range( db.query(func.max(Skill.column)) )]
+    #     for _id in bskill_ids:
+    #         enc[_id] = '1'
+    #     return int(''.join(enc), base=2)
+
+    # @encode_biz_skills.expression
+    # def encode_biz_skills(cls):
+    #     ## TODO WHAT
+    #     return 0
+
+    # @hybrid_property
+    # def encode_attitudes(self):
+    #     """
+    #     Converts attitudes possessed to an integer.
+    #     Only looks at whether the seeker added it to their profile.
+    #     """
+    #     # skill_id skill_level
+    #     att_ids = [s.skill_id for s in self._attitudes]
+    #     enc = ['0' for _ in range( db.query(func.max(Attitude.column)) )]
+    #     for _id in att_ids:
+    #         enc[_id] = '1'
+    #     return int(''.join(enc), base=2)
+
+    # @encode_attitudes.expression
+    # def encode_attitudes(cls):
+    #     ## TODO WHAT
+    #     return 0
 
     def avatar(self, size=128):
         rand_bg_hex = "".join([hex(int(round(255*x)))[2:] for x in colorsys.hsv_to_rgb(random(), 0.25, 1.0)])
@@ -607,31 +763,31 @@ class JobPostAttitude(db.Model):
 
 
 ##### SEARCHES #####
-'''
-class SeekerSearch(db.Model):
-    __tablename__='seeker_search'
-    id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('seeker.id'),nullable=False)
-    job_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
-    label = Column(job_lables, nullable=False)
-
-    user = relationship('User')
-    skill = relationship('Skill', back_populates= 'SeekerSearch')
-'''
-
-'''
-
 class CompanySeekerSearch(db.Model):
-    __tablename__ = 'companyseekersearch'
-
+    __tablename__ = 'company_seeker_search'
     id = Column(Integer, nullable=False, primary_key=True)
+    company_id = Column(Integer, ForeignKey('company_profile.id'), nullable=False)
+    label = Column(String, nullable=False)
+    query = Column(String, nullable=False)
 
-    seekrid = Column(Integer, ForeignKey('seekerprofile.seeker_id'), nullable=False)
-    seekr_city = Column(Integer, ForeignKey('seekerprofile.city'), nullable=False)
-    seekr_state = Column(Integer, ForeignKey('seekerprofile.state'), nullable=False)
-    seekr_skill = Column(ForeignKey('skill.title'), default='Not update yet')
-    seekr_type = Column(ForeignKey('skill.type'), default='Not update yet')
-    seekr_attitude = Column(ForeignKey('attitude.title'), nullable=False)
-    company = relationship("CompanyProfile", back_populates="companyseekersearch")
-'''
+    _company = relationship("CompanyProfile", back_populates="_searches")
 
+
+class SeekerJobSearch(db.Model):
+    __tablename__ = 'seeker_job_search'
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('seeker_profile.id'), nullable=False)
+    label = Column(String, nullable=False)
+    query = Column(String, nullable=False)
+
+    _seeker = relationship("SeekerProfile", back_populates="_searches")
+
+
+##### LOGGING/CACHE #####
+# class LocationCoordinates(db.Model):
+#     __tablename__ = 'location_coordinates'
+#     id = Column(Integer, nullable=False, primary_key=True)
+#     city = Column(String, nullable=False)
+#     state = Column(String(2), nullable=False)
+#     longitude = Column(Numeric)
+#     latitude = Column(Numeric)
