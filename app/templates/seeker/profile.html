@@ -13,9 +13,8 @@
                             <h4>{{ seeker.full_name }}</h4>
                             <p class="text-secondary mb-1">{{ seeker.location }}</p>
                             <p class="text-secondary mb-1"><i class="far fa-clock"></i> {{ " • ".join(seeker.work_wanted_list) }} </p>
-
-                            <p class="text-secondary mb-1"><i class="fab fa-safari"></i> remote</p>
                             {% if seeker.remote %}
+                            <p class="text-secondary mb-1"><i class="fab fa-safari"></i> remote</p>
                             {% endif %}
                         </div>
                     </div>
