@@ -3,11 +3,11 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-<div class="container">
+<div class="container mt-5">
     <div class="row">
-        <div class="col-3">
+        <div class="col-3 ms-0 ps-0 pe-0 me-3">
             <!-- filter panel-->
-            <div class="container"><div class="row g-0 align-items-center">
+            <div class="container p-0"><div class="row g-0 align-items-center">
                 <!-- header -->
                 <div class="col-md-4">
                     <!-- Filter title/icon -->
@@ -18,22 +18,21 @@
                 </div>
                 <div class="col-md-3">
                     <!-- Apply current filter button -->
-                    <form>
-                        <input class="btn btn-sm btn-success" type="submit" id="applyFilter">
+                    <form method="post">
+                        <input class="btn btn-sm btn-success" type="submit" id="applyFilter" value="Apply">
                     </form>
-
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <!-- save/load searches button -->
                     <div class="btn-group btn-sm">
                         <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                            Save/load...
+                            Save/load
                         </button>
                         <div class="dropdown-menu">
                             <form class="px-3 py-3">
                                 <div class="mb-3">
                                     <label for="query_saveas" class="form-label">Save as...</label>
-                                    <input type="text" class="form-control" id="query_saveas" placeholder="Seeker search" required>
+                                    <input type="text" class="form-control" id="query_saveas" placeholder="Seeker search">
                                 </div>
                                 <button type="button" class="btn btn-primary">Save</button>
                             </form>
@@ -104,7 +103,7 @@
                             <h6 class="text-center" style="margin-bottom: 0px;">Education</h6>
                             <label id="rng-edulvl" for="slider-edulvl"
                                    style="font-weight:bold; font-size:12px;">
-                                X to Y
+                                <!--X to Y-->
                             </label>
                             <div id="slider-edulvl"></div>
 
@@ -113,7 +112,7 @@
                             <h6 class="text-center" style="margin-bottom: 0px;">Work</h6>
                             <label id="rng-workyrs" for="slider-workyrs"
                                    style="font-weight:bold; font-size:12px;">
-                                X to Y years
+                                <!--X to Y years-->
                             </label>
                             <div id="slider-workyrs"></div>
                         </div>
@@ -231,6 +230,11 @@
                     </h2>
                     <div id="tskill_panel" class="accordion-collapse collapse show" aria-labelledby="tskill_header">
                         <div class="accordion-body">
+<!--                            <label class="form-check-label">-->
+<!--                                Minimum competency-->
+<!--                            </label>-->
+<!--                            TODO SLIDER-->
+
                             <label class="form-check-label" for="sel_techs">
                                 Select one or more skills
                             </label>
@@ -293,8 +297,10 @@
                 <div class="row g-0 ">
                     <div class="col-md-2 d-flex justify-content-center align-items-center">
             <!--            <i class="fas fa-smile fa-5x"></i>-->
-                        <div class="avatar-container">
-                            <img src="{{ seeker.avatar() }}">
+                        <div class="avatar-container mt-2 mb-2">
+                            <a href="{{ url_for('main.seeker_profile', seeker_id=seeker.id) }}" style="text-decoration: none; color: black;">
+                            <img src="{{ seeker.avatar(64) }}">
+                            </a>
             <!--                <img src="{{ seeker._user.avatar(96) }}" style="filter:saturate(0%);">-->
             <!--                <div class="avatar-overlay">-->
             <!--                    <span>{{ seeker.first_name[0].upper() + seeker.last_name[0].upper() }}</span>-->
@@ -304,7 +310,7 @@
             <!--        https://stackoverflow.com/questions/26148740/how-to-add-text-over-the-image-in-bootstrap-->
                     <div class="col-md-10">
                         <div class="card-body">
-                            <h5 class="card-title">{{ seeker.full_name }}</h5>
+                            <a href="{{ url_for('main.seeker_profile', seeker_id=seeker.id) }}" style="text-decoration: none; color: black;"><h5 class="card-title">{{ seeker.full_name }}</h5></a>
                             {% for line in seeker.tag_lines %}
                             {{ line }}<br/>
                             {% endfor%}
