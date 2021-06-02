@@ -1,18 +1,27 @@
 # Routes are the different URLs that the application implements.
 # The functions below handle the routing/behavior.
+import random
+from io import BytesIO
 
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for, request, send_file
+from werkzeug.datastructures import ImmutableMultiDict
 
 import app
 from app import constants
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
+#from app.api.query import get_seeker_query
+from app.api.query import get_seeker_query, request_args_to_kwargs
+from app.api.users import new_seeker, update_seeker_skill, add_seeker_education, add_seeker_attitude, add_seeker_job
 from app.main import bp
 from app.main.forms import JobPostForm, SkillRequirementForm, AttitudeRequirementForm
 from flask_login import current_user, login_required
-from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
+from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude, LocationCoordinates
 
 ## TODO Routes needed for editing profile page, searching, sending messages, etc.
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
+from resources.generators.attribute_gen import gen_tech, gen_biz
+from resources.generators.seeker_gen import generate_profile, generate_attributes, generate_history_education, \
+    generate_history_job, generate_bio
 
 
 @bp.route("/")
@@ -80,14 +89,44 @@ def seeker_profile(seeker_id):
     Navigate to a specific seeker's profile page.
     """
     # TODO limit access?
-    prof = SeekerProfile.query.filter_by(id=seeker_id).first()
-    if prof is None:
+    skr = SeekerProfile.query.filter_by(id=seeker_id).first()
+    if skr is None:
         # could not find profile with that id
         flash(f'No seeker with the id {seeker_id}.')
         return redirect(url_for('main.index'))
 
-    _name = f'{prof.first_name} {prof.last_name}'
-    return render_template('seeker/profile.html', fullname=_name)
+    _name = f'{skr.first_name} {skr.last_name}'
+    return render_template('seeker/profile.html', seeker=skr)
+
+
+@bp.route("/seeker/<seeker_id>/upload", methods=['POST'])
+def seeker_resume_upload(seeker_id):
+    # TODO make sure current user is seeker
+
+    skr = SeekerProfile.query.filter_by(id=seeker_id).first()
+    if skr is None:
+        # could not find profile with that id
+        flash(f'No seeker with the id {seeker_id}.')
+        return redirect(url_for('main.index'))
+    file = request.files['inputFile']
+    skr.resume = file.read()
+    app.db.session.commit()
+    return redirect(url_for('main.seeker_profile', seeker_id=seeker_id))
+
+
+@bp.route("/seeker/<seeker_id>/download")
+def seeker_resume_download(seeker_id):
+    skr = SeekerProfile.query.filter_by(id=seeker_id).first()
+    if skr is None:
+        # could not find profile with that id
+        flash(f'No seeker with the id {seeker_id}.')
+        return redirect(url_for('main.index'))
+    if skr.resume is None:
+        flash('Seeker does not have a resume uploaded.')
+        return redirect(url_for('main.seeker_profile', seeker_id=seeker_id))
+    # TODO assume docx okay?
+    filename = f"resume_{skr.last_name},{skr.first_name}.docx"
+    return send_file(BytesIO(skr.resume), attachment_filename=filename, as_attachment=True)
 
 
 @bp.route("/company/<company_id>")
@@ -193,19 +232,27 @@ def job_page(job_id: int):
     return render_template('company/jobpost.html', job=job_post)
 
 
-@bp.route("/seekers")
+@bp.route("/seekers", methods=['GET', 'POST'])
 # @login_required
 def seeker_search():
     """
     Navigate to the seeker search page.
     """
     # TODO should be only for companies/admins?
+    # if request.method == 'POST':
+    #     print("POSTAGE!")
+    #     print(request.args)
+    #     print(request.form)
+    #     print(request.values)
+    #     print(request.json)
+
     # `request` is a global value that lets you check the URL request.
     page = request.args.get('page', 1, type=int)
 
     # query.all can be replaced with query.paginate to iteratively get that page's results.
     # https://flask-sqlalchemy.palletsprojects.com/en/2.x/api/#flask_sqlalchemy.BaseQuery.paginate
-    pager = SeekerProfile.query.paginate(
+    req_kwargs = request_args_to_kwargs(request.args)
+    pager = get_seeker_query(**req_kwargs).paginate(
         page, app.Config.RESULTS_PER_PAGE, False)
 
     prev_url = url_for('main.seeker_search', page=pager.prev_num) if pager.has_prev else "#"
@@ -228,3 +275,106 @@ def seeker_search():
                            dprev=prev_link_clz, prev_url=prev_url,
                            dnext=next_link_clz, next_url=next_url,
                            )
+
+# @bp.route("/ss")
+# def ss():
+#     print(request.args)
+#     kwargs = dict()
+#     arg_worktype = request.args.get('worktype', '')
+#     if arg_worktype.isdigit():
+#         binstr = bin(int(arg_worktype))
+#         kwargs['worktype'] = [b == '1' for b in binstr[-3:]]
+#
+#     if 'remote' in request.args:
+#         kwargs['remote'] = True
+#
+#     arg_eduexp = request.args.get('eduexp', '')
+#     if len(arg_eduexp) == 2 and arg_eduexp.isdigit():
+#         kwargs['edu_range'] = [int(arg_eduexp[0]), int(arg_eduexp[1])]
+#
+#     arg_workexp = request.args.get('workexp', '')
+#     if len(arg_workexp) == 2 and arg_workexp.isdigit():
+#         kwargs['work_range'] = [int(arg_workexp[0]), int(arg_workexp[1])]
+#
+#     arg_dist = request.args.get('dist', '')
+#     if arg_dist and arg_dist.count('-') == 2:
+#         d, c, s = arg_dist.split("-")
+#         kwargs['loc_distance'] = int(d)
+#         kwargs['loc_citystate'] = [c, s]
+#
+#     arg_tech = request.args.get('tech', '')
+#     if arg_tech.isdigit():
+#         kwargs['tech_skills'] = int(arg_tech)
+#
+#     arg_biz = request.args.get('biz', '')
+#     if arg_biz.isdigit():
+#         kwargs['biz_skills'] = int(arg_biz)
+#
+#     arg_att = request.args.get('att', '')
+#     if arg_att.isdigit():
+#         kwargs['atts'] = int(arg_att)
+#
+#     print(kwargs)
+#     # matches = get_seeker_query(**kwargs)
+#     # print(list(matches))
+#     q = get_seeker_query(**kwargs)
+#     for sk in q.all():
+#         print(sk)
+#     return index()
+
+
+# @bp.route("/test")
+# def test():
+#     coords = LocationCoordinates.get("Naperville", "IL")
+#     print(coords)
+#     return index()
+
+# @bp.route("/genseekers")
+# def genseekers():
+#     n = int(request.args.get('n', '1'))
+#     for _ in range(n):
+#         prof = generate_profile()
+#         attrs = generate_attributes( (1, 10), (0, 5), (2, 15) )
+#         edus = [] if random.random() < 0.3 else [generate_history_education()]
+#         jobs = [generate_history_job() for _ in range(random.randint(0, 1))]
+#         tag, summary = generate_bio(prof, attrs, edus, jobs)
+#
+#         # update profile dict with generated text
+#         prof['tagline'] = tag
+#         prof['summary'] = summary
+#
+#         sid = new_seeker(prof.pop('email'), 'password', **prof)
+#         for sname, sinfo in attrs['skills']['tech'].items():
+#             skl = Skill.query.filter_by(title=sname).first()
+#             if skl is None:
+#                 print(f"COULD NOT FIND {sname}")
+#             else:
+#                 print(f"Giving {prof['first_name']} {sname}")
+#                 update_seeker_skill(sid, skl.id, sinfo['level'])
+#         for sname, sinfo in attrs['skills']['biz'].items():
+#             skl = Skill.query.filter_by(title=sname).first()
+#             if skl is None:
+#                 print(f"COULD NOT FIND {sname}")
+#             else:
+#                 print(f"Giving {prof['first_name']} {sname}")
+#                 update_seeker_skill(sid, skl.id, sinfo['level'])
+#         for aname in attrs['values']:
+#             att = Attitude.query.filter_by(title=aname).first()
+#             if att is None:
+#                 print(f"COULD NOT FIND {aname}")
+#             else:
+#                 print(f"Giving {prof['first_name']} {aname}")
+#                 add_seeker_attitude(sid, att.id, False)
+#         if edus:
+#             edu = edus[0]
+#             add_seeker_education(sid, edu['school'], edu['education_lvl'], edu['study_field'])
+#         if jobs:
+#             for jinfo in jobs:
+#                 add_seeker_job(sid, jinfo['job_title'], jinfo['years_employed'])
+#
+#
+#     return index()
+
+
+
+

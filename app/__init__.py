@@ -11,11 +11,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 
+from geopy.geocoders import Nominatim
+
 
 db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
 login.login_view = 'auth.login'
+geolocator = Nominatim(user_agent="senior_software_proj_commitme")
 
 
 def init_bootstrap(app):

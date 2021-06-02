@@ -2,6 +2,7 @@ import colorsys
 import re
 from datetime import datetime
 from hashlib import md5
+from operator import itemgetter
 from random import random
 from typing import List, Tuple, Union
 
@@ -214,6 +215,7 @@ def load_user(id):
     print(f"Loading user w/id {id}")
     return User.query.get(int(id))
 
+
 ##### PROFILES ######
 
 class CompanyProfile(db.Model):  # one to one with company-type user account
@@ -314,8 +316,6 @@ class SeekerProfile(db.Model):
     _bookmarks = relationship('SeekerBookmark', back_populates='_seeker')
     _searches = relationship("SeekerJobSearch", back_populates='_seeker')
 
-    coordinates = None
-
     def __repr__(self):
         return f"SeekerProfile[{self.first_name}{self.last_name}]"
 
@@ -342,6 +342,33 @@ class SeekerProfile(db.Model):
             return "USA"
 
     @property
+    def phone_formatted(self):
+        if self.phone_number is None:
+            return "Not provided"
+        return re.sub(r"(\d*)(\d{3})(\d{3})(\d{4})", r"\1(\2) \3 - \4", self.phone_number)
+
+    @property
+    def work_wanted_list(self):
+        wants = self.work_wanted.name.replace("_or_", "_").split("_")
+        if WorkTypes.any.name in wants:
+            wants = ["full", "part", "contract"]
+        print("WANTS =", wants)
+        return wants
+
+    def get_tech_skills_levels(self):
+        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if skr_skl._skill.is_tech()]
+        output.sort(key=itemgetter(1), reverse=True)
+        return output
+
+    def get_biz_skills_levels(self):
+        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if skr_skl._skill.is_biz()]
+        output.sort(key=itemgetter(1), reverse=True)
+        return output
+
+    def get_attitudes(self):
+        return [skr_att._attitude.title for skr_att in self._attitudes]
+
+    @property
     def tag_lines(self):
         """ Return a list of things this seeker can boast about."""
         lines = []
@@ -358,7 +385,7 @@ class SeekerProfile(db.Model):
                 skill_highest_names.append(skl._skill.title)
         if skill_highest_lvl > 0:  # make sure seeker has some skills
             skill_lvl = str(SkillLevels(skill_highest_lvl))
-            lvl_name = skill_lvl[skill_lvl.index('.')+1:].capitalize()
+            lvl_name = skill_lvl[skill_lvl.index('.') + 1:].capitalize()
             s_names = ", ".join(skill_highest_names)
             # s = "skills" if skill_highest_count > 1 else "skill"
             lines.append(f"{lvl_name} in {s_names}")
@@ -377,129 +404,75 @@ class SeekerProfile(db.Model):
             lines.append(f"Has {total_years} {y} of job experience")  # TODO maybe add example title?
         return lines
 
+    @property
+    def min_edu_level(self):
+        """
+        Converts the education experience to a single int representing the minimum qualifications held.
+        """
+        if len(self._history_edus) == 0:
+            return 0
+        # add one since allocating 0 for 'none'
+        return int(max([e.education_lvl for e in self._history_edus])) + 1
 
+    @property
+    def years_job_experience(self):
+        """
+        Calculates the number of years of job experience held.
+        """
+        return sum([job.years_employed for job in self._history_jobs])
 
-    # @hybrid_property
-    # def min_edu_level(self):
-    #     """
-    #     Converts the education experience to a single int representing the minimum qualifications held.
-    #     """
-    #     if len(self._history_edus) == 0:
-    #         return 0
-    #     # add one since allocating 0 for 'none'
-    #     return int(max([e.education_lvl for e in self._history_edus])) + 1
+    def is_within(self, distance_limit_mi, city, state):
+        if not self.city and not self.state:
+            # always return true if user does not have a city or a state
+            return True
 
-    # @min_edu_level.expression
-    # def min_edu_level(cls):
-    #     ## TODO WHAT
-    #     return -1
+        self_coords = LocationCoordinates.get(self.city, self.state)
+        other_coords = LocationCoordinates.get(city, state)
 
-    # @hybrid_property
-    # def years_job_experience(self):
-    #     """
-    #     Calculates the number of years of job experience held.
-    #     """
-    #     return sum([job.years_employed for job in self._history_jobs])
+        dist_mi = geodesic(self_coords, other_coords).miles
+        return dist_mi <= distance_limit_mi
 
-    # @years_job_experience.expression
-    # def years_job_experience(cls):
-    #     ## TODO WHAT
-    #     x = select([SeekerHistoryJob.years_employed]).where(SeekerHistoryJob.seeker_id == cls.id)
-    #     print(x)
-    #     y = func.sum(x)
-    #     print(y)
-    #     z = y.as_scalar()
-    #     print(z)
-    #     return z
+    def encode_tech_skills(self):
+        """
+        Converts technical skills possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        tskill_ids = [s.skill_id for s in self._skills if s.is_tech]
+        enc = ['0' for _ in range(db.query(func.max(Skill.column)))]
+        for _id in tskill_ids:
+            enc[_id] = '1'
+        return int(''.join(enc), base=2)
 
-    # @hybrid_method
-    # def is_within(self, distance_limit_mi, city, state):
-    #     if not self.city and not self.state:
-    #         # always return true if user does not have a city or a state
-    #         return True
-    #     elif not self.city and self.state:
-    #         # return based on state matching if the user only has a state
-    #         return state == self.state
-    #
-    #     # TODO is this persisted? maybe should cache
-    #     if self.coordinates is None:
-    #         print(f"CHECKING FOR {self.city}, {self.state}")
-    #         loc = geolocator.geocode(f"{self.city}, {self.state} USA")
-    #         self.coordinates = [loc.latitude, loc.longitude]
-    #     loc = geolocator.geocode(f"{city}, {state or ''} USA")
-    #     dist_mi = geodesic(self.coordinates, loc).miles
-    #     return dist_mi <= distance_limit_mi
+    def encode_biz_skills(self):
+        """
+        Converts business skills possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        bskill_ids = [s.skill_id for s in self._skills if s.is_biz]
+        enc = ['0' for _ in range(db.query(func.max(Skill.column)))]
+        for _id in bskill_ids:
+            enc[_id] = '1'
+        return int(''.join(enc), base=2)
 
-    # @is_within.expression
-    # def is_within(cls, distance_limit_mi, city, state):
-    #     # TODO WHAT
-    #     print(type(cls.first_name))
-    #     print(cls.first_name.key)
-    #     print(cls.first_name.label())
-    #     print(cls.first_name.prop)
-    #     print("OPTIONS IN FNAME: ", dir(cls.first_name))
-    #     return True
-
-    # @hybrid_property
-    # def encode_tech_skills(self):
-    #     """
-    #     Converts technical skills possessed to an integer.
-    #     Only looks at whether the seeker added it to their profile.
-    #     """
-    #     # skill_id skill_level
-    #     tskill_ids = [s.skill_id for s in self._skills if s.is_tech]
-    #     enc = ['0' for _ in range( db.query(func.max(Skill.column)) )]
-    #     for _id in tskill_ids:
-    #         enc[_id] = '1'
-    #     return int(''.join(enc), base=2)
-
-    # @encode_tech_skills.expression
-    # def encode_tech_skills(cls):
-    #     ## TODO WHAT
-    #     return 0
-
-    # @hybrid_property
-    # def encode_biz_skills(self):
-    #     """
-    #     Converts business skills possessed to an integer.
-    #     Only looks at whether the seeker added it to their profile.
-    #     """
-    #     # skill_id skill_level
-    #     bskill_ids = [s.skill_id for s in self._skills if s.is_biz]
-    #     enc = ['0' for _ in range( db.query(func.max(Skill.column)) )]
-    #     for _id in bskill_ids:
-    #         enc[_id] = '1'
-    #     return int(''.join(enc), base=2)
-
-    # @encode_biz_skills.expression
-    # def encode_biz_skills(cls):
-    #     ## TODO WHAT
-    #     return 0
-
-    # @hybrid_property
-    # def encode_attitudes(self):
-    #     """
-    #     Converts attitudes possessed to an integer.
-    #     Only looks at whether the seeker added it to their profile.
-    #     """
-    #     # skill_id skill_level
-    #     att_ids = [s.skill_id for s in self._attitudes]
-    #     enc = ['0' for _ in range( db.query(func.max(Attitude.column)) )]
-    #     for _id in att_ids:
-    #         enc[_id] = '1'
-    #     return int(''.join(enc), base=2)
-
-    # @encode_attitudes.expression
-    # def encode_attitudes(cls):
-    #     ## TODO WHAT
-    #     return 0
+    def encode_attitudes(self):
+        """
+        Converts attitudes possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        att_ids = [s.skill_id for s in self._attitudes]
+        enc = ['0' for _ in range(db.query(func.max(Attitude.column)))]
+        for _id in att_ids:
+            enc[_id] = '1'
+        return int(''.join(enc), base=2)
 
     def avatar(self, size=128):
-        rand_bg_hex = "".join([hex(int(round(255*x)))[2:] for x in colorsys.hsv_to_rgb(random(), 0.25, 1.0)])
+        rand_bg_hex = "".join([hex(int(round(255 * x)))[2:] for x in colorsys.hsv_to_rgb(random(), 0.25, 1.0)])
         url = f"https://ui-avatars.com/api/?rounded=true&bold=true&color=00000" \
               f"&size={size}&background={rand_bg_hex}&name={self.first_name}+{self.last_name}"
         return url
-
 
 
 class SeekerSkill(db.Model):
@@ -751,7 +724,7 @@ class JobPostAttitude(db.Model):
     __tablename__ = 'jobpost_attitude'
 
     id = Column(Integer, nullable=False, primary_key=True)
-    jobpost_id = Column(Integer, ForeignKey('jobpost.id', ondelete="CASCADE"), nullable= False)
+    jobpost_id = Column(Integer, ForeignKey('jobpost.id', ondelete="CASCADE"), nullable=False)
     attitude_id = Column(Integer, ForeignKey('attitude.id', ondelete="CASCADE"), nullable=False)
     importance_level = Column(ENUM(ImportanceLevel), default=ImportanceLevel.none)
 
@@ -784,10 +757,39 @@ class SeekerJobSearch(db.Model):
 
 
 ##### LOGGING/CACHE #####
-# class LocationCoordinates(db.Model):
-#     __tablename__ = 'location_coordinates'
-#     id = Column(Integer, nullable=False, primary_key=True)
-#     city = Column(String, nullable=False)
-#     state = Column(String(2), nullable=False)
-#     longitude = Column(Numeric)
-#     latitude = Column(Numeric)
+class LocationCoordinates(db.Model):
+    """
+    This table contains a mapping between a location string to the coordinates of that location.
+    It contains static functions to convert a given city/state to the expected format and to 'get' coordinates
+        (which will attempt to first retrieve from the table, then query the geolocator if not present).
+    Locations are in the format: `X, Y USA` where X is the city name and Y is the state's 2 letter abbreviation.
+    """
+    __tablename__ = 'location_coordinates'
+    location = Column(String, nullable=False, primary_key=True)
+    latitude = Column(Numeric)
+    longitude = Column(Numeric)
+
+    @staticmethod
+    def to_location(city: str = None, state: str = None) -> str:
+        """
+        Converts a city and state (both optional) to the key expected by this table.
+        """
+        if city is None and state is None:
+            return "USA"
+        elif city is None or state is None:
+            return f"{city}{state}, USA"
+        return f"{city}, {state} USA"
+
+    @staticmethod
+    def get(city: str = None, state: str = None) -> Tuple[float, float]:
+        loc_id = LocationCoordinates.to_location(city, state)
+        row = LocationCoordinates.query.get(loc_id)
+        if row is None:
+            # not present, create then return
+            loc_obj = geolocator.geocode(loc_id)
+            row = LocationCoordinates(location=loc_id, latitude=loc_obj.latitude, longitude=loc_obj.longitude)
+            db.session.add(row)
+            db.session.commit()
+        return row.latitude, row.longitude
+
+
