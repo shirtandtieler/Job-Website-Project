@@ -1,13 +1,41 @@
 # TODO add functions to create/update/get entries in database related to users or their account/profile
-from typing import Union
+from typing import Union, List, Tuple
 
 from app import db
 from app.models import AccountTypes, WorkTypes, SkillLevels, SeekerSkill, SeekerAttitude, EducationLevel, \
-    SeekerHistoryEducation, SeekerHistoryJob
+    SeekerHistoryEducation, SeekerHistoryJob, CompanySeekerSearch, SeekerJobSearch
 from app.models import User, CompanyProfile, SeekerProfile
 
 
 ## TODO should add arg for commiting? May increase performance when updating in bulk
+
+def save_seeker_search(user_id, label, query):
+    entry = CompanySeekerSearch(user_id=user_id, label=label, query=query)
+    db.session.add(entry)
+    db.session.commit()
+
+
+def delete_seeker_search(user_id, label, query):
+    entry = db.session.query(CompanySeekerSearch).filter_by(user_id=user_id, label=label, query=query).first()
+    if entry is None:
+        raise ValueError(f"No such search from user {user_id} w/ label {label} and query {query}")
+    db.session.delete(entry)
+    db.session.commit()
+
+
+def save_job_search(user_id, label, query):
+    entry = SeekerJobSearch(user_id=user_id, label=label, query=query)
+    db.session.add(entry)
+    db.session.commit()
+
+
+def delete_job_search(user_id, label, query):
+    entry = db.session.query(SeekerJobSearch).filter_by(user_id=user_id, label=label, query=query).first()
+    if entry is None:
+        raise ValueError(f"No such search from user {user_id} w/ label {label} and query {query}")
+    db.session.delete(entry)
+    db.session.commit()
+
 
 def new_company(email, password, join_date=None,
                 name=None, city=None, state=None, website=None,
@@ -140,9 +168,9 @@ def update_seeker_skill(seeker_id: int, skill_id: int, skill_level: Union[int, S
     if isinstance(skill_level, int):
         skill_level = SkillLevels(skill_level)
     # check if adding or updating
-    entry = SeekerSkill.query.filter_by(seeker_id=seeker_id, skill_id=skill_id)
+    entry = SeekerSkill.query.filter_by(seeker_id=seeker_id, skill_id=skill_id).first()
     if entry is None:
-        entry = SeekerSkill(seeker_id, skill_id, skill_level)
+        entry = SeekerSkill(seeker_id=seeker_id, skill_id=skill_id, skill_level=skill_level)
         db.session.add(entry)
     else:
         entry.skill_level = skill_level
@@ -162,12 +190,12 @@ def remove_seeker_skill(seeker_id, skill_id):
 
 def add_seeker_attitude(seeker_id: int, attitude_id: int, error_if_fail=True):
     """ Adds a seeker's attitude. """
-    entry = SeekerAttitude.query.filter_by(seeker_id=seeker_id, attitude_id=attitude_id)
+    entry = SeekerAttitude.query.filter_by(seeker_id=seeker_id, attitude_id=attitude_id).first()
     if entry is not None:  # already added
         if error_if_fail:
-            raise ValueError(f"Seeker with ID {seeker_id} already possesses attitude with ID {attitude_id}")
+            raise ValueError(f"Seeker with ID {seeker_id} already possesses attitude with ID {attitude_id}: entry {entry.id}")
         return
-    entry = SeekerAttitude(seeker_id, attitude_id)
+    entry = SeekerAttitude(seeker_id=seeker_id, attitude_id=attitude_id)
     db.session.add(entry)
     db.session.commit()
 

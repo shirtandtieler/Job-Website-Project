@@ -1,17 +1,21 @@
 # Routes are the different URLs that the application implements.
 # The functions below handle the routing/behavior.
+import json
 import random
+from datetime import datetime
 from io import BytesIO
 
-from flask import render_template, flash, redirect, url_for, request, send_file
-from werkzeug.datastructures import ImmutableMultiDict
+from flask import render_template, flash, redirect, url_for, request, send_file, Response
 
 import app
 from app import constants
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
 #from app.api.query import get_seeker_query
-from app.api.query import get_seeker_query, request_args_to_kwargs
-from app.api.users import new_seeker, update_seeker_skill, add_seeker_education, add_seeker_attitude, add_seeker_job
+from app.api.query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
+    seeker_url_args_to_input_states
+from app.api.routing import modify_query
+from app.api.users import new_seeker, update_seeker_skill, add_seeker_education, add_seeker_attitude, add_seeker_job, \
+    save_seeker_search, delete_seeker_search
 from app.main import bp
 from app.main.forms import JobPostForm, SkillRequirementForm, AttitudeRequirementForm
 from flask_login import current_user, login_required
@@ -22,7 +26,8 @@ from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
 from resources.generators.attribute_gen import gen_tech, gen_biz
 from resources.generators.seeker_gen import generate_profile, generate_attributes, generate_history_education, \
     generate_history_job, generate_bio
-
+from flask import request
+from werkzeug.urls import url_encode
 
 @bp.route("/")
 @bp.route("/index")
@@ -239,141 +244,73 @@ def seeker_search():
     Navigate to the seeker search page.
     """
     # TODO should be only for companies/admins?
-    # if request.method == 'POST':
-    #     print("POSTAGE!")
-    #     print(request.args)
-    #     print(request.form)
-    #     print(request.values)
-    #     print(request.json)
+    if request.method == 'POST':
+        saved_name = request.form.get('query_saveas', '')
+        delete_info = request.form.get('query_delete', '')
+        if saved_name:  # user wants to save the recent search
+            query = request.query_string
+            save_seeker_search(current_user.id, saved_name, query.decode())
+            flash(f"Saved!")
+            return redirect(request.full_path)
+        elif delete_info:
+            q_id = current_user.id
+            q_label = request.form.get('label')
+            q_query = request.form.get('query')
+            delete_seeker_search(q_id, q_label, q_query)
+            flash(f"Deleted!")
+            return redirect(request.full_path)
+        a = seeker_form_to_url_params(request.form)
+        new_path = f"{request.path}?{a}"
+        return redirect(new_path)
 
     # `request` is a global value that lets you check the URL request.
-    page = request.args.get('page', 1, type=int)
+    page_num = request.args.get('page', 1, type=int)
 
     # query.all can be replaced with query.paginate to iteratively get that page's results.
     # https://flask-sqlalchemy.palletsprojects.com/en/2.x/api/#flask_sqlalchemy.BaseQuery.paginate
-    req_kwargs = request_args_to_kwargs(request.args)
-    pager = get_seeker_query(**req_kwargs).paginate(
-        page, app.Config.RESULTS_PER_PAGE, False)
+    req_kwargs = seeker_url_args_to_query_args(request.args)
 
-    prev_url = url_for('main.seeker_search', page=pager.prev_num) if pager.has_prev else "#"
+    pager = get_seeker_query(**req_kwargs).paginate(
+        page_num, app.Config.RESULTS_PER_PAGE, False)
+
+    prev_url = modify_query(request, page=pager.prev_num) if pager.has_prev else "#"
     prev_link_clz = "disabled" if not pager.has_prev else ""
 
-    next_url = url_for('main.seeker_search', page=pager.next_num) if pager.has_next else "#"
+    next_url = modify_query(request, page=pager.next_num) if pager.has_next else "#"
     next_link_clz = "disabled" if not pager.has_next else ""
 
-    # get lower and upper page count for up to 5 surrounding pages
+    # get lower and upper page count for (up to) 5 surrounding pages
     max_window = min(5, pager.pages)
-    pg_lower = pg_upper = page
+    pg_lower = pg_upper = page_num
     while pg_upper-pg_lower+1 < max_window:
         pg_lower = max(1, pg_lower-1)
         pg_upper = min(pager.pages, pg_upper+1)
 
+    filter_options_set = seeker_url_args_to_input_states(request.args)
+
     return render_template('seeker/browse.html',
+                           tech_tuples=Skill.to_tech_tuples(0), biz_tuples=Skill.to_biz_tuples(0),
+                           att_tuples=Attitude.to_tuples(0),
                            seeker_profiles=pager.items,  # .items gets the list of profiles
-                           page=page,
+                           total=pager.total,
+                           page=page_num,
                            plwr=pg_lower, pupr=pg_upper,
                            dprev=prev_link_clz, prev_url=prev_url,
                            dnext=next_link_clz, next_url=next_url,
+                           show_saveload=False,
+                           opts=filter_options_set
                            )
 
-# @bp.route("/ss")
-# def ss():
-#     print(request.args)
-#     kwargs = dict()
-#     arg_worktype = request.args.get('worktype', '')
-#     if arg_worktype.isdigit():
-#         binstr = bin(int(arg_worktype))
-#         kwargs['worktype'] = [b == '1' for b in binstr[-3:]]
-#
-#     if 'remote' in request.args:
-#         kwargs['remote'] = True
-#
-#     arg_eduexp = request.args.get('eduexp', '')
-#     if len(arg_eduexp) == 2 and arg_eduexp.isdigit():
-#         kwargs['edu_range'] = [int(arg_eduexp[0]), int(arg_eduexp[1])]
-#
-#     arg_workexp = request.args.get('workexp', '')
-#     if len(arg_workexp) == 2 and arg_workexp.isdigit():
-#         kwargs['work_range'] = [int(arg_workexp[0]), int(arg_workexp[1])]
-#
-#     arg_dist = request.args.get('dist', '')
-#     if arg_dist and arg_dist.count('-') == 2:
-#         d, c, s = arg_dist.split("-")
-#         kwargs['loc_distance'] = int(d)
-#         kwargs['loc_citystate'] = [c, s]
-#
-#     arg_tech = request.args.get('tech', '')
-#     if arg_tech.isdigit():
-#         kwargs['tech_skills'] = int(arg_tech)
-#
-#     arg_biz = request.args.get('biz', '')
-#     if arg_biz.isdigit():
-#         kwargs['biz_skills'] = int(arg_biz)
-#
-#     arg_att = request.args.get('att', '')
-#     if arg_att.isdigit():
-#         kwargs['atts'] = int(arg_att)
-#
-#     print(kwargs)
-#     # matches = get_seeker_query(**kwargs)
-#     # print(list(matches))
-#     q = get_seeker_query(**kwargs)
-#     for sk in q.all():
-#         print(sk)
-#     return index()
+@bp.route("/seekers/download")
+def seeker_search_download():
+    req_kwargs = seeker_url_args_to_query_args(request.args)
+    results = get_seeker_query(**req_kwargs).all()
+    results = [s.to_dict() for s in results]
+    output = {"timestamp": datetime.now().isoformat(), "query": f"?{request.query_string.decode()}", "results": results}
+    return Response(json.dumps(output, indent=4),
+                    mimetype='text/json',
+                    headers={'Content-disposition': 'attachment; filename=seeker_search_results.json'})
 
-
-# @bp.route("/test")
-# def test():
-#     coords = LocationCoordinates.get("Naperville", "IL")
-#     print(coords)
-#     return index()
-
-# @bp.route("/genseekers")
-# def genseekers():
-#     n = int(request.args.get('n', '1'))
-#     for _ in range(n):
-#         prof = generate_profile()
-#         attrs = generate_attributes( (1, 10), (0, 5), (2, 15) )
-#         edus = [] if random.random() < 0.3 else [generate_history_education()]
-#         jobs = [generate_history_job() for _ in range(random.randint(0, 1))]
-#         tag, summary = generate_bio(prof, attrs, edus, jobs)
-#
-#         # update profile dict with generated text
-#         prof['tagline'] = tag
-#         prof['summary'] = summary
-#
-#         sid = new_seeker(prof.pop('email'), 'password', **prof)
-#         for sname, sinfo in attrs['skills']['tech'].items():
-#             skl = Skill.query.filter_by(title=sname).first()
-#             if skl is None:
-#                 print(f"COULD NOT FIND {sname}")
-#             else:
-#                 print(f"Giving {prof['first_name']} {sname}")
-#                 update_seeker_skill(sid, skl.id, sinfo['level'])
-#         for sname, sinfo in attrs['skills']['biz'].items():
-#             skl = Skill.query.filter_by(title=sname).first()
-#             if skl is None:
-#                 print(f"COULD NOT FIND {sname}")
-#             else:
-#                 print(f"Giving {prof['first_name']} {sname}")
-#                 update_seeker_skill(sid, skl.id, sinfo['level'])
-#         for aname in attrs['values']:
-#             att = Attitude.query.filter_by(title=aname).first()
-#             if att is None:
-#                 print(f"COULD NOT FIND {aname}")
-#             else:
-#                 print(f"Giving {prof['first_name']} {aname}")
-#                 add_seeker_attitude(sid, att.id, False)
-#         if edus:
-#             edu = edus[0]
-#             add_seeker_education(sid, edu['school'], edu['education_lvl'], edu['study_field'])
-#         if jobs:
-#             for jinfo in jobs:
-#                 add_seeker_job(sid, jinfo['job_title'], jinfo['years_employed'])
-#
-#
-#     return index()
 
 
 

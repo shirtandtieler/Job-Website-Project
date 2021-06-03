@@ -2,7 +2,8 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask, Blueprint
+from flask import Flask, Blueprint, request
+from werkzeug.urls import url_encode
 from wtforms import HiddenField
 
 from app.form_renderer import render_form
@@ -76,6 +77,18 @@ def create_app(config_class=Config):
 
         app.logger.setLevel(logging.INFO)
         app.logger.info('Website startup')
+
+    @app.template_global()
+    def modify_query(**new_values):
+        """
+        Keeps the current URL scheme with the specified modifications.
+        Is placed here to give Jinja global access it.
+        A Python variant is accessible from `api.query`.
+        """
+        args = request.args.copy()
+        for key, val in new_values.items():
+            args[key] = val
+        return f"{request.path}?{url_encode(args)}"
 
     return app
 
