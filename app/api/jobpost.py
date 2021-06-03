@@ -25,7 +25,7 @@ def extract_details(form):
 def new_jobpost(company_id: int, title: str,
                 city: str = None, state: str = None, description: str = None, remote: bool = None,
                 salary: Tuple[int, int] = None, active: bool = True,
-                skills: List[Tuple[Union[str, int], int, int]] = None, 
+                skills: List[Tuple[Union[str, int], int, int]] = None,
                 attitudes: List[Tuple[Union[str, int], int]] = None) -> int:
     """
     Create a new job post, passing - at minimum - the company ID and job post title.
@@ -79,12 +79,12 @@ def new_jobpost(company_id: int, title: str,
             traceback.print_exc()
             print("<<<< ROLLING BACK! >>>>")
             db.session.rollback()
-        
+
     return post.id
 
 
 def edit_jobpost(post_id: int,
-                 title: str = None, city: str = None, state: str = None, description: str = None, 
+                 title: str = None, city: str = None, state: str = None, description: str = None,
                  remote: bool = None, salary: Tuple[Union[None, int], Union[None, int]] = None, active: bool = None,
                  skills: List[Tuple[Union[str, int], int, int]] = None,
                  attitudes: List[Tuple[Union[str, int], int]] = None):
@@ -140,7 +140,7 @@ def edit_jobpost(post_id: int,
                 db.session.delete(jp_skill)
         # for the remaining skills in the dict, add them in
         for sid, (slvl, simp) in new_skill_lookup.items():
-            jp_skill = JobPostSkill(jobpost_id=post.id, skill_id = sid, skill_level_min = slvl, importance_level = simp)
+            jp_skill = JobPostSkill(jobpost_id=post.id, skill_id=sid, skill_level_min=slvl, importance_level=simp)
             db.session.add(jp_skill)
     if attitudes:
         # make a dictionary mapping new ids to their importance
@@ -159,9 +159,8 @@ def edit_jobpost(post_id: int,
                 db.session.delete(jp_att)
         # for the remaining attitudes in the dict, add them in
         for aid, aimp in new_att_lookup.items():
-            jp_att = JobPostAttitude(jobpost_id=post.id, attitude_id = aid, importance_level = aimp)
+            jp_att = JobPostAttitude(jobpost_id=post.id, attitude_id=aid, importance_level=aimp)
             db.session.add(jp_att)
 
     # submit all changes
     db.session.commit()
-

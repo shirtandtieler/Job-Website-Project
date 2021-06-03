@@ -3,11 +3,12 @@ from wtforms import StringField, SubmitField, SelectField, BooleanField, Integer
     FormField
 from wtforms.validators import DataRequired, Optional
 
-## TODO forms needed for editing profile, searching, messaging, etc.
-
-from app.constants import STATE_CHOICES, STATE_ABBVS
+from app.constants import STATE_ABBVS
 from app.models import SkillLevels, ImportanceLevel
 from resources.generators import SKILL_NAMES, ATTITUDE_NAMES
+
+
+# TODO forms needed for editing profile, searching, messaging, etc.
 
 
 class SkillRequirementForm(Form):

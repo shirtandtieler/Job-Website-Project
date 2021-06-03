@@ -16,15 +16,16 @@ with open("resources/generators/culture_framework.csv") as f:
 
 enames = ["recruiter", "hr", "info", "job", "inquiry"]
 
+
 def generate_profile():
     profile = dict()
     name = random.choice(companies)
     profile['name'] = name
-    email = random.choice(enames) + "@" + re.sub("[^\w]", "", name).lower() + "." + fake.tld()
+    email = random.choice(enames) + "@" + re.sub(r"[^\w]", "", name).lower() + "." + fake.tld()
     profile['email'] = email
 
-    profile['website'] = 'https://' + re.sub("[^\w]", "", name).lower() + '.com'
-    
+    profile['website'] = 'https://' + re.sub(r"[^\w]", "", name).lower() + '.com'
+
     zip_code, city, state = barnum.create_city_state_zip()
     profile['city'] = city
     profile['state'] = state
