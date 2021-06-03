@@ -215,7 +215,7 @@ def job_search():
 
     posts = [(j.job_title, j.company, f"/company/{j.company_id}", j.location, j.expected_salary)
              for j in JobPost.query.all()]
-    return render_template('company/browse.html', jobposts=posts)
+    return render_template('company/search.html', jobposts=posts)
 
 
 @bp.route("/job/<job_id>")
@@ -280,7 +280,7 @@ def seeker_search():
 
     filter_options_set = seeker_url_args_to_input_states(request.args)
 
-    return render_template('seeker/browse.html',
+    return render_template('seeker/search.html',
                            tech_tuples=Skill.to_tech_tuples(0), biz_tuples=Skill.to_biz_tuples(0),
                            att_tuples=Attitude.to_tuples(0),
                            seeker_profiles=pager.items,  # .items gets the list of profiles
