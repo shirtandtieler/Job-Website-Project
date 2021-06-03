@@ -3,24 +3,606 @@
 {% extends "base.html" %}
 
 {% block app_content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-3 ms-0 ps-0 pe-0 me-3">
+            <!-- filter panel-->
+            <div class="container p-0"><div class="row g-0 align-items-center">
+                <!-- header -->
+                <div class="col-md-4">
+                    <!-- Filter title/icon -->
+                    <div class="d-inline fw-bold">
+                        <i class="fas fa-filter"></i>
+                        Filter
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <!-- Empty space -->
+                </div>
+                <div class="col-md-2">
+                    <!-- save/load searches button -->
+                    <div class="btn-group btn-sm">
+                        <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                            Save/load
+                        </button>
+                        <div class="dropdown-menu border-dark rounded-bottom border-top-0 shadow-lg " style="border-radius: 0;">
+                            <!-- Save field -->
+                            <form class="px-3 py-3" method="post">
+                                <div class="mb-3">
+                                    <label for="query_saveas" class="form-label">Save as...</label>
+                                    <input type="text" class="form-control" name="query_saveas" id="query_saveas" placeholder="Seeker search" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save</button>
+                            </form>
+                            <div class="dropdown-divider"></div>
+                            <!-- Load options -->
+                            <div class="px-3 py-3">
+                                <label class="form-label">Load...</label>
+                                {% for s in current_user._seeker_searches %}
+                                <form method="post">
+                                    <div class="d-flex">
+                                        <a class="dropdown-item align-self-center rounded-pill border border-secondary bg-light text-primary" href="/seekers?{{ s.query }}">
+                                            {{ s.label }}
+                                        </a>
+                                        <input type="hidden" name="query_delete" value="true" />
+                                        <input type="hidden" name="label" value="{{ s.label }}" />
+                                        <input type="hidden" name="query" value="{{s.query}}" />
+                                        <button type="submit" class="btn-close align-self-center"></button>
+                                    </div>
+                                </form>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div></div>
 
-{% for name,taglines,location in seekers %}
-<div class="w3-cell-row w3-padding-hor-16" style="width:75%">
-    <div class="w3-container w3-cell" style="width:5%">
-        <span class="fas fa-smile w3-xxlarge w3-left"></span>
-    </div>
+            <form method="post">
+                <!-- Submit / reset buttons -->
+                <div class="d-flex justify-content-around">
+                    <input class="btn btn-sm btn-outline-success mt-2 mb-2" type="submit" id="applyFilter" value="Apply" style="width:40%"/>
+                    <input class="btn btn-sm btn-outline-danger mt-2 mb-2" type="button" id="resetFilter" value="Reset" onclick="window.location.href='/seekers';" style="width:40%"/>
+                </div>
 
-    <div class="w3-container w3-cell w3-cell-middle">
-        <span class="w3-large">{{ name }}</span><br>
-        {% for line in taglines %}
-        <span class="w3-small">{{ line }}</span><br>
-        {% endfor%}
-        <p class="w3-tiny">{{ location }}</p>
-    </div>
+                <div class="accordion">
+                    <!--"Looking for" Work type section-->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="lf_header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#lf_panel"
+                                    aria-expanded="true" aria-controls="lf_panel">
+                                Work types
+                            </button>
+                        </h2>
+                        <div id="lf_panel" class="accordion-collapse collapse show" aria-labelledby="lf_header">
+                            <div class="accordion-body">
+                                <div class="form-check">
+                                    <label class="form-check-label" for="lf_ft">
+                                        Full time
+                                    </label>
+                                    <input class="form-check-input" type="checkbox" value="1" id="lf_ft" name="lf_ft" {{ opts['lf_ft'] }}>
+                                </div>
+                                <div class="form-check">
+                                    <label class="form-check-label" for="lf_pt">
+                                        Part time
+                                    </label>
+                                    <input class="form-check-input" type="checkbox" value="1" id="lf_pt" name="lf_pt" {{ opts['lf_pt'] }}>
+                                </div>
+                                <div class="form-check">
+                                    <label class="form-check-label" for="lf_contract">
+                                        Contract
+                                    </label>
+                                    <input class="form-check-input" type="checkbox" value="1" id="lf_contract" name="lf_contract" {{ opts['lf_contract'] }}>
+                                </div>
+                                <div class="form-check">
+                                    <label class="form-check-label" for="lf_remote">
+                                        Remote
+                                    </label>
+                                    <input class="form-check-input" type="checkbox" value="1" id="lf_remote" name="lf_remote" {{ opts['lf_remote'] }}>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Experience section-->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="edu_header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#edu_panel"
+                                    aria-expanded="true" aria-controls="edu_panel">
+                                Experiences
+                            </button>
+                        </h2>
+                        <div id="edu_panel" class="accordion-collapse collapse show" aria-labelledby="edu_header">
+                            <div class="accordion-body">
+                                <h6 class="text-center" style="margin-bottom: 0px;">Education</h6>
+                                <label id="rng-edulvl" for="slider-edulvl"
+                                       style="font-weight:bold; font-size:12px;">
+                                    <!--X to Y-->
+                                </label>
+                                <div id="slider-edulvl" name="slider_edulvl"></div>
+                                <input type="hidden" id="hidden_edulvl_lower" name="edulvl_lower" value={{ opts['slider-edulvl'][0] }} />
+                                <input type="hidden" id="hidden_edulvl_upper" name="edulvl_upper" value={{ opts['slider-edulvl'][1] }} />
 
-    <div class="w3-container w3-cell" style="width:10%">
-        <span class="far fa-star w3-xxlarge"></span>
+                                <br/>
+
+                                <h6 class="text-center" style="margin-bottom: 0px;">Work</h6>
+                                <label id="rng-workyrs" for="slider-workyrs"
+                                       style="font-weight:bold; font-size:12px;">
+                                    <!--X to Y years-->
+                                </label>
+                                <div id="slider-workyrs" name="slider_workyrs"></div>
+                                <input type="hidden" id="hidden_workyrs_lower" name="workyrs_lower" value={{ opts['slider-workyrs'][0] }} />
+                                <input type="hidden" id="hidden_workyrs_upper" name="workyrs_upper" value={{ opts['slider-workyrs'][1] }} />
+                            </div>
+                        </div>
+                    </div>
+                    <!--Distance section-->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="dist_header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#dist_panel"
+                                    aria-expanded="true" aria-controls="dist_panel">
+                                Distance
+                            </button>
+                        </h2>
+                        <div id="dist_panel" class="accordion-collapse collapse show" aria-labelledby="dist_header">
+                            <div class="accordion-body">
+                                <div class="form-check">
+                                    <label class="form-check-label" for="dist_any">
+                                        Anywhere
+                                    </label>
+                                    <input class="form-check-input" type="radio" name="dist_choice" value="1" id="dist_any" {{ opts['dist_any'] }}
+                                           data-bs-toggle="collapse" data-bs-target="#dist_within_input">
+                                </div>
+                                <div class="form-check">
+                                    <label class="form-check-label" for="dist_within">
+                                        Within...
+                                    </label>
+                                    <input class="form-check-input" type="radio" name="dist_choice" value="0" id="dist_within" {{ opts['dist_within'] }}
+                                           data-bs-toggle="collapse" data-bs-target="#dist_within_input">
+                                </div>
+                                <div id="dist_within_input" class="accordion-collapse collapse {% if opts['dist_within'] %}show{% endif %}" aria-expanded="false">
+                                    <div class="input-group input-group-sm">
+                                        <input type="number" class="form-control" placeholder="#" aria-label="Miles" value="{{ opts['dist_miles'] }}" id="dist_miles" name="dist_miles">
+                                        <span class="input-group-text">miles of</span>
+                                    </div>
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control" placeholder="City" style="flex-grow: 2.25;" id="dist_city" name="dist_city" value="{{ opts['dist_city'] }}">
+                                        <span class="input-group-text">, </span>
+                                        <select class="form-select" aria-label="Locations" id="dist_state" name="dist_state">
+                                            <option value="" selected>State</option>
+                                            <option value="AL">AL</option>
+                                            <option value="AK">AK</option>
+                                            <option value="AZ">AZ</option>
+                                            <option value="AR">AR</option>
+                                            <option value="CA">CA</option>
+                                            <option value="CO">CO</option>
+                                            <option value="CT">CT</option>
+                                            <option value="DE">DE</option>
+                                            <option value="DC">DC</option>
+                                            <option value="FL">FL</option>
+                                            <option value="GA">GA</option>
+                                            <option value="HI">HI</option>
+                                            <option value="ID">ID</option>
+                                            <option value="IL">IL</option>
+                                            <option value="IN">IN</option>
+                                            <option value="IA">IA</option>
+                                            <option value="KS">KS</option>
+                                            <option value="KY">KY</option>
+                                            <option value="LA">LA</option>
+                                            <option value="ME">ME</option>
+                                            <option value="MD">MD</option>
+                                            <option value="MA">MA</option>
+                                            <option value="MI">MI</option>
+                                            <option value="MN">MN</option>
+                                            <option value="MS">MS</option>
+                                            <option value="MO">MO</option>
+                                            <option value="MT">MT</option>
+                                            <option value="NE">NE</option>
+                                            <option value="NV">NV</option>
+                                            <option value="NH">NH</option>
+                                            <option value="NJ">NJ</option>
+                                            <option value="NM">NM</option>
+                                            <option value="NY">NY</option>
+                                            <option value="NC">NC</option>
+                                            <option value="ND">ND</option>
+                                            <option value="OH">OH</option>
+                                            <option value="OK">OK</option>
+                                            <option value="OR">OR</option>
+                                            <option value="PA">PA</option>
+                                            <option value="RI">RI</option>
+                                            <option value="SC">SC</option>
+                                            <option value="SD">SD</option>
+                                            <option value="TN">TN</option>
+                                            <option value="TX">TX</option>
+                                            <option value="UT">UT</option>
+                                            <option value="VT">VT</option>
+                                            <option value="VA">VA</option>
+                                            <option value="WA">WA</option>
+                                            <option value="WV">WV</option>
+                                            <option value="WI">WI</option>
+                                            <option value="WY">WY</option>
+                                        </select>
+    <!--                                    {% if current_user._company %}-->
+    <!--                                    <select class="form-select" aria-label="Locations">-->
+    <!--                                        <option selected>HQ</option>-->
+    <!--                                        {% for job in current_user._company._job_posts %}-->
+    <!--                                        <option value="{{ job.id }}">{{ job.location }}</option>-->
+    <!--                                        {% endfor %}-->
+    <!--                                    </select>-->
+    <!--                                    {% else %}-->
+
+    <!--                                    {% endif %}-->
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Tech skills-->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="tskill_header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#tskill_panel"
+                                    aria-expanded="true" aria-controls="tskill_panel">
+                                Tech Skills
+                            </button>
+                        </h2>
+                        <div id="tskill_panel" class="accordion-collapse collapse show" aria-labelledby="tskill_header">
+                            <div class="accordion-body">
+    <!--                            <label class="form-check-label">-->
+    <!--                                Minimum competency-->
+    <!--                            </label>-->
+    <!--                            TODO SLIDER-->
+
+                                <label class="form-check-label" for="sel_techs">
+                                    Select one or more skills
+                                </label>
+                                <select id="sel_techs" class="form-select" multiple name="techs" size="6">
+                                    {% for title, id in tech_tuples %}
+                                    <option value="{{ id }}">{{ title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Biz skills-->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="bskill_header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#bskill_panel"
+                                    aria-expanded="true" aria-controls="bskill_panel">
+                                Business Skills
+                            </button>
+                        </h2>
+                        <div id="bskill_panel" class="accordion-collapse collapse show" aria-labelledby="bskill_header">
+                            <div class="accordion-body">
+                                <label class="form-check-label" for="sel_bizs">
+                                    Select one or more skills
+                                </label>
+                                <select id="sel_bizs" class="form-select" multiple name="bizs" size="6">
+                                    {% for title, id in biz_tuples %}
+                                    <option value="{{ id }}">{{ title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!--Attitudes-->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="att_header">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#att_panel"
+                                    aria-expanded="true" aria-controls="att_panel">
+                                Attitudes
+                            </button>
+                        </h2>
+                        <div id="att_panel" class="accordion-collapse collapse show" aria-labelledby="att_header">
+                            <div class="accordion-body">
+                                <label class="form-check-label" for="sel_atts">
+                                    Select one or more attitudes
+                                </label>
+                                <select id="sel_atts" class="form-select" multiple name="atts" size="6">
+                                    {% for title, id in att_tuples %}
+                                    <option value="{{ id }}">{{ title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="col">
+            <div class="position-relative me-4" style="height:48px">
+                <div class="position-absolute top-50 start-0 translate-middle-y d-inline">
+                    <i class="fas fa-users"></i>
+                    <div class="fw-bold d-inline">
+                        Results
+                    </div>
+                    <small class="d-inline">
+                        ({{ total }})
+                    </small>
+<!--                    <div class="d-inline">-->
+<!--                        - sorted by match-->
+<!--                    </div>-->
+                </div>
+                <div class="position-absolute top-50 start-100 translate-middle-y">
+                    <a href="{{ url_for('main.seeker_search_download')+'?'+request.query_string.decode() }}" data-bs-toggle="tooltip" data-bs-placement="left" title="Download all results">
+                        <i class="far fa-arrow-alt-circle-down fa-lg" style=""></i>
+                    </a>
+                </div>
+            </div>
+            <!-- seeker listing/pagination -->
+            {% for seeker in seeker_profiles %}
+            <div class="card mb-3">
+                <div class="row g-0 ps-3">
+                    <div class="col-md-1 d-flex flex-column justify-content-center align-items-center">
+                        <div class="avatar-container mt-2 mb-2">
+                            <a href="{{ url_for('main.seeker_profile', seeker_id=seeker.id) }}" style="text-decoration: none; color: black;">
+                            <img src="{{ seeker.avatar(64) }}">
+                            </a>
+                        </div>
+<!--                        <div style="font-family: monospace">-->
+<!--                            XX%-->
+<!--                        </div>-->
+                    </div>
+            <!--        https://stackoverflow.com/questions/26148740/how-to-add-text-over-the-image-in-bootstrap-->
+                    <div class="col-md-11">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div class="flex-fill" style="max-width: 300px;">
+                                    <a href="{{ url_for('main.seeker_profile', seeker_id=seeker.id) }}" style="text-decoration: none; color: black;">
+                                        <h5 class="card-title">{{ seeker.full_name }}</h5>
+                                    </a>
+                                    <p class="card-text"><small class="text-muted">{{ seeker.location }}</small></p>
+                                    <div class="container">
+                                        <div class="row">
+                                            <div class="col">
+                                                <i class="fas fa-business-time"></i> {% for abbv in seeker.work_wanted_abbv %} {{ abbv }} {% endfor %}
+                                            </div>
+                                            <div class="col">
+                                                {% if seeker.min_edu_level %}
+                                                <div>
+                                                    <i class="fas fa-graduation-cap"></i> {{ seeker.min_edu_abbv }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col">
+                                                {% if seeker.remote_wanted %}
+                                                <div>
+                                                    <i class="fas fa-laptop-house"></i>
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="col">
+                                                {% if seeker.years_job_experience %}
+                                                <div>
+                                                    <i class="fas fa-briefcase"></i> {{ seeker.years_job_experience }} years
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column" style="width:500px">
+                                    {% if seeker.tagline %}
+                                    <div class="mb-1" style="border-left:6px solid #ccc;padding-left:10px; font-size:14px">
+                                        <i class="fas fa-quote-right"></i>
+                                        {{ seeker.tagline }}
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <i class="fas fa-laptop-code"></i>
+                                        {% for skl in seeker.get_tech_skills()[:3] %}
+                                        <span class="badge rounded-pill bg-secondary">
+                                        {{ skl }}
+                                        </span>
+                                        {% endfor %}
+                                        {% if (seeker.get_tech_skills()|length) > 3 %}
+                                        <span class="badge rounded-pill bg-secondary">...</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-handshake"></i>
+                                        {% for skl in seeker.get_biz_skills()[:3] %}
+                                        <span class="badge rounded-pill bg-secondary">
+                                        {{ skl }}
+                                        </span>
+                                        {% endfor %}
+                                        {% if (seeker.get_biz_skills()|length) > 3 %}
+                                        <span class="badge rounded-pill bg-secondary">...</span>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <i class="fas fa-heart me-1"></i>
+                                        {% for att in seeker.get_attitudes()[:3] %}
+                                        <span class="badge rounded-pill bg-secondary">
+                                        {{ att }}
+                                        </span>
+                                        {% endfor %}
+                                        {% if (seeker.get_attitudes()|length) > 3 %}
+                                        <span class="badge rounded-pill bg-secondary">...</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!--
+                            <i class="fas fa-business-time"></i> WORK TYPES WANTED
+                            <i class="fas fa-laptop-house"></i> IF REMOTE WANTED
+
+                            <i class="fas fa-graduation-cap"></i> DEGREE NAME
+                            <i class="fas fa-briefcase"></i> YEARS WORK
+
+                            <i class="fas fa-laptop-code"></i> TECH SKILLS
+                            <i class="fas fa-handshake"></i> BIZ SKILLS
+                            <i class="fas fa-heart"></i> VALUES
+                             -->
+
+<!--                            {# for line in seeker.tag_lines #}-->
+<!--                            {# {{ line }}<br/> #}-->
+<!--                            {# endfor #}-->
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor%}
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {{ dprev }}">
+                        <a class="page-link" href="{{ prev_url }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% for i in range(plwr, pupr+1) %}
+                    <li class="page-item {{ 'active' if i == page else '' }}">
+                        <a class="page-link" href="{{ modify_query(page=i) }}">{{ i }}</a>
+                    </li>
+                    {% endfor %}
+                    <li class="page-item  {{ dnext }}">
+                        <a class="page-link" href="{{ next_url }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
 </div>
-{% endfor%}
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .avatar-container{
+      position: relative;
+      display: inline-block;
+    }
+
+    .avatar-overlay span{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      color: #000;
+      font-size: 70px;
+      font-family: monospace;
+      filter: drop-shadow(0px 0px 1px white) drop-shadow(0px 0px 3px white);
+    }
+
+    .custom-blue { background: #3a99fc; }
+
+</style>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script>
+    function extra_reset() {
+        // covers resetting fields that the 'reset' input type itself doesn't handle
+
+    }
+
+    var eduLvls = ["None", "Certification", "Associate", "Bachelor", "Master", "Doctor"];
+
+    function getEduLvlText(val0, val1) {
+        if (val0 == val1) {
+            // same value, display "only"
+            return "Only " + eduLvls[val0];
+        } else if ( val1-val0 == 5 ) {
+            // covers full range
+            return "Any education level";
+        }
+
+        return eduLvls[val0] + " to " + eduLvls[val1];
+    }
+
+    function getWorkYearsText(val0, val1) {
+        // handle specific case when val1 is at 11 (interpreted as "10+")
+        if (val1 == 11) {
+            if (val0 == 0) {
+                // lower bound is min
+                return "Any work experience";
+            } else if (val0 == 11) {
+                // lower bound is also max
+                return "Over 10 years";
+            }
+            // e.g., 3 - 10+ years == 3+ years
+            return "Over " + val0 + " years";
+        }
+
+        if (val0 == val1) {
+            // same value
+            return "Exactly " + val0 + " years";
+        }
+        return val0 + " to " + val1 + " years";
+    }
+
+    $( "#slider-edulvl" ).slider({
+        min: 0,
+        max: 5,
+        range: true,
+        values: [{{ opts['slider-edulvl'][0] }}, {{ opts['slider-edulvl'][1] }}],
+        slide: function(event, ui) {
+            // update displayed text
+            $( "#rng-edulvl" ).html( getEduLvlText(ui.values[ 0 ], ui.values[ 1 ]) );
+            // update hidden inputs
+            $("#hidden_edulvl_lower").val( ui.values[0] );
+            $("#hidden_edulvl_upper").val( ui.values[1] );
+        },
+        classes: {
+            "ui-slider-range": "custom-blue"
+        }
+    });
+
+    $( "#slider-workyrs" ).slider({
+        min: 0,
+        max: 11,
+        range: true,
+        values: [{{ opts['slider-workyrs'][0] }}, {{ opts['slider-workyrs'][1] }}],
+        slide: function(event, ui) {
+            // update displayed text
+            $( "#rng-workyrs" ).html( getWorkYearsText(ui.values[ 0 ], ui.values[ 1 ]) );
+            // update hidden inputs
+            $("#hidden_workyrs_lower").val( ui.values[0] );
+            $("#hidden_workyrs_upper").val( ui.values[1] );
+        },
+        classes: {
+            "ui-slider-range": "custom-blue"
+        }
+    });
+
+    $( document ).ready(function() {
+        // setup tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+
+
+        // setup initial text for sliders
+        var s1 = $( "#slider-edulvl" );
+        $( "#rng-edulvl" ).html( getEduLvlText(s1.slider( "values", 0 ), s1.slider("values", 1)) );
+
+        var s2 = $( "#slider-workyrs" );
+        $( "#rng-workyrs" ).html( getWorkYearsText(s2.slider( "values", 0 ), s2.slider("values", 1)) );
+
+        // setup chosen options
+        {% if opts['dist_state'] %}
+        $('#dist_state').val("{{ opts['dist_state'] }}");
+        {% endif %}
+
+        $.each({{ opts['sel_techs'] }}, function(i, e){
+            $("#sel_techs option[value='" + e + "']").prop("selected", true);
+        });
+
+        $.each({{ opts['sel_bizs'] }}, function(i, e){
+            $("#sel_bizs option[value='" + e + "']").prop("selected", true);
+        });
+
+        $.each({{ opts['sel_atts'] }}, function(i, e){
+            $("#sel_atts option[value='" + e + "']").prop("selected", true);
+        });
+    });
+</script>
 {% endblock %}

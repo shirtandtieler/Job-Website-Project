@@ -34,7 +34,7 @@ class FlexibleIntegerField(IntegerField):
         return super(FlexibleIntegerField, self).process_formdata(valuelist)
 
 
-class JobPostForm(FlaskForm):  ## TODO expand me
+class JobPostForm(FlaskForm):
     active = BooleanField('Active', default=True)
     title = StringField('Job Title', validators=[DataRequired()])
     city = StringField('City')

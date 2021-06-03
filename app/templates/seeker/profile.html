@@ -2,131 +2,175 @@
 
 {% block app_content %}
 
-<h2>{{fullname}}'s Seeker Profile</h2>
-    <style>
-    .heading {
-    overflow: hidden;
-  }
+<div class="container pt-5">
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex flex-column align-items-center text-center">
+                        <img src="{{ seeker.avatar() }}" class="rounded-circle" width="150">
+                        <div class="mt-3">
+                            <h4>{{ seeker.full_name }}</h4>
+                            <p class="text-secondary mb-1">{{ seeker.location }}</p>
+                            <p class="text-secondary mb-1"><i class="fas fa-business-time"></i> {{ " • ".join(seeker.work_wanted_list) }} </p>
+                            {% if seeker.remote %}
+                            <p class="text-secondary mb-1"><i class="fas fa-laptop-house"></i> remote</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-3">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-mobile-alt" style="margin:3px;"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3 text-secondary">
+                                {{ seeker.phone_formatted }}
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <i class="far fa-envelope"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3 text-secondary">
+                                {{ seeker._user.email }}
+                            </div>
+                            <div class="">
+                                <a type="button" class="btn btn-sm btn-outline-primary" href="mailto:{{ seeker._user.email }}" style="padding-left:.2rem;padding-right:.2rem">Contact</a>
+                            </div>
+                        </div>
+                    </li>
+                    {% if seeker.resume %}
+                    <li class="list-group-item">
+                        <a href="{{ url_for('main.seeker_resume_download', seeker_id=seeker.id) }}" style="text-decoration: none;color:black;">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3 text-primary">
+                                    Download resume
+                                </div>
+                            </div>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <h6 class="mt-1 mb-1 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-user-circle me-1"></i>About</h6>
+                        </div>
+                        <div class="col-sm-10 text-secondary">
+                            {{ seeker.summary }}
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <h6 class="mt-1 mb-1 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-heart me-1"></i>Values</h6>
+                        </div>
+                        <div class="col-sm-10 text-secondary">
+                            {% for att in seeker.get_attitudes() %}
+                                <span class="badge rounded-pill bg-secondary">{{ att }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row gutters-sm">
+                {% if seeker.min_edu_level > 0 %}
+                <div class="col mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="d-flex align-items-center mb-3 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-graduation-cap me-1"></i>Past Education</h6>
+                            <ul class="list-group">
+                                {% for edu in seeker._history_edus %}
+                                <li class="list-group-item">
+                                    <p class="mb-0 pt-1" style="line-height:12px">{{ edu.education_lvl_abbv }} in {{ edu.study_field }}</p>
+                                    <small class="fw-light">{{ edu.school }}</small>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if seeker.years_job_experience > 0 %}
+                <div class="col mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
 
-  .heading a {
-    float: center;
-    margin-top: 0px;
-    margin-bottom: 100px;
-    margin-right: 0%;
-    margin-left: 77%;
-    color: blue;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-    font-size: 17px;
+                            <h6 class="d-flex align-items-center mb-3 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-briefcase me-1"></i>Past Work</h6>
+                            <ul class="list-group">
+                                {% for work in seeker._history_jobs %}
+                                <li class="list-group-item">
+                                    <p class="mb-0 pt-1" style="line-height:12px">{{ work.job_title }}</p>
+                                    <small class="fw-light">{{ work.years_employed }} years</small>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="row gutters-sm">
+                {% set colors = ['#f4aea3', '#e8638b', '#a73b8f', '#61208d', '#3c1357'] %}
+                <div class="col-sm-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="d-flex align-items-center mb-3 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-laptop-code me-1"></i>Technical Skills</h6>
+                            {% for title, lvl in seeker.get_tech_skills_levels() %}
+                            <div class="d-flex">
+                                <div class="p-1"><small>{{ title }}</small></div>
+                                <div class="m-2 flex-grow-1" style="border-bottom-color: rgba(0, 0, 0, 0.25); border-bottom-style: dotted;"></div>
+                                <div class="p-1 align-self-center">
+                                    {% for n in range(lvl) %}
+                                    <i class="fas fa-circle" style="color: {{ colors[n] }}; float:left"></i>
+                                    {% endfor %}
+                                    {% for n in range(lvl, 5) %}
+                                    <i class="far fa-circle" style="color: {{ colors[n] }}; float:left"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="d-flex align-items-center mb-3 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-handshake me-1"></i>Business Skills</h6>
+                            {% for title, lvl in seeker.get_biz_skills_levels() %}
+                            <div class="d-flex">
+                                <div class="p-1"><small>{{ title }}</small></div>
+                                <div class="m-2 flex-grow-1" style="border-bottom-color: rgba(0, 0, 0, 0.25); border-bottom-style: dotted;"></div>
+                                <div class="p-1 align-self-center">
+                                    {% for n in range(lvl) %}
+                                    <i class="fas fa-circle" style="color: {{ colors[n] }}; float:left"></i>
+                                    {% endfor %}
+                                    {% for n in range(lvl, 5) %}
+                                    <i class="far fa-circle" style="color: {{ colors[n] }}; float:left"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-  }
-.gridcontainer {
-  display: grid;
-    grid-gap: 50px;
-  grid-template-columns: auto auto auto;
-  padding: 10px;
-}
-.griditem {
-  border: 1px solid rgba(0, 0, 0, 0.8);
-  padding: 20px 0;
-  font-size: 20px;
-  text-align: center;
-}
-
-.first {
-  display: grid;
-    grid-gap: 20px;
-  grid-template-columns: auto auto auto;
-  padding: 10px;
-}
-.firstitem {
-  border: 1px solid rgba(0, 0, 0, 0.8);
-  padding: 20px 0;
-  font-size: 17px;
-  text-align: center;
-}
-
-
-
-.logo{
-    width: 8%;
-    height: auto;
-    float: left
-}
-.Profile{
-    width: 5%;
-    height: auto;
-    float:right;
-
-    border-radius: 50%;
-}
-.topnav {
-    overflow: hidden;
-  }
-
-  .topnav a {
-    float: left;
-    color: blue;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-    font-size: 17px;
-  }
-
-  .topnav a.active {
-    color: blue;
-  }
-    </style>
-<head>
-    <meta charset="UTF-8">
-    <title>Profile</title>
-    
-</head>
-<body>
-
-<div class="first">
-    <img src="https://img.icons8.com/ios-glyphs/30/000000/test-account.png"/>
-    <div class="firstitem">
-        <b>About Seeker Description</b>
-        
+        </div>
     </div>
-
-
-
 </div>
-
-<div class="gridcontainer">
-    <div class="griditem"> <b>Past Experience </b>
-    <p>Item One</p>
-    <p>Item Two</p>
-    <p>Item Three</p>
-    <p>Item Four</p>
-    </div>
-    <div class="griditem"> <b>Skills List </b>
-    <p>Item One</p>
-    <p>Item Two</p>
-    <p>Item Three</p>
-    <p>Item Four</p>
-    </div>
-
-    <div class="griditem">
-        <b> Download {{fullname}} Resume?</b>
-    </div>
-    <div class="griditem">
-        <b>Contact Information</b>
-        <p>Email: johndoe@gmail.com</p>
-        <p>Optional Phone: (847)-123-1234 </p>
-        <p>etc</p>
-    </div>
-
-
-
-
-</div>
-
-
-
-</body>
 
 {% endblock %}
