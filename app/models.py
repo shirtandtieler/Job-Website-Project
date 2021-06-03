@@ -2,6 +2,7 @@ import colorsys
 import re
 from datetime import datetime
 from hashlib import md5
+from zlib import crc32
 from operator import itemgetter
 from random import random
 from typing import List, Tuple, Union
@@ -28,7 +29,9 @@ metadata = MetaData()
 
 TINYGRAPH_THEMES = ["sugarsweets", "heatwave", "daisygarden", "seascape", "summerwarmth",
                     "bythepool", "duskfalling", "frogideas", "berrypie"]
-
+TSKILL_TITLEIDS = None
+BSKILL_TITLEIDS = None
+ATTITUDE_TITLEIDS = None
 
 class AccountTypes(enum.Enum):
     """
@@ -119,10 +122,22 @@ class Attitude(db.Model):
         return f"Attitude[{self.title}]"
 
     @staticmethod
-    def get_attitude_names():
-        return [[a.title for a in Attitude.query.all()]]
+    def to_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        global ATTITUDE_TITLEIDS
+        if ATTITUDE_TITLEIDS is None:
+            ATTITUDE_TITLEIDS = [(a.title, a.id) for a in Attitude.query.all()]
 
-    def to_dict(self):  ## TODO do this with the others
+        if sort_index is None:
+            return ATTITUDE_TITLEIDS
+        else:
+            return sorted(ATTITUDE_TITLEIDS, key=itemgetter(sort_index), reverse=reverse)
+
+    @staticmethod
+    def count() -> int:
+        tups = Attitude.to_tuples()
+        return len(tups)
+
+    def to_dict(self):  ## TODO do this with the others?
         return {
             "title": self.title,
             "_seekers": [x.id for x in self._seekers],
@@ -153,16 +168,42 @@ class Skill(db.Model):
         return self.type == SkillTypes.b
 
     @staticmethod
-    def get_skill_names():
-        return [s.title for s in Skill.query.all()]
+    def count() -> int:
+        tups1 = Skill.to_tech_tuples()
+        tups2 = Skill.to_biz_tuples()
+        return len(tups1) + len(tups2)
 
     @staticmethod
-    def get_tech_skill_names():
-        return [s.title for s in Skill.query.all() if s.is_tech()]
+    def to_tech_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        global TSKILL_TITLEIDS
+        if TSKILL_TITLEIDS is None:
+            TSKILL_TITLEIDS = [(s.title, s.id) for s in Skill.query.all() if s.is_tech()]
+
+        if sort_index is None:
+            return TSKILL_TITLEIDS
+        else:
+            return sorted(TSKILL_TITLEIDS, key=itemgetter(sort_index), reverse=reverse)
 
     @staticmethod
-    def get_biz_skill_names():
-        return [s.title for s in Skill.query.all() if s.is_biz()]
+    def tech_count() -> int:
+        tups = Skill.to_tech_tuples()
+        return len(tups)
+
+    @staticmethod
+    def to_biz_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        global BSKILL_TITLEIDS
+        if BSKILL_TITLEIDS is None:
+            BSKILL_TITLEIDS = [(s.title, s.id) for s in Skill.query.all() if s.is_biz()]
+
+        if sort_index is None:
+            return BSKILL_TITLEIDS
+        else:
+            return sorted(BSKILL_TITLEIDS, key=itemgetter(sort_index), reverse=reverse)
+
+    @staticmethod
+    def biz_count() -> int:
+        tups = Skill.to_biz_tuples()
+        return len(tups)
 
 
 class UserPicture(db.Model, Image):
@@ -190,6 +231,8 @@ class User(UserMixin, db.Model):
     _picture = image_attachment("UserPicture", uselist=False, back_populates="_user")
     _company = relationship("CompanyProfile", uselist=False, back_populates="_user")
     _seeker = relationship("SeekerProfile", uselist=False, back_populates="_user")
+    _job_searches = relationship("SeekerJobSearch", back_populates="_user")
+    _seeker_searches = relationship("CompanySeekerSearch", back_populates="_user")
 
     def __repr__(self):
         status = ("" if self.is_active else "Non") + "Active"
@@ -240,7 +283,6 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
 
     _user = relationship("User", back_populates="_company")
     _job_posts = relationship("JobPost", back_populates="_company")
-    _searches = relationship("CompanySeekerSearch", back_populates="_company")
 
     def __repr__(self):
         return f"CompanyProfile[{self.name}]"
@@ -314,7 +356,6 @@ class SeekerProfile(db.Model):
     _history_jobs = relationship("SeekerHistoryJob", back_populates="_seeker")
     _applications = relationship("SeekerApplication", back_populates="_seeker")
     _bookmarks = relationship('SeekerBookmark', back_populates='_seeker')
-    _searches = relationship("SeekerJobSearch", back_populates='_seeker')
 
     def __repr__(self):
         return f"SeekerProfile[{self.first_name}{self.last_name}]"
@@ -352,62 +393,26 @@ class SeekerProfile(db.Model):
         wants = self.work_wanted.name.replace("_or_", "_").split("_")
         if WorkTypes.any.name in wants:
             wants = ["full", "part", "contract"]
-        print("WANTS =", wants)
         return wants
 
-    def get_tech_skills_levels(self):
-        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if skr_skl._skill.is_tech()]
-        output.sort(key=itemgetter(1), reverse=True)
-        return output
-
-    def get_biz_skills_levels(self):
-        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if skr_skl._skill.is_biz()]
-        output.sort(key=itemgetter(1), reverse=True)
-        return output
-
-    def get_attitudes(self):
-        return [skr_att._attitude.title for skr_att in self._attitudes]
+    @property
+    def work_wanted_abbv(self):
+        wants = self.work_wanted_list
+        abbvs = []
+        for w in wants:
+            if w == 'full':
+                abbvs.append("Ft")
+            elif w == 'part':
+                abbvs.append("Pt")
+            else:
+                abbvs.append("C")
+        return abbvs
 
     @property
-    def tag_lines(self):
-        """ Return a list of things this seeker can boast about."""
-        lines = []
-        # get a line about a number of their highest skills
-        skill_highest_lvl, skill_highest_count, skill_highest_names = 0, 0, []
-        for skl in self._skills:
-            lvl = int(skl.skill_level)
-            if lvl > skill_highest_lvl:
-                skill_highest_lvl = lvl
-                skill_highest_count = 1
-                skill_highest_names = [skl._skill.title]
-            elif lvl == skill_highest_lvl:
-                skill_highest_count += 1
-                skill_highest_names.append(skl._skill.title)
-        if skill_highest_lvl > 0:  # make sure seeker has some skills
-            skill_lvl = str(SkillLevels(skill_highest_lvl))
-            lvl_name = skill_lvl[skill_lvl.index('.') + 1:].capitalize()
-            s_names = ", ".join(skill_highest_names)
-            # s = "skills" if skill_highest_count > 1 else "skill"
-            lines.append(f"{lvl_name} in {s_names}")
-        # get a line about their past experience
-        if len(self._history_edus) > 0 and len(self._history_jobs) > 0:
-            total_years = sum([job.years_employed for job in self._history_jobs])
-            d = "degrees" if len(self._history_edus) > 1 else "degree"
-            y = "years" if total_years > 1 else "year"
-            lines.append(f"Holds {len(self._history_edus)} {d} and {total_years} {y} of job experience")
-        elif len(self._history_edus) > 0:
-            d = "degrees" if len(self._history_edus) > 1 else "degree"
-            lines.append(f"Holds {len(self._history_edus)} {d}")  # TODO maybe add highest level/give example?
-        elif len(self._history_jobs) > 0:
-            total_years = sum([job.years_employed for job in self._history_jobs])
-            y = "years" if total_years > 1 else "year"
-            lines.append(f"Has {total_years} {y} of job experience")  # TODO maybe add example title?
-        return lines
-
-    @property
-    def min_edu_level(self):
+    def min_edu_level(self) -> int:
         """
         Converts the education experience to a single int representing the minimum qualifications held.
+        This is one higher than the EducationLevel values (0 = no education, 1 = certification, etc.)
         """
         if len(self._history_edus) == 0:
             return 0
@@ -415,13 +420,73 @@ class SeekerProfile(db.Model):
         return int(max([e.education_lvl for e in self._history_edus])) + 1
 
     @property
-    def years_job_experience(self):
+    def min_edu_abbv(self) -> int:
+        """
+        Get's the abbreviated degree name of the min education level.
+        """
+        lvl = self.min_edu_level
+        if lvl == 0:
+            return "None"
+        elif lvl == 1:
+            return "Cert"
+        elif lvl == 2:
+            return "A.S."
+        elif lvl == 3:
+            return "B.S."
+        elif lvl == 4:
+            return "M.S."
+        elif lvl == 5:
+            return "D.S."
+
+    @property
+    def years_job_experience(self) -> int:
         """
         Calculates the number of years of job experience held.
         """
         return sum([job.years_employed for job in self._history_jobs])
 
-    def is_within(self, distance_limit_mi, city, state):
+    def get_tech_skills_levels(self):
+        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if skr_skl._skill.is_tech()]
+        output.sort(key=itemgetter(1), reverse=True)
+        return output
+
+    def get_tech_skills(self, only_max=False):
+        skl_lvls = self.get_tech_skills_levels()
+        if not skl_lvls:
+            return []
+        if not only_max:
+            return [s[0] for s in skl_lvls]
+        _max = skl_lvls[0][1]
+        skls = []
+        for skl, lvl in skl_lvls:
+            if lvl < _max:
+                break
+            skls.append(skl)
+        return skls
+
+    def get_biz_skills_levels(self) -> List[Tuple[str, int]]:
+        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if skr_skl._skill.is_biz()]
+        output.sort(key=itemgetter(1), reverse=True)
+        return output
+
+    def get_biz_skills(self, only_max=False) -> List[Tuple[str, int]]:
+        skl_lvls = self.get_biz_skills_levels()
+        if not skl_lvls:
+            return []
+        if not only_max:
+            return [s[0] for s in skl_lvls]
+        _max = skl_lvls[0][1]
+        skls = []
+        for skl, lvl in skl_lvls:
+            if lvl < _max:
+                break
+            skls.append(skl)
+        return skls
+
+    def get_attitudes(self) -> List[str]:
+        return [skr_att._attitude.title for skr_att in self._attitudes]
+
+    def is_within(self, distance_limit_mi, city, state) -> bool:
         if not self.city and not self.state:
             # always return true if user does not have a city or a state
             return True
@@ -432,47 +497,76 @@ class SeekerProfile(db.Model):
         dist_mi = geodesic(self_coords, other_coords).miles
         return dist_mi <= distance_limit_mi
 
-    def encode_tech_skills(self):
+    def avatar(self, size=128):
+        # convert email to random number between 0 and 1
+        r01 = float(crc32(self._user.email.encode("utf-8")) & 0xffffffff) / 2**32
+        rand_bg_hex = "".join([hex(int(round(255 * x)))[2:] for x in colorsys.hsv_to_rgb(r01, 0.25, 1.0)])
+        url = f"https://ui-avatars.com/api/?rounded=true&bold=true&color=00000" \
+              f"&size={size}&background={rand_bg_hex}&name={self.first_name}+{self.last_name}"
+        return url
+
+    def to_dict(self) -> dict:
+        """ Converts an instance of this class to a dictionary (e.g., for JSONifying it)"""
+        d = dict()
+        d['id'] = self.id
+        d['name'] = self.full_name
+        d['email'] = self._user.email
+        d['phone'] = self.phone_number
+        d['location'] = self.location
+        ww = int(self.work_wanted)
+        d['work_types'] = {
+            'full': ww & 1 > 0,
+            'part': ww & 2 > 0,
+            'contract': ww & 4 > 0,
+            'remote': self.remote_wanted}
+        d['descriptions'] = {
+            'tagline': self.tagline,
+            'summary': self.summary}
+        d['skills'] = {
+            '__comment': 'Range: [1-5]',
+            'tech': dict(self.get_tech_skills_levels()),
+            'biz': dict(self.get_biz_skills_levels())}
+        d['values'] = self.get_attitudes()
+        d['history'] = {
+            'education': [entry.to_dict() for entry in self._history_edus],
+            'work': [entry.to_dict() for entry in self._history_jobs]}
+        return d
+
+    def encode_tech_skills(self) -> int:
         """
         Converts technical skills possessed to an integer.
         Only looks at whether the seeker added it to their profile.
         """
         # skill_id skill_level
-        tskill_ids = [s.skill_id for s in self._skills if s.is_tech]
-        enc = ['0' for _ in range(db.query(func.max(Skill.column)))]
+        tskill_ids = [s.skill_id for s in self._skills if s._skill.is_tech()]
+        enc = ['0' for _ in range(Skill.count())]
         for _id in tskill_ids:
-            enc[_id] = '1'
+            enc[_id-1] = '1'
         return int(''.join(enc), base=2)
 
-    def encode_biz_skills(self):
+    def encode_biz_skills(self) -> int:
         """
         Converts business skills possessed to an integer.
         Only looks at whether the seeker added it to their profile.
         """
         # skill_id skill_level
-        bskill_ids = [s.skill_id for s in self._skills if s.is_biz]
-        enc = ['0' for _ in range(db.query(func.max(Skill.column)))]
+        bskill_ids = [s.skill_id for s in self._skills if s._skill.is_biz()]
+        enc = ['0' for _ in range(Skill.count())]
         for _id in bskill_ids:
-            enc[_id] = '1'
+            enc[_id-1] = '1'
         return int(''.join(enc), base=2)
 
-    def encode_attitudes(self):
+    def encode_attitudes(self) -> int:
         """
         Converts attitudes possessed to an integer.
         Only looks at whether the seeker added it to their profile.
         """
         # skill_id skill_level
-        att_ids = [s.skill_id for s in self._attitudes]
-        enc = ['0' for _ in range(db.query(func.max(Attitude.column)))]
+        att_ids = [s.attitude_id for s in self._attitudes]
+        enc = ['0' for _ in range(Attitude.count())]
         for _id in att_ids:
-            enc[_id] = '1'
+            enc[_id-1] = '1'
         return int(''.join(enc), base=2)
-
-    def avatar(self, size=128):
-        rand_bg_hex = "".join([hex(int(round(255 * x)))[2:] for x in colorsys.hsv_to_rgb(random(), 0.25, 1.0)])
-        url = f"https://ui-avatars.com/api/?rounded=true&bold=true&color=00000" \
-              f"&size={size}&background={rand_bg_hex}&name={self.first_name}+{self.last_name}"
-        return url
 
 
 class SeekerSkill(db.Model):
@@ -532,6 +626,27 @@ class SeekerHistoryEducation(db.Model):
     def __repr__(self):
         return f"Seeker[{self.seeker_id}]-EduExp[{self.education_lvl}:{self.study_field}@{self.school}]"
 
+    @property
+    def education_lvl_abbv(self):
+        lvl = self.education_lvl
+        if lvl == 0:
+            return "Certification"
+        elif lvl == 1:
+            return "A.S."
+        elif lvl == 2:
+            return "B.S."
+        elif lvl == 3:
+            return "M.S."
+        elif lvl == 4:
+            return "D.S."
+        return "???"
+
+    def to_dict(self) -> dict:
+        d = dict()
+        d['school'] = self.school
+        d['type'] = self.education_lvl.name
+        d['field'] = self.study_field
+        return d
 
 class SeekerHistoryJob(db.Model):
     """
@@ -549,6 +664,12 @@ class SeekerHistoryJob(db.Model):
 
     def __repr__(self):
         return f"Seeker[{self.seeker_id}]-JobExp[{self.job_title}:{self.years_employed} years]"
+
+    def to_dict(self) -> dict:
+        d = dict()
+        d['title'] = self.job_title
+        d['years'] = self.years_employed
+        return d
 
 
 class SeekerApplication(db.Model):
@@ -739,21 +860,21 @@ class JobPostAttitude(db.Model):
 class CompanySeekerSearch(db.Model):
     __tablename__ = 'company_seeker_search'
     id = Column(Integer, nullable=False, primary_key=True)
-    company_id = Column(Integer, ForeignKey('company_profile.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     label = Column(String, nullable=False)
     query = Column(String, nullable=False)
 
-    _company = relationship("CompanyProfile", back_populates="_searches")
+    _user = relationship("User", back_populates="_seeker_searches")
 
 
 class SeekerJobSearch(db.Model):
     __tablename__ = 'seeker_job_search'
     id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('seeker_profile.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     label = Column(String, nullable=False)
     query = Column(String, nullable=False)
 
-    _seeker = relationship("SeekerProfile", back_populates="_searches")
+    _user = relationship("User", back_populates="_job_searches")
 
 
 ##### LOGGING/CACHE #####
