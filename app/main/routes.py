@@ -1,33 +1,25 @@
 # Routes are the different URLs that the application implements.
 # The functions below handle the routing/behavior.
 import json
-import random
 from datetime import datetime
 from io import BytesIO
 
-from flask import render_template, flash, redirect, url_for, request, send_file, Response
+from flask import render_template, flash, redirect, url_for, send_file, Response
+from flask import request
+from flask_login import current_user, login_required
 
 import app
-from app import constants
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
-#from app.api.query import get_seeker_query
 from app.api.query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
     seeker_url_args_to_input_states
 from app.api.routing import modify_query
-from app.api.users import new_seeker, update_seeker_skill, add_seeker_education, add_seeker_attitude, add_seeker_job, \
-    save_seeker_search, delete_seeker_search
+from app.api.users import save_seeker_search, delete_seeker_search
 from app.main import bp
-from app.main.forms import JobPostForm, SkillRequirementForm, AttitudeRequirementForm
-from flask_login import current_user, login_required
-from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude, LocationCoordinates
-
-## TODO Routes needed for editing profile page, searching, sending messages, etc.
+from app.main.forms import JobPostForm
+from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
+# TODO Routes needed for editing profile page, searching, sending messages, etc.
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
-from resources.generators.attribute_gen import gen_tech, gen_biz
-from resources.generators.seeker_gen import generate_profile, generate_attributes, generate_history_education, \
-    generate_history_job, generate_bio
-from flask import request
-from werkzeug.urls import url_encode
+
 
 @bp.route("/")
 @bp.route("/index")
@@ -301,6 +293,7 @@ def seeker_search():
                            opts=filter_options_set
                            )
 
+
 @bp.route("/seekers/download")
 def seeker_search_download():
     req_kwargs = seeker_url_args_to_query_args(request.args)
@@ -310,8 +303,3 @@ def seeker_search_download():
     return Response(json.dumps(output, indent=4),
                     mimetype='text/json',
                     headers={'Content-disposition': 'attachment; filename=seeker_search_results.json'})
-
-
-
-
-

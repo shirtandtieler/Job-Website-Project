@@ -4,9 +4,8 @@ from werkzeug.utils import redirect
 
 from app.api.users import new_seeker, new_company
 from app.auth import bp
-from app import db
 from app.auth.forms import LoginForm, RegisterForm
-from app.models import User, AccountTypes
+from app.models import User
 
 
 # TODO update last login of user if successful

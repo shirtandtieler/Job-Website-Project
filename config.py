@@ -35,8 +35,8 @@ def get_database_url():
         url = url.replace("postgres:", "postgresql:")
     else:
         url = build_db_url(user="user", pw="password",
-                             host="localhost", port="5432",
-                             db="jobsite")
+                           host="localhost", port="5432",
+                           db="jobsite")
     print(f"DB URL: {url}")
     return url
 
@@ -47,4 +47,4 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     LOG_TO_STDOUT = os.environ.get('LOG_TO_STDOUT')
     SQLALCHEMY_ECHO = False
-    RESULTS_PER_PAGE = 20
+    RESULTS_PER_PAGE = 15

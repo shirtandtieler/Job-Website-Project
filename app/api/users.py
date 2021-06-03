@@ -1,5 +1,5 @@
 # TODO add functions to create/update/get entries in database related to users or their account/profile
-from typing import Union, List, Tuple
+from typing import Union
 
 from app import db
 from app.models import AccountTypes, WorkTypes, SkillLevels, SeekerSkill, SeekerAttitude, EducationLevel, \
@@ -7,7 +7,7 @@ from app.models import AccountTypes, WorkTypes, SkillLevels, SeekerSkill, Seeker
 from app.models import User, CompanyProfile, SeekerProfile
 
 
-## TODO should add arg for commiting? May increase performance when updating in bulk
+# TODO should add arg for commiting? May increase performance when updating in bulk
 
 def save_seeker_search(user_id, label, query):
     entry = CompanySeekerSearch(user_id=user_id, label=label, query=query)

@@ -1,29 +1,23 @@
 import colorsys
+import enum
 import re
 from datetime import datetime
 from hashlib import md5
-from zlib import crc32
 from operator import itemgetter
-from random import random
 from typing import List, Tuple, Union
+from zlib import crc32
 
-from geopy.distance import geodesic
-from sqlalchemy.ext.hybrid import hybrid_property, hybrid_method
-from sqlalchemy.sql.elements import Null
-from flask import url_for
-from sqlalchemy.sql.elements import Null
-from sqlalchemy import Boolean, CheckConstraint, Column, Date, ForeignKey, Integer, SmallInteger, String, \
-    Sequence, Table, Text, UniqueConstraint, text, MetaData, DateTime, select
-from sqlalchemy.orm import relationship, validates
-from sqlalchemy.sql.functions import current_timestamp, func
-from sqlalchemy.sql.sqltypes import LargeBinary, SMALLINT, TIMESTAMP, Numeric
-from sqlalchemy_imageattach.entity import Image, image_attachment
-from app import db, login, geolocator
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from sqlalchemy.sql.sqltypes import SMALLINT, TIMESTAMP
-import enum
+from geopy.distance import geodesic
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, \
+    Text, MetaData, DateTime
 from sqlalchemy.dialects.postgresql import ENUM
+from sqlalchemy.orm import relationship, validates
+from sqlalchemy.sql.sqltypes import LargeBinary, Numeric
+from sqlalchemy_imageattach.entity import Image, image_attachment
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from app import db, login, geolocator
 
 metadata = MetaData()
 
@@ -32,6 +26,7 @@ TINYGRAPH_THEMES = ["sugarsweets", "heatwave", "daisygarden", "seascape", "summe
 TSKILL_TITLEIDS = None
 BSKILL_TITLEIDS = None
 ATTITUDE_TITLEIDS = None
+
 
 class AccountTypes(enum.Enum):
     """
@@ -137,7 +132,7 @@ class Attitude(db.Model):
         tups = Attitude.to_tuples()
         return len(tups)
 
-    def to_dict(self):  ## TODO do this with the others?
+    def to_dict(self):  # TODO do this with the others?
         return {
             "title": self.title,
             "_seekers": [x.id for x in self._seekers],
@@ -254,9 +249,9 @@ class User(UserMixin, db.Model):
 
 
 @login.user_loader
-def load_user(id):
-    print(f"Loading user w/id {id}")
-    return User.query.get(int(id))
+def load_user(id_):
+    print(f"Loading user w/id {id_}")
+    return User.query.get(int(id_))
 
 
 ##### PROFILES ######
@@ -306,7 +301,7 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
         return company_id
 
     def avatar(self, size=128):
-        _hashstr = re.sub("\W", "", self.name)
+        _hashstr = re.sub(r"\W", "", self.name)
         # choose "random" attributes (theme and number of colors) based on lazy encoding
         _hashint = sum([ord(x) for x in self.name])
         _theme = TINYGRAPH_THEMES[_hashint % len(TINYGRAPH_THEMES)]
@@ -314,7 +309,7 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
         return f"http://www.tinygraphs.com/spaceinvaders/{_hashstr}?theme={_theme}&numcolors={_ncolors}&size={size}"
 
     def banner(self, dims=(100, 20)):
-        _hashstr = re.sub("\W", "", self.name)
+        _hashstr = re.sub(r"\W", "", self.name)
         # choose "random" attributes (theme and number of colors) based on lazy encoding
         _hashint = sum([ord(x) for x in self.name])
         _theme = TINYGRAPH_THEMES[_hashint % len(TINYGRAPH_THEMES)]
@@ -420,7 +415,7 @@ class SeekerProfile(db.Model):
         return int(max([e.education_lvl for e in self._history_edus])) + 1
 
     @property
-    def min_edu_abbv(self) -> int:
+    def min_edu_abbv(self) -> str:
         """
         Get's the abbreviated degree name of the min education level.
         """
@@ -446,7 +441,8 @@ class SeekerProfile(db.Model):
         return sum([job.years_employed for job in self._history_jobs])
 
     def get_tech_skills_levels(self):
-        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if skr_skl._skill.is_tech()]
+        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if
+                  skr_skl._skill.is_tech()]
         output.sort(key=itemgetter(1), reverse=True)
         return output
 
@@ -465,11 +461,12 @@ class SeekerProfile(db.Model):
         return skls
 
     def get_biz_skills_levels(self) -> List[Tuple[str, int]]:
-        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if skr_skl._skill.is_biz()]
+        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if
+                  skr_skl._skill.is_biz()]
         output.sort(key=itemgetter(1), reverse=True)
         return output
 
-    def get_biz_skills(self, only_max=False) -> List[Tuple[str, int]]:
+    def get_biz_skills(self, only_max=False) -> List[Union[str,Tuple[str, int]]]:
         skl_lvls = self.get_biz_skills_levels()
         if not skl_lvls:
             return []
@@ -499,7 +496,7 @@ class SeekerProfile(db.Model):
 
     def avatar(self, size=128):
         # convert email to random number between 0 and 1
-        r01 = float(crc32(self._user.email.encode("utf-8")) & 0xffffffff) / 2**32
+        r01 = float(crc32(self._user.email.encode("utf-8")) & 0xffffffff) / 2 ** 32
         rand_bg_hex = "".join([hex(int(round(255 * x)))[2:] for x in colorsys.hsv_to_rgb(r01, 0.25, 1.0)])
         url = f"https://ui-avatars.com/api/?rounded=true&bold=true&color=00000" \
               f"&size={size}&background={rand_bg_hex}&name={self.first_name}+{self.last_name}"
@@ -541,7 +538,7 @@ class SeekerProfile(db.Model):
         tskill_ids = [s.skill_id for s in self._skills if s._skill.is_tech()]
         enc = ['0' for _ in range(Skill.count())]
         for _id in tskill_ids:
-            enc[_id-1] = '1'
+            enc[_id - 1] = '1'
         return int(''.join(enc), base=2)
 
     def encode_biz_skills(self) -> int:
@@ -553,7 +550,7 @@ class SeekerProfile(db.Model):
         bskill_ids = [s.skill_id for s in self._skills if s._skill.is_biz()]
         enc = ['0' for _ in range(Skill.count())]
         for _id in bskill_ids:
-            enc[_id-1] = '1'
+            enc[_id - 1] = '1'
         return int(''.join(enc), base=2)
 
     def encode_attitudes(self) -> int:
@@ -565,7 +562,7 @@ class SeekerProfile(db.Model):
         att_ids = [s.attitude_id for s in self._attitudes]
         enc = ['0' for _ in range(Attitude.count())]
         for _id in att_ids:
-            enc[_id-1] = '1'
+            enc[_id - 1] = '1'
         return int(''.join(enc), base=2)
 
 
@@ -647,6 +644,7 @@ class SeekerHistoryEducation(db.Model):
         d['type'] = self.education_lvl.name
         d['field'] = self.study_field
         return d
+
 
 class SeekerHistoryJob(db.Model):
     """
@@ -788,7 +786,7 @@ class JobPost(db.Model):
     def n_skills(self):
         return len(self._skills)
 
-    def get_skills_data(self, type='all', name=False) -> List[Tuple[Union[str, int], int, int]]:
+    def get_skills_data(self, type_='all', name=False) -> List[Tuple[Union[str, int], int, int]]:
         """
         Gets a list of skills, where each entry contains:
             1. the id or name of the skill (depends on the value of `name`)
@@ -796,9 +794,9 @@ class JobPost(db.Model):
             3. the importance level (0-5)
         Can filter skills to either [t]ech, [b]iz, or [a]ll
         """
-        matches_type = lambda skl: type == 'all' or \
-                                   (type.startswith('t') and skl._skill.is_tech()) or \
-                                   (type.startswith('b') and skl._skill.is_biz())
+        matches_type = lambda skl: type_ == 'all' or \
+                                   (type_.startswith('t') and skl._skill.is_tech()) or \
+                                   (type_.startswith('b') and skl._skill.is_biz())
         return [(s._skill.title if name else s.skill_id, s.skill_level_min, s.importance_level)
                 for s in self._skills if matches_type(s)]
 
@@ -912,5 +910,3 @@ class LocationCoordinates(db.Model):
             db.session.add(row)
             db.session.commit()
         return row.latitude, row.longitude
-
-
