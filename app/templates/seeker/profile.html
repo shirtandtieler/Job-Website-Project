@@ -12,9 +12,9 @@
                         <div class="mt-3">
                             <h4>{{ seeker.full_name }}</h4>
                             <p class="text-secondary mb-1">{{ seeker.location }}</p>
-                            <p class="text-secondary mb-1"><i class="far fa-clock"></i> {{ " • ".join(seeker.work_wanted_list) }} </p>
+                            <p class="text-secondary mb-1"><i class="fas fa-business-time"></i> {{ " • ".join(seeker.work_wanted_list) }} </p>
                             {% if seeker.remote %}
-                            <p class="text-secondary mb-1"><i class="fab fa-safari"></i> remote</p>
+                            <p class="text-secondary mb-1"><i class="fas fa-laptop-house"></i> remote</p>
                             {% endif %}
                         </div>
                     </div>
@@ -67,7 +67,7 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-sm-2">
-                            <h6 class="mt-1 mb-1">About</h6>
+                            <h6 class="mt-1 mb-1 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-user-circle me-1"></i>About</h6>
                         </div>
                         <div class="col-sm-10 text-secondary">
                             {{ seeker.summary }}
@@ -76,22 +76,59 @@
                     <hr>
                     <div class="row">
                         <div class="col-sm-2">
-                            <h6 class="mt-1 mb-1">Values</h6>
+                            <h6 class="mt-1 mb-1 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-heart me-1"></i>Values</h6>
                         </div>
                         <div class="col-sm-10 text-secondary">
                             {% for att in seeker.get_attitudes() %}
-                                <span class="badge rounded-pill bg-info">{{ att }}</span>
+                                <span class="badge rounded-pill bg-secondary">{{ att }}</span>
                             {% endfor %}
                         </div>
                     </div>
                 </div>
             </div>
             <div class="row gutters-sm">
+                {% if seeker.min_edu_level > 0 %}
+                <div class="col mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="d-flex align-items-center mb-3 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-graduation-cap me-1"></i>Past Education</h6>
+                            <ul class="list-group">
+                                {% for edu in seeker._history_edus %}
+                                <li class="list-group-item">
+                                    <p class="mb-0 pt-1" style="line-height:12px">{{ edu.education_lvl_abbv }} in {{ edu.study_field }}</p>
+                                    <small class="fw-light">{{ edu.school }}</small>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if seeker.years_job_experience > 0 %}
+                <div class="col mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+
+                            <h6 class="d-flex align-items-center mb-3 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-briefcase me-1"></i>Past Work</h6>
+                            <ul class="list-group">
+                                {% for work in seeker._history_jobs %}
+                                <li class="list-group-item">
+                                    <p class="mb-0 pt-1" style="line-height:12px">{{ work.job_title }}</p>
+                                    <small class="fw-light">{{ work.years_employed }} years</small>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="row gutters-sm">
                 {% set colors = ['#f4aea3', '#e8638b', '#a73b8f', '#61208d', '#3c1357'] %}
                 <div class="col-sm-6 mb-3">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h6 class="d-flex align-items-center mb-3">Technical Skills</h6>
+                            <h6 class="d-flex align-items-center mb-3 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-laptop-code me-1"></i>Technical Skills</h6>
                             {% for title, lvl in seeker.get_tech_skills_levels() %}
                             <div class="d-flex">
                                 <div class="p-1"><small>{{ title }}</small></div>
@@ -112,7 +149,7 @@
                 <div class="col-sm-6 mb-3">
                     <div class="card h-100">
                         <div class="card-body">
-                            <h6 class="d-flex align-items-center mb-3">Business Skills</h6>
+                            <h6 class="d-flex align-items-center mb-3 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-handshake me-1"></i>Business Skills</h6>
                             {% for title, lvl in seeker.get_biz_skills_levels() %}
                             <div class="d-flex">
                                 <div class="p-1"><small>{{ title }}</small></div>
