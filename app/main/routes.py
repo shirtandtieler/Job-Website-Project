@@ -15,7 +15,7 @@ from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
 from app.api.seeker_query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
     seeker_url_args_to_input_states
 from app.api.routing import modify_query
-from app.api.statistics import get_coordinates_seekers, get_coordinates_companies, get_coordinates_jobs
+#from app.api.statistics import get_coordinates_seekers, get_coordinates_companies, get_coordinates_jobs
 from app.api.users import save_seeker_search, delete_seeker_search, save_job_search, delete_job_search
 from app.main import bp
 from app.main.forms import JobPostForm
@@ -372,12 +372,12 @@ def seeker_search_download():
                     headers={'Content-disposition': 'attachment; filename=seeker_search_results.json'})
 
 
-@bp.route("/maps")
-def maps():
-    seeker_coordinates = get_coordinates_seekers()
-    job_coordinates = get_coordinates_jobs()
-    company_coordinates = get_coordinates_companies()
-    return render_template('admin/user_map.html',
-                           seeker_coords = seeker_coordinates,
-                           job_coords = job_coordinates,
-                           company_coords = company_coordinates)
+# @bp.route("/maps")
+# def maps():
+#     seeker_coordinates = get_coordinates_seekers()
+#     job_coordinates = get_coordinates_jobs()
+#     company_coordinates = get_coordinates_companies()
+#     return render_template('admin/user_map.html',
+#                            seeker_coords = seeker_coordinates,
+#                            job_coords = job_coordinates,
+#                            company_coords = company_coordinates)
