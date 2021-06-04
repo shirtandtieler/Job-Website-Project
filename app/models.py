@@ -6,6 +6,7 @@ from hashlib import md5
 from operator import itemgetter
 from typing import List, Tuple, Union
 from zlib import crc32
+from datetime import datetime as dt
 
 from flask_login import UserMixin
 from geopy.distance import geodesic
@@ -272,9 +273,6 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
     website = Column(String(191))
     tagline = Column(String(100))
     summary = Column(String)
-
-    # TODO add logo (and banner?) then replace instances that use 'blue_company' image
-    # TODO add slogan or description?
 
     _user = relationship("User", back_populates="_company")
     _job_posts = relationship("JobPost", back_populates="_company")
@@ -725,6 +723,7 @@ class JobPost(db.Model):
     city = Column(String(191))
     state = Column(String(2))
     description = Column(Text)
+    work_type = Column(ENUM(WorkTypes), default=WorkTypes.any)
     is_remote = Column(Boolean, default=False)
     salary_min = Column(Integer)
     salary_max = Column(Integer)
@@ -752,10 +751,26 @@ class JobPost(db.Model):
             loc = f"{self.city}{self.state}"
         else:
             loc = "USA"
-
-        if self.is_remote:
-            loc += " (remote available)"
         return loc
+
+    def get_work_types_list(self):
+        wt = self.work_type or WorkTypes.any
+        types = wt.name.replace("_or_", "_").split("_")
+        if WorkTypes.any.name in types:
+            types = ["full", "part", "contract"]
+        return types
+
+    def get_work_types_abbv(self):
+        types = self.get_work_types_list()
+        abbvs = []
+        for t in types:
+            if t == 'full':
+                abbvs.append("Ft")
+            elif t == 'part':
+                abbvs.append("Pt")
+            else:
+                abbvs.append("C")
+        return abbvs
 
     @property
     def expected_salary(self):
@@ -768,6 +783,71 @@ class JobPost(db.Model):
         else:
             sal = f"Salary depends on experience"
         return sal
+
+    @property
+    def age(self) -> str:
+        """
+        A string to represent the age of this post.
+        It's intended to be in a phrasing that would work with the format: "Posted X ago".
+        """
+        tdelta = dt.now() - self.created_timestamp
+        if tdelta.days >= 548:  # enough to round it up to 2 years
+            return f'about {tdelta.days/365:.0f} years'
+        elif tdelta.days >= 345:  # enough to round it up to 1 year (so it doesn't report '12 months')
+            return f'about a year'
+        elif tdelta.days > 45:  # beyond 1 month (after rounding)
+            return f'about {tdelta.days/30:.0f} months'
+        elif tdelta.days > 24:  # enough to round it up to 1 month (so it doesn't report '4 weeks')
+            return f'about a month'
+        elif tdelta.days > 7:
+            # round to nearest half, dropping '.0' when whole
+            return f'{round((tdelta.days/7)*2)/2:g} weeks'
+        elif tdelta.days == 7:
+            return 'a week'
+        elif tdelta.days > 1:
+            return f'{tdelta.days} days'
+        elif tdelta.days == 1:
+            return f'a day'
+        # break it down into parts of a day
+        hours = tdelta.seconds // 3600
+        if hours > 1:
+            return f'{hours:.0f} hours'
+        elif hours == 1:
+            return f'an hour'
+        minutes = tdelta.seconds % 3600 / 60
+        if minutes > 1:
+            return f'{minutes:.0f} minutes'
+        elif minutes == 1:
+            return f'a minute'
+        return 'moments'
+
+    def to_dict(self):
+        d = dict()
+        d['id'] = self.id
+        d['creation'] = self.created_timestamp.isoformat()
+        d['active'] = self.active
+        d['company'] = {
+            'id': self.company_id,
+            'name': self._company.name
+        }
+        d['title'] = self.job_title
+        d['location'] = self.location
+        wt = int(self.work_type or WorkTypes.any)
+        d['work_types'] = {
+            'full': wt & 1 > 0,
+            'part': wt & 2 > 0,
+            'contract': wt & 4 > 0,
+            'remote': self.is_remote
+        }
+        d['salary'] = [self.salary_min, self.salary_max]
+        d['description'] = self.description
+        d['skills'] = {
+            '__comment': '(title, min. skill level [1-5], importance level [1-5])',
+            'tech': [(entry._skill.title, entry.skill_level_min, entry.importance_level) for entry in self._skills if entry._skill.is_tech()],
+            'biz': [(entry._skill.title, entry.skill_level_min, entry.importance_level) for entry in self._skills if entry._skill.is_biz()]
+        }
+        d['values'] = [(entry._attitude.title, entry.importance_level) for entry in self._attitudes]
+        return d
 
     def n_tech_skills(self):
         n = 0
@@ -811,6 +891,53 @@ class JobPost(db.Model):
         """
         return [(a._attitude.title if name else a.attitude_id, a.importance_level)
                 for a in self._attitudes]
+
+    def is_within(self, distance_limit_mi, city, state) -> bool:
+        if not self.city and not self.state:
+            # always return true if user does not have a city or a state
+            return True
+
+        self_coords = LocationCoordinates.get(self.city, self.state)
+        other_coords = LocationCoordinates.get(city, state)
+
+        dist_mi = geodesic(self_coords, other_coords).miles
+        return dist_mi <= distance_limit_mi
+
+    def encode_tech_skills(self) -> int:
+        """
+        Converts technical skills possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        tskill_ids = [s.skill_id for s in self._skills if s._skill.is_tech()]
+        enc = ['0' for _ in range(Skill.count())]
+        for _id in tskill_ids:
+            enc[_id - 1] = '1'
+        return int(''.join(enc), base=2)
+
+    def encode_biz_skills(self) -> int:
+        """
+        Converts business skills possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        bskill_ids = [s.skill_id for s in self._skills if s._skill.is_biz()]
+        enc = ['0' for _ in range(Skill.count())]
+        for _id in bskill_ids:
+            enc[_id - 1] = '1'
+        return int(''.join(enc), base=2)
+
+    def encode_attitudes(self) -> int:
+        """
+        Converts attitudes possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        att_ids = [s.attitude_id for s in self._attitudes]
+        enc = ['0' for _ in range(Attitude.count())]
+        for _id in att_ids:
+            enc[_id - 1] = '1'
+        return int(''.join(enc), base=2)
 
 
 class JobPostSkill(db.Model):
@@ -896,16 +1023,28 @@ class LocationCoordinates(db.Model):
         if city is None and state is None:
             return "USA"
         elif city is None or state is None:
-            return f"{city}{state}, USA"
+            return f"{city or ''}{state or ''}, USA"
         return f"{city}, {state} USA"
 
     @staticmethod
-    def get(city: str = None, state: str = None) -> Tuple[float, float]:
+    def get(city: str = None, state: str = None, fallback=True) -> Tuple[float, float]:
+        """
+        Gets the coordinates for the given city and/or state.
+        If fallback is true, it will attempt to get the closest matching result
+            (just state if city cannot be found, otherwise just 'USA')
+        """
         loc_id = LocationCoordinates.to_location(city, state)
         row = LocationCoordinates.query.get(loc_id)
         if row is None:
             # not present, create then return
             loc_obj = geolocator.geocode(loc_id)
+            if loc_obj is None or loc_obj.latitude is None:
+                if not fallback:
+                    raise ValueError(f"Cannot be found: '{loc_id}' (city: {city}, state: {state})")
+                if city is not None:  # try just getting the state
+                    return LocationCoordinates.get(None, state, fallback)
+                # otherwise just get 'USA'
+                return LocationCoordinates.get(None, None, fallback)
             row = LocationCoordinates(location=loc_id, latitude=loc_obj.latitude, longitude=loc_obj.longitude)
             db.session.add(row)
             db.session.commit()
