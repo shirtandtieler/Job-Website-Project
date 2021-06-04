@@ -15,7 +15,7 @@ from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
 from app.api.seeker_query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
     seeker_url_args_to_input_states
 from app.api.routing import modify_query
-#from app.api.statistics import get_coordinates_seekers, get_coordinates_companies, get_coordinates_jobs
+from app.api.statistics import get_coordinate_info
 from app.api.users import save_seeker_search, delete_seeker_search, save_job_search, delete_job_search
 from app.main import bp
 from app.main.forms import JobPostForm
@@ -254,9 +254,9 @@ def job_search():
     # get lower and upper page count for (up to) 5 surrounding pages
     max_window = min(5, pager.pages)
     pg_lower = pg_upper = page_num
-    while pg_upper-pg_lower+1 < max_window:
-        pg_lower = max(1, pg_lower-1)
-        pg_upper = min(pager.pages, pg_upper+1)
+    while pg_upper - pg_lower + 1 < max_window:
+        pg_lower = max(1, pg_lower - 1)
+        pg_upper = min(pager.pages, pg_upper + 1)
 
     filter_options_set = job_url_args_to_input_states(request.args)
 
@@ -341,9 +341,9 @@ def seeker_search():
     # get lower and upper page count for (up to) 5 surrounding pages
     max_window = min(5, pager.pages)
     pg_lower = pg_upper = page_num
-    while pg_upper-pg_lower+1 < max_window:
-        pg_lower = max(1, pg_lower-1)
-        pg_upper = min(pager.pages, pg_upper+1)
+    while pg_upper - pg_lower + 1 < max_window:
+        pg_lower = max(1, pg_lower - 1)
+        pg_upper = min(pager.pages, pg_upper + 1)
 
     filter_options_set = seeker_url_args_to_input_states(request.args)
 
@@ -372,12 +372,12 @@ def seeker_search_download():
                     headers={'Content-disposition': 'attachment; filename=seeker_search_results.json'})
 
 
-# @bp.route("/maps")
-# def maps():
-#     seeker_coordinates = get_coordinates_seekers()
-#     job_coordinates = get_coordinates_jobs()
-#     company_coordinates = get_coordinates_companies()
-#     return render_template('admin/user_map.html',
-#                            seeker_coords = seeker_coordinates,
-#                            job_coords = job_coordinates,
-#                            company_coords = company_coordinates)
+@bp.route("/maps")
+def maps():
+    seeker_coord_info = get_coordinate_info(SeekerProfile, True, True)
+    job_coord_info = get_coordinate_info(JobPost, True, True)
+    company_coord_info = get_coordinate_info(CompanyProfile, True, True)
+    return render_template('admin/stats_map.html',
+                           seeker_coords=seeker_coord_info,
+                           job_coords=job_coord_info,
+                           company_coords=company_coord_info)

@@ -1034,6 +1034,7 @@ class LocationCoordinates(db.Model):
             (just state if city cannot be found, otherwise just 'USA')
         """
         loc_id = LocationCoordinates.to_location(city, state)
+
         row = LocationCoordinates.query.get(loc_id)
         if row is None:
             # not present, create then return
@@ -1041,10 +1042,10 @@ class LocationCoordinates(db.Model):
             if loc_obj is None or loc_obj.latitude is None:
                 if not fallback:
                     raise ValueError(f"Cannot be found: '{loc_id}' (city: {city}, state: {state})")
-                if city is not None:  # try just getting the state
+                if state is not None:  # try just getting the state
                     return LocationCoordinates.get(None, state, fallback)
-                # otherwise just get 'USA'
-                return LocationCoordinates.get(None, None, fallback)
+                # otherwise place in bermuda
+                return 32.3078, -64.7505
             row = LocationCoordinates(location=loc_id, latitude=loc_obj.latitude, longitude=loc_obj.longitude)
             db.session.add(row)
             db.session.commit()
