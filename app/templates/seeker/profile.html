@@ -130,16 +130,20 @@
                         <div class="card-body">
                             <h6 class="d-flex align-items-center mb-3 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-laptop-code me-1"></i>Technical Skills</h6>
                             {% for title, lvl in seeker.get_tech_skills_levels() %}
-                            <div class="d-flex">
-                                <div class="p-1"><small>{{ title }}</small></div>
-                                <div class="m-2 flex-grow-1" style="border-bottom-color: rgba(0, 0, 0, 0.25); border-bottom-style: dotted;"></div>
-                                <div class="p-1 align-self-center">
-                                    {% for n in range(lvl) %}
-                                    <i class="fas fa-circle" style="color: {{ colors[n] }}; float:left"></i>
-                                    {% endfor %}
-                                    {% for n in range(lvl, 5) %}
-                                    <i class="far fa-circle" style="color: {{ colors[n] }}; float:left"></i>
-                                    {% endfor %}
+                            <div class="d-flex mb-1">
+                                <div class="p-0 p-sm-1"><small>{{ title }}</small></div>
+                                <div class="m-1 flex-grow-1" style="border-bottom-color: rgba(0, 0, 0, 0.25); border-bottom-style: dotted;"></div>
+                                <div class="p-0 p-sm-1">
+                                    <div class="d-flex align-items-end" style="height: 100%; width: 50px;">
+                                        {% for n in range(lvl) %}
+                                        <!-- Achieved level -->
+                                        <div class="" style="height: {{ 30+14*(n+1) }}%; width: 20%; background-color: {{ colors[n] }}; border-style: solid; border-color: {{ colors[n] }}; border-width: 2px"></div>
+                                        {% endfor %}
+                                        {% for n in range(lvl, 5) %}
+                                        <!-- Above skill level -->
+                                        <div class="" style="height: {{ 30+14*(n+1) }}%; width: 20%; border-style: solid; border-color: rgba(0,0,0,0.2); border-width: 1px"></div>
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             </div>
                             {% endfor %}
@@ -151,16 +155,20 @@
                         <div class="card-body">
                             <h6 class="d-flex align-items-center mb-3 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-handshake me-1"></i>Business Skills</h6>
                             {% for title, lvl in seeker.get_biz_skills_levels() %}
-                            <div class="d-flex">
-                                <div class="p-1"><small>{{ title }}</small></div>
-                                <div class="m-2 flex-grow-1" style="border-bottom-color: rgba(0, 0, 0, 0.25); border-bottom-style: dotted;"></div>
-                                <div class="p-1 align-self-center">
-                                    {% for n in range(lvl) %}
-                                    <i class="fas fa-circle" style="color: {{ colors[n] }}; float:left"></i>
-                                    {% endfor %}
-                                    {% for n in range(lvl, 5) %}
-                                    <i class="far fa-circle" style="color: {{ colors[n] }}; float:left"></i>
-                                    {% endfor %}
+                            <div class="d-flex mb-1">
+                                <div class="p-0 p-lg-1"><small>{{ title }}</small></div>
+                                <div class="m-1 flex-grow-1" style="border-bottom-color: rgba(0, 0, 0, 0.25); border-bottom-style: dotted;"></div>
+                                <div class="p-0 p-sm-1">
+                                    <div class="d-flex align-items-end" style="height: 100%; width: 50px;">
+                                        {% for n in range(lvl) %}
+                                        <!-- Achieved level -->
+                                        <div class="" style="height: {{ 30+14*(n+1) }}%; width: 20%; background-color: {{ colors[n] }}; border-style: solid; border-color: {{ colors[n] }}; border-width: 2px"></div>
+                                        {% endfor %}
+                                        {% for n in range(lvl, 5) %}
+                                        <!-- Above skill level -->
+                                        <div class="" style="height: {{ 30+14*(n+1) }}%; width: 20%; border-style: solid; border-color: rgba(0,0,0,0.2); border-width: 1px"></div>
+                                        {% endfor %}
+                                    </div>
                                 </div>
                             </div>
                             {% endfor %}

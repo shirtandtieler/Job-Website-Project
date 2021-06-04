@@ -5,13 +5,7 @@ from itertools import groupby
 from werkzeug.datastructures import ImmutableMultiDict
 from werkzeug.urls import url_encode
 
-from app.models import SeekerProfile, Skill, Attitude
-
-
-# for u, a in session.query(User, Address). \
-#         ...                     filter(User.id==Address.user_id). \
-#         ...                     filter(Address.email_address=='jack@google.com'). \
-#         ...                     all():
+from app.models import Skill, Attitude, JobPost, WorkTypes
 
 
 def _compress(indices: List[int], max_size: int) -> str:
@@ -70,16 +64,15 @@ def _decompress(cstr, output=None):
     return [i + 1 for i, v in enumerate(bin_str) if v == '1']  # add 1 to get ID
 
 
-def seeker_form_to_url_params(form: ImmutableMultiDict) -> str:
+def job_form_to_url_params(form: ImmutableMultiDict) -> str:
     """
-    Converts the form results from a the seeker search to the proper URL arguments.
+    Converts the form results from a job search to the proper URL arguments.
     The keys in 'form' are based on the name attribute in the search HTML.
     The keys in the output are URL parameters, whose names are based on abbreviations of what they're searching for.
     """
     # --- use get(type=X)
     # lf_ft, lf_pt, lf_contract, lf_remote: 1 or ''
-    # edulvl_lower, edulvl_upper: 0-5
-    # workyrs_lower, workyrs_upper: 0-11
+    # salary_lower, salary_upper: 0-200
     # dist_choice: True (any) or False (within)
     # dist_miles: int
     # dist_city: str
@@ -88,10 +81,7 @@ def seeker_form_to_url_params(form: ImmutableMultiDict) -> str:
     args = dict()
     args['worktype'] = form.get('lf_ft', '0') + form.get('lf_pt', '0') + form.get('lf_contract', '0') + form.get(
         'lf_remote', '0')
-    args['eduexp'] = form.get('edulvl_lower', '0') + form.get('edulvl_upper', '5')
-    # need to convert to int so that it can be converted to hex (since nums can go up to 11)
-    args['workexp'] = format(form.get('workyrs_lower', 0, type=int), 'x') + \
-                      format(form.get('workyrs_upper', 11, type=int), 'x')
+    args['salary'] = form.get('salary_lower', '0') + '-' + form.get('salary_upper', '200')
     if not form.get('dist_choice', type=int):
         # False = within the given distance
         args['dist'] = "-".join([form.get('dist_miles', '50'), form.get('dist_city'), form.get('dist_state')])
@@ -109,10 +99,11 @@ def seeker_form_to_url_params(form: ImmutableMultiDict) -> str:
         acmp = _compress(alist, Attitude.count())
         args['att'] = acmp
 
+    print(f'URL ENCODED {form} TO {args}')
     return url_encode(args)
 
 
-def seeker_url_args_to_input_states(req_args: ImmutableMultiDict) -> dict:
+def job_url_args_to_input_states(req_args: ImmutableMultiDict) -> dict:
     """
     Converts the args passed in the request to a dictionary which the filter bar can set the states of its input to.
     The keys in 'req_args' are the URL parameters, whose names are based on abbreviations of what they're searching for.
@@ -121,8 +112,7 @@ def seeker_url_args_to_input_states(req_args: ImmutableMultiDict) -> dict:
     options = dict()
     # set all defaults and override in the next sections
     options['lf_ft'] = options['lf_pt'] = options['lf_contract'] = options['lf_remote'] = 'checked'
-    options['slider-edulvl'] = [0, 5]
-    options['slider-workyrs'] = [0, 11]
+    options['slider-salary'] = [0, 205]
     options['dist_any'] = 'checked'
     options['dist_within'] = options['dist_miles'] = options['dist_city'] = options['dist_state'] = ''
     options['sel_techs'] = options['sel_bizs'] = options['sel_atts'] = []
@@ -135,13 +125,10 @@ def seeker_url_args_to_input_states(req_args: ImmutableMultiDict) -> dict:
         options['lf_contract'] = '' if arg_worktype[2] == '0' else options['lf_contract']
         options['lf_remote'] = '' if arg_worktype[3] == '0' else options['lf_remote']
 
-    arg_eduexp = req_args.get('eduexp', '')
-    if len(arg_eduexp) == 2 and arg_eduexp.isdigit():
-        options['slider-edulvl'] = [int(arg_eduexp[0]), int(arg_eduexp[1])]
-
-    arg_workexp = req_args.get('workexp', '')  # need to use regex since work can be up to 11
-    if len(arg_workexp) == 2 and re.match("^[0-9A-F]{2}$", arg_workexp, re.I):
-        options['slider-workyrs'] = [int(arg_workexp[0], base=16), int(arg_workexp[1], base=16)]
+    arg_salary = req_args.get('salary', '')
+    if re.match(r'\d{1,3}-\d{1,3}', arg_salary):
+        s0, s1 = arg_salary.split('-')
+        options['slider-salary'] = [int(s0), int(s1)]
 
     arg_dist = req_args.get('dist', '')
     if arg_dist and arg_dist.count('-') == 2:
@@ -153,28 +140,24 @@ def seeker_url_args_to_input_states(req_args: ImmutableMultiDict) -> dict:
         options['dist_state'] = s
 
     arg_tech = req_args.get('tech', '')
-    if arg_tech:  # TODO incorporate
+    if arg_tech:
         options['sel_techs'] = _decompress(arg_tech)
-    # if arg_tech.isdigit():  # for when arg is an int
-    #     kwargs['tech_skills'] = int(arg_tech)
 
     arg_biz = req_args.get('biz', '')
-    if arg_biz:  # TODO incorporate
+    if arg_biz:
         options['sel_bizs'] = _decompress(arg_biz)
-    # if arg_biz.isdigit():  # for when arg is an int
-    #     kwargs['biz_skills'] = int(arg_biz)
 
     arg_att = req_args.get('att', '')
-    if arg_att:  # TODO incorporate
+    if arg_att:
         options['sel_atts'] = _decompress(arg_att)
 
-    print(options)
+    print(f'INPUT SET {req_args} TO {options}')
     return options
 
 
-def seeker_url_args_to_query_args(req_args: ImmutableMultiDict) -> dict:
+def job_url_args_to_query_args(req_args: ImmutableMultiDict) -> dict:
     """
-    Converts the args passed in the request to a dictionary which the seeker query function can process.
+    Converts the args passed in the request to a dictionary which the job query function can process.
     The keys in 'req_args' are the URL parameters, whose names are based on abbreviations of what they're searching for.
     The keys in the output dictionary are based on the parameter names given to the `get_seeker_query` function.
     """
@@ -188,18 +171,15 @@ def seeker_url_args_to_query_args(req_args: ImmutableMultiDict) -> dict:
     # if req_args.get('remote', '') != '0':
     #     kwargs['remote'] = True
 
-    arg_eduexp = req_args.get('eduexp', '')
-    if len(arg_eduexp) == 2 and arg_eduexp.isdigit():
-        kwargs['edu_range'] = [int(arg_eduexp[0]), int(arg_eduexp[1])]
-
-    arg_workexp = req_args.get('workexp', '')  # need to use regex since work can be up to 11
-    if len(arg_workexp) == 2 and re.match("^[0-9A-F]{2}$", arg_workexp, re.I):
-        kwargs['work_range'] = [int(arg_workexp[0], base=16), int(arg_workexp[1], base=16)]
-        # when work range is 11, should be considered "> 10"; adjust specific range values accordingly.
-        # (when index 0 is 11, that's fine since it's the lower bound.
-        #   but when index 1 is 11, should be a large number to capture those with 11+ years)
-        if kwargs['work_range'][1] == 11:
-            kwargs['work_range'][1] = 9999
+    arg_salary = req_args.get('salary', '')
+    if re.match(r'\d{1,3}-\d{1,3}', arg_salary):
+        s0, s1 = arg_salary.split('-')
+        kwargs['sal_range'] = [int(s0)*1e3, int(s1)*1e3]
+        # when salary range is 201k, that should be considered "> 200k"; adjust specific range values accordingly.
+        # (when index 0 is 201k, that's fine since it's the lower bound,
+        #   but when index 1 is 201k, that should be a large enough number ot capture those with 200k salaries)
+        if kwargs['sal_range'][1] == 201e3:
+            kwargs['sal_range'][1] = 1e9  # billion
 
     arg_dist = req_args.get('dist', '')
     if arg_dist and arg_dist.count('-') == 2:
@@ -224,41 +204,35 @@ def seeker_url_args_to_query_args(req_args: ImmutableMultiDict) -> dict:
         kwargs['atts'] = _decompress(arg_att, output="int")
     # if arg_att.isdigit():  # for when arg is an int
     #     kwargs['atts'] = int(arg_att)
+    print(f'CONVERTED {req_args} TO {kwargs}')
     return kwargs
 
 
-def get_seeker_query(
+def get_job_query(
         worktype: Tuple[bool, bool, bool, bool] = None,
-        edu_range: Tuple[int, int] = None, work_range: Tuple[int, int] = None,
+        sal_range: Tuple[int, int] = None,
         loc_distance: int = None, loc_citystate: Tuple[str, str] = None,
         tech_skills: int = None, biz_skills: int = None, atts: int = None):
     """
-    Performs a search query on the seekers based on the provided filters.
+    Performs a search query on the jobs based on the provided filters.
     Returns a 'query' object that can then be passed to 'paginate'.
     """
-    # Couldn't figure out how to convert some of these filters to pure SQL
-    #   (necessary as part of the 'hybrid_property'/'hybrid_method' annotations to be used in calls to a query's
-    #   'filter' call),
-    #   so the entire list of seekers is queried as a Python list, then filtered thru Python's built-in function.
-    #
-    # To make this work with `paginate`, it needs to be a query, so the seeker objects left at the end of the filter
-    #   are then converted to their IDs for querying the "proper" way.
-    #
 
-    matches = SeekerProfile.query.all()
+    matches = JobPost.query.all()
+
+    # first, always filter out any non-active jobs
+    matches = filter(lambda m: m.active, matches)
+    # also filter out any jobs related to companies who are inactive
+    matches = filter(lambda m: m._company._user.is_active, matches)
+
     if worktype is not None and any(worktype):
         bin_worktype = sum(v << i for i, v in enumerate(worktype[::-1]))
         # work wanted only has for the 3 types; add in remote before checking for truthiness
-        matches = filter(lambda m: (m.work_wanted << 1 | int(m.remote_wanted)) & bin_worktype > 0, matches)
-
-        # old way below; filtered out remote when worktype was 1111
-        # bin_worktype = sum(v << i for i, v in enumerate(worktype[-2::-1]))
-        # matches = filter(lambda m: m.work_wanted & bin_worktype > 0, matches)
-        # matches = filter(lambda m: m.remote_wanted == worktype[-1], matches)
-    if edu_range is not None:
-        matches = filter(lambda m: edu_range[0] <= m.min_edu_level <= edu_range[1], matches)
-    if work_range is not None:
-        matches = filter(lambda m: work_range[0] <= m.years_job_experience <= work_range[1], matches)
+        matches = filter(lambda m: ((m.work_type or WorkTypes.any) << 1 | int(m.is_remote or False)) & bin_worktype > 0, matches)
+    if sal_range is not None:
+        # accept any that overlap in range.
+        # since salaries may be None, default them to an appropriate extreme
+        matches = filter(lambda m: (m.salary_min or 0) <= sal_range[1] and (m.salary_max or 1e9) >= sal_range[0], matches)
     if loc_distance is not None and loc_citystate is not None:
         matches = filter(lambda m: m.is_within(loc_distance, *loc_citystate), matches)
     if tech_skills is not None:
@@ -280,5 +254,5 @@ def get_seeker_query(
     # )
 
     match_ids = [m.id for m in matches]
-    q = SeekerProfile.query.filter(SeekerProfile.id.in_(match_ids))
+    q = JobPost.query.filter(JobPost.id.in_(match_ids)).order_by(JobPost.created_timestamp.desc())
     return q
