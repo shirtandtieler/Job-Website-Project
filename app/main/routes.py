@@ -1,18 +1,30 @@
 # Routes are the different URLs that the application implements.
 # The functions below handle the routing/behavior.
+import json
+from datetime import datetime
+from io import BytesIO
 from typing import Union
 
-from flask import render_template, flash, redirect, url_for, request
-
-from app import constants
-from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
-from app.main import bp
-from app.main.forms import JobPostForm, SkillRequirementForm, AttitudeRequirementForm
+from flask import render_template, flash, redirect, url_for, send_file, Response
+from flask import request
 from flask_login import current_user, login_required
+
+import app
+from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
+    job_form_to_url_params
+from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
+from app.api.seeker_query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
+    seeker_url_args_to_input_states
+from app.api.routing import modify_query
+#from app.api.statistics import get_coordinates_seekers, get_coordinates_companies, get_coordinates_jobs
+from app.api.users import save_seeker_search, delete_seeker_search, save_job_search, delete_job_search
+from app.main import bp
+from app.main.forms import JobPostForm
 from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
 
 ## TODO Routes needed for editing profile page, searching, sending messages, etc.
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
+
 
 @bp.route("/")
 @bp.route("/index")
@@ -75,14 +87,44 @@ def seeker_profile(seeker_id):
     Navigate to a specific seeker's profile page.
     """
     # TODO limit access?
-    prof = SeekerProfile.query.filter_by(id=seeker_id).first()
-    if prof is None:
+    skr = SeekerProfile.query.filter_by(id=seeker_id).first()
+    if skr is None:
         # could not find profile with that id
         flash(f'No seeker with the id {seeker_id}.')
         return redirect(url_for('main.index'))
 
-    _name = f'{prof.first_name} {prof.last_name}'
-    return render_template('seeker/profile.html', fullname=_name)
+    _name = f'{skr.first_name} {skr.last_name}'
+    return render_template('seeker/profile.html', seeker=skr)
+
+
+@bp.route("/seeker/<seeker_id>/upload", methods=['POST'])
+def seeker_resume_upload(seeker_id):
+    # TODO make sure current user is seeker
+
+    skr = SeekerProfile.query.filter_by(id=seeker_id).first()
+    if skr is None:
+        # could not find profile with that id
+        flash(f'No seeker with the id {seeker_id}.')
+        return redirect(url_for('main.index'))
+    file = request.files['inputFile']
+    skr.resume = file.read()
+    app.db.session.commit()
+    return redirect(url_for('main.seeker_profile', seeker_id=seeker_id))
+
+
+@bp.route("/seeker/<seeker_id>/download")
+def seeker_resume_download(seeker_id):
+    skr = SeekerProfile.query.filter_by(id=seeker_id).first()
+    if skr is None:
+        # could not find profile with that id
+        flash(f'No seeker with the id {seeker_id}.')
+        return redirect(url_for('main.index'))
+    if skr.resume is None:
+        flash('Seeker does not have a resume uploaded.')
+        return redirect(url_for('main.seeker_profile', seeker_id=seeker_id))
+    # TODO assume docx okay?
+    filename = f"resume_{skr.last_name},{skr.first_name}.docx"
+    return send_file(BytesIO(skr.resume), attachment_filename=filename, as_attachment=True)
 
 
 @bp.route("/company/<company_id>")
@@ -107,7 +149,7 @@ def company_profile(company_id: int):
 
     _job_posts = JobPost.query.filter_by(company_id=company_id).order_by(JobPost.created_timestamp).all()
 
-    return render_template('company/profile.html', company_name=_name, citystate=_loc, url=_url,
+    return render_template('company/profile.html', company=prof,
                            job_posts=_job_posts)
 
 
@@ -185,17 +227,81 @@ def edit_job(job_id):
                            )
 
 
-@bp.route("/jobs")
+@bp.route("/jobs", methods=['GET', 'POST'])
 # @login_required
 def job_search():
     """
     Navigate to the job search page.
     """
     # TODO limit access to only seekers/admins?
+    print(f"JOBS PAGE-{request.method}\n\tFORM: {request.form}\n\tARGS: {request.args}")
+    if request.method == 'POST':
+        saved_name = request.form.get('query_saveas', '')
+        delete_info = request.form.get('query_delete', '')
+        if saved_name:  # user wants to save the recent search
+            query = request.query_string
+            save_job_search(current_user.id, saved_name, query.decode())
+            flash(f"Saved!")
+            return redirect(request.full_path)
+        elif delete_info:
+            q_id = current_user.id
+            q_label = request.form.get('label')
+            q_query = request.form.get('query')
+            delete_job_search(q_id, q_label, q_query)
+            flash(f"Deleted!")
+            return redirect(request.full_path)
+        a = job_form_to_url_params(request.form)
+        new_path = f"{request.path}?{a}"
+        return redirect(new_path)
 
-    posts = [(j.job_title, j.company, f"/company/{j.company_id}", j.location, j.expected_salary)
-             for j in JobPost.query.all()]
-    return render_template('company/browse.html', jobposts=posts)
+    # `request` is a global value that lets you check the URL request.
+    page_num = request.args.get('page', 1, type=int)
+
+    # query.all can be replaced with query.paginate to iteratively get that page's results.
+    # https://flask-sqlalchemy.palletsprojects.com/en/2.x/api/#flask_sqlalchemy.BaseQuery.paginate
+    req_kwargs = job_url_args_to_query_args(request.args)
+
+    pager = get_job_query(**req_kwargs).paginate(
+        page_num, app.Config.RESULTS_PER_PAGE, False)
+
+    prev_url = modify_query(request, page=pager.prev_num) if pager.has_prev else "#"
+    prev_link_clz = "disabled" if not pager.has_prev else ""
+
+    next_url = modify_query(request, page=pager.next_num) if pager.has_next else "#"
+    next_link_clz = "disabled" if not pager.has_next else ""
+
+    # get lower and upper page count for (up to) 5 surrounding pages
+    max_window = min(5, pager.pages)
+    pg_lower = pg_upper = page_num
+    while pg_upper-pg_lower+1 < max_window:
+        pg_lower = max(1, pg_lower-1)
+        pg_upper = min(pager.pages, pg_upper+1)
+
+    filter_options_set = job_url_args_to_input_states(request.args)
+
+    return render_template('company/search.html',
+                           tech_tuples=Skill.to_tech_tuples(0), biz_tuples=Skill.to_biz_tuples(0),
+                           att_tuples=Attitude.to_tuples(0),
+                           job_posts=pager.items,
+                           total=pager.total,
+                           page=page_num,
+                           plwr=pg_lower, pupr=pg_upper,
+                           dprev=prev_link_clz, prev_url=prev_url,
+                           dnext=next_link_clz, next_url=next_url,
+                           show_saveload=False,
+                           opts=filter_options_set
+                           )
+
+
+@bp.route("/jobs/download")
+def job_search_download():
+    req_kwargs = job_url_args_to_query_args(request.args)
+    results = get_job_query(**req_kwargs).all()
+    results = [s.to_dict() for s in results]
+    output = {"timestamp": datetime.now().isoformat(), "query": f"?{request.query_string.decode()}", "results": results}
+    return Response(json.dumps(output, indent=4),
+                    mimetype='text/json',
+                    headers={'Content-disposition': 'attachment; filename=job_search_results.json'})
 
 
 @bp.route("/job/<job_id>")
@@ -209,12 +315,88 @@ def job_page(job_id: int):
     return render_template('company/jobpost.html', job=job_post)
 
 
-@bp.route("/seekers")
+@bp.route("/seekers", methods=['GET', 'POST'])
 # @login_required
 def seeker_search():
     """
     Navigate to the seeker search page.
     """
     # TODO should be only for companies/admins?
-    seekers = [(s.full_name, s.tag_lines, s.location) for s in SeekerProfile.query.all()]
-    return render_template('seeker/browse.html', seekers=seekers)
+    if request.method == 'POST':
+        saved_name = request.form.get('query_saveas', '')
+        delete_info = request.form.get('query_delete', '')
+        if saved_name:  # user wants to save the recent search
+            query = request.query_string
+            save_seeker_search(current_user.id, saved_name, query.decode())
+            flash(f"Saved!")
+            return redirect(request.full_path)
+        elif delete_info:
+            q_id = current_user.id
+            q_label = request.form.get('label')
+            q_query = request.form.get('query')
+            delete_seeker_search(q_id, q_label, q_query)
+            flash(f"Deleted!")
+            return redirect(request.full_path)
+        a = seeker_form_to_url_params(request.form)
+        new_path = f"{request.path}?{a}"
+        return redirect(new_path)
+
+    # `request` is a global value that lets you check the URL request.
+    page_num = request.args.get('page', 1, type=int)
+
+    # query.all can be replaced with query.paginate to iteratively get that page's results.
+    # https://flask-sqlalchemy.palletsprojects.com/en/2.x/api/#flask_sqlalchemy.BaseQuery.paginate
+    req_kwargs = seeker_url_args_to_query_args(request.args)
+
+    pager = get_seeker_query(**req_kwargs).paginate(
+        page_num, app.Config.RESULTS_PER_PAGE, False)
+
+    prev_url = modify_query(request, page=pager.prev_num) if pager.has_prev else "#"
+    prev_link_clz = "disabled" if not pager.has_prev else ""
+
+    next_url = modify_query(request, page=pager.next_num) if pager.has_next else "#"
+    next_link_clz = "disabled" if not pager.has_next else ""
+
+    # get lower and upper page count for (up to) 5 surrounding pages
+    max_window = min(5, pager.pages)
+    pg_lower = pg_upper = page_num
+    while pg_upper-pg_lower+1 < max_window:
+        pg_lower = max(1, pg_lower-1)
+        pg_upper = min(pager.pages, pg_upper+1)
+
+    filter_options_set = seeker_url_args_to_input_states(request.args)
+
+    return render_template('seeker/search.html',
+                           tech_tuples=Skill.to_tech_tuples(0), biz_tuples=Skill.to_biz_tuples(0),
+                           att_tuples=Attitude.to_tuples(0),
+                           seeker_profiles=pager.items,  # .items gets the list of profiles
+                           total=pager.total,
+                           page=page_num,
+                           plwr=pg_lower, pupr=pg_upper,
+                           dprev=prev_link_clz, prev_url=prev_url,
+                           dnext=next_link_clz, next_url=next_url,
+                           show_saveload=False,
+                           opts=filter_options_set
+                           )
+
+
+@bp.route("/seekers/download")
+def seeker_search_download():
+    req_kwargs = seeker_url_args_to_query_args(request.args)
+    results = get_seeker_query(**req_kwargs).all()
+    results = [s.to_dict() for s in results]
+    output = {"timestamp": datetime.now().isoformat(), "query": f"?{request.query_string.decode()}", "results": results}
+    return Response(json.dumps(output, indent=4),
+                    mimetype='text/json',
+                    headers={'Content-disposition': 'attachment; filename=seeker_search_results.json'})
+
+
+# @bp.route("/maps")
+# def maps():
+#     seeker_coordinates = get_coordinates_seekers()
+#     job_coordinates = get_coordinates_jobs()
+#     company_coordinates = get_coordinates_companies()
+#     return render_template('admin/user_map.html',
+#                            seeker_coords = seeker_coordinates,
+#                            job_coords = job_coordinates,
+#                            company_coords = company_coordinates)

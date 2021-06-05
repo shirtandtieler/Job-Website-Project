@@ -17,6 +17,7 @@ for title, info in dataset.items():
     titles.append(title)
     weights.append(info['jobs'])
 
+
 def generate_jobpost(company_name, city=None, state=None, website=None):
     """
     Generates dict with keys:
@@ -89,4 +90,3 @@ def generate_jobpost(company_name, city=None, state=None, website=None):
         post["location"] = {"city": city, "state": state}
 
     return post
-    

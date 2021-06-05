@@ -1,24 +1,32 @@
+import colorsys
+import enum
+import re
 from datetime import datetime
 from hashlib import md5
+from operator import itemgetter
 from typing import List, Tuple, Union
+from zlib import crc32
+from datetime import datetime as dt
 
-from sqlalchemy.sql.elements import Null
-from flask import url_for
-from sqlalchemy.sql.elements import Null
-from sqlalchemy import Boolean, CheckConstraint, Column, Date, ForeignKey, Integer, SmallInteger, String, \
-    Sequence, Table, Text, UniqueConstraint, text, MetaData, DateTime
-from sqlalchemy.orm import relationship, validates
-from sqlalchemy.sql.functions import current_timestamp
-from sqlalchemy.sql.sqltypes import LargeBinary, SMALLINT, TIMESTAMP
-from sqlalchemy_imageattach.entity import Image, image_attachment
-from app import db, login
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-from sqlalchemy.sql.sqltypes import SMALLINT, TIMESTAMP
-import enum
+from geopy.distance import geodesic
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, \
+    Text, MetaData, DateTime
 from sqlalchemy.dialects.postgresql import ENUM
+from sqlalchemy.orm import relationship, validates
+from sqlalchemy.sql.sqltypes import LargeBinary, Numeric
+from sqlalchemy_imageattach.entity import Image, image_attachment
+from werkzeug.security import generate_password_hash, check_password_hash
+
+from app import db, login, geolocator
 
 metadata = MetaData()
+
+TINYGRAPH_THEMES = ["sugarsweets", "heatwave", "daisygarden", "seascape", "summerwarmth",
+                    "bythepool", "duskfalling", "frogideas", "berrypie"]
+TSKILL_TITLEIDS = None
+BSKILL_TITLEIDS = None
+ATTITUDE_TITLEIDS = None
 
 
 class AccountTypes(enum.Enum):
@@ -75,6 +83,21 @@ class EducationLevel(enum.IntEnum):
     doctoral = 4
 
 
+class WorkTypes(enum.IntEnum):
+    """
+    An enumeration for declaring what work type is desired.
+    Main 3 types are powers of two to allow for combinations.
+    """
+    full = 1
+    part = 2
+    contract = 4
+
+    full_or_part = 3
+    full_or_contract = 5
+    part_or_contract = 6
+    any = 7
+
+
 ##### SHARED TYPES #####
 
 ## TODO add admin profile (will service as the page with the cards for actions)
@@ -95,10 +118,22 @@ class Attitude(db.Model):
         return f"Attitude[{self.title}]"
 
     @staticmethod
-    def get_attitude_names():
-        return [[a.title for a in Attitude.query.all()]]
+    def to_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        global ATTITUDE_TITLEIDS
+        if ATTITUDE_TITLEIDS is None:
+            ATTITUDE_TITLEIDS = [(a.title, a.id) for a in Attitude.query.all()]
 
-    def to_dict(self):  ## TODO do this with the others
+        if sort_index is None:
+            return ATTITUDE_TITLEIDS
+        else:
+            return sorted(ATTITUDE_TITLEIDS, key=itemgetter(sort_index), reverse=reverse)
+
+    @staticmethod
+    def count() -> int:
+        tups = Attitude.to_tuples()
+        return len(tups)
+
+    def to_dict(self):  # TODO do this with the others?
         return {
             "title": self.title,
             "_seekers": [x.id for x in self._seekers],
@@ -129,8 +164,42 @@ class Skill(db.Model):
         return self.type == SkillTypes.b
 
     @staticmethod
-    def get_skill_names():
-        return [[s.title for s in Skill.query.all()]]
+    def count() -> int:
+        tups1 = Skill.to_tech_tuples()
+        tups2 = Skill.to_biz_tuples()
+        return len(tups1) + len(tups2)
+
+    @staticmethod
+    def to_tech_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        global TSKILL_TITLEIDS
+        if TSKILL_TITLEIDS is None:
+            TSKILL_TITLEIDS = [(s.title, s.id) for s in Skill.query.all() if s.is_tech()]
+
+        if sort_index is None:
+            return TSKILL_TITLEIDS
+        else:
+            return sorted(TSKILL_TITLEIDS, key=itemgetter(sort_index), reverse=reverse)
+
+    @staticmethod
+    def tech_count() -> int:
+        tups = Skill.to_tech_tuples()
+        return len(tups)
+
+    @staticmethod
+    def to_biz_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        global BSKILL_TITLEIDS
+        if BSKILL_TITLEIDS is None:
+            BSKILL_TITLEIDS = [(s.title, s.id) for s in Skill.query.all() if s.is_biz()]
+
+        if sort_index is None:
+            return BSKILL_TITLEIDS
+        else:
+            return sorted(BSKILL_TITLEIDS, key=itemgetter(sort_index), reverse=reverse)
+
+    @staticmethod
+    def biz_count() -> int:
+        tups = Skill.to_biz_tuples()
+        return len(tups)
 
 
 class UserPicture(db.Model, Image):
@@ -158,6 +227,8 @@ class User(UserMixin, db.Model):
     _picture = image_attachment("UserPicture", uselist=False, back_populates="_user")
     _company = relationship("CompanyProfile", uselist=False, back_populates="_user")
     _seeker = relationship("SeekerProfile", uselist=False, back_populates="_user")
+    _job_searches = relationship("SeekerJobSearch", back_populates="_user")
+    _seeker_searches = relationship("CompanySeekerSearch", back_populates="_user")
 
     def __repr__(self):
         status = ("" if self.is_active else "Non") + "Active"
@@ -171,8 +242,7 @@ class User(UserMixin, db.Model):
 
     def avatar(self, size):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
-        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(
-            digest, size)
+        return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
 
     def update(self):
         if self.is_active:
@@ -180,9 +250,10 @@ class User(UserMixin, db.Model):
 
 
 @login.user_loader
-def load_user(id):
-    print(f"Loading user w/id {id}")
-    return User.query.get(int(id))
+def load_user(id_):
+    print(f"Loading user w/id {id_}")
+    return User.query.get(int(id_))
+
 
 ##### PROFILES ######
 
@@ -200,9 +271,8 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
     city = Column(String(191))
     state = Column(String(2))
     website = Column(String(191))
-
-    # TODO add logo (and banner?) then replace instances that use 'blue_company' image
-    # TODO add slogan or description?
+    tagline = Column(String(100))
+    summary = Column(String)
 
     _user = relationship("User", back_populates="_company")
     _job_posts = relationship("JobPost", back_populates="_company")
@@ -228,6 +298,23 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
             raise ValueError(f"Account type is not a Company")
         return company_id
 
+    def avatar(self, size=128):
+        _hashstr = re.sub(r"\W", "", self.name)
+        # choose "random" attributes (theme and number of colors) based on lazy encoding
+        _hashint = sum([ord(x) for x in self.name])
+        _theme = TINYGRAPH_THEMES[_hashint % len(TINYGRAPH_THEMES)]
+        _ncolors = 3 + (_hashint % 2)
+        return f"http://www.tinygraphs.com/spaceinvaders/{_hashstr}?theme={_theme}&numcolors={_ncolors}&size={size}"
+
+    def banner(self, dims=(100, 20)):
+        _hashstr = re.sub(r"\W", "", self.name)
+        # choose "random" attributes (theme and number of colors) based on lazy encoding
+        _hashint = sum([ord(x) for x in self.name])
+        _theme = TINYGRAPH_THEMES[_hashint % len(TINYGRAPH_THEMES)]
+        _ncolors = 3 + (_hashint % 2)
+        _ntris = 40 + (_hashint % 20)
+        return f"https://www.tinygraphs.com/isogrids/banner/random/gradient?w={dims[0]}&h={dims[1]}&xt={_ntris}&theme={_theme}&numcolors={_ncolors}"
+
 
 class SeekerProfile(db.Model):
     """
@@ -249,6 +336,10 @@ class SeekerProfile(db.Model):
     phone_number = Column(String(10))
     city = Column(String(191))
     state = Column(String(2))
+    work_wanted = Column(ENUM(WorkTypes), default=WorkTypes.any)
+    remote_wanted = Column(Boolean, default=False)
+    tagline = Column(String(100))
+    summary = Column(String)
     resume = Column(LargeBinary)
 
     _user = relationship("User", back_populates="_seeker")
@@ -285,38 +376,192 @@ class SeekerProfile(db.Model):
             return "USA"
 
     @property
-    def tag_lines(self):
-        """ Return a list of things this seeker can boast about."""
-        lines = []
-        # get a line about a number of their highest skills
-        skill_highest_lvl, skill_highest_count = 0, 0
-        for skl in self._skills:
-            lvl = int(skl.skill_level)
-            if lvl > skill_highest_lvl:
-                skill_highest_lvl = lvl
-                skill_highest_count = 1
-            elif lvl == skill_highest_lvl:
-                skill_highest_count += 1
-        if skill_highest_lvl > 0:  # make sure seeker has some skills
-            skill_lvl = str(SkillLevels(skill_highest_lvl))
-            lvl_name = skill_lvl[skill_lvl.index('.')+1:].capitalize()
-            s = "skills" if skill_highest_count > 1 else "skill"
-            lines.append(f"{lvl_name} in {skill_highest_count} {s}")
-        # get a line about their past experience
-        if len(self._history_edus) > 0 and len(self._history_jobs) > 0:
-            total_years = sum([job.years_employed for job in self._history_jobs])
-            d = "degrees" if len(self._history_edus) > 1 else "degree"
-            y = "years" if total_years > 1 else "year"
-            lines.append(f"Holds {len(self._history_edus)} {d} and {total_years} {y} of job experience.")
-        elif len(self._history_edus) > 0:
-            d = "degrees" if len(self._history_edus) > 1 else "degree"
-            lines.append(f"Holds {len(self._history_edus)} {d}")  # TODO maybe add highest level/give example?
-        elif len(self._history_jobs) > 0:
-            total_years = sum([job.years_employed for job in self._history_jobs])
-            y = "years" if total_years > 1 else "year"
-            lines.append(f"Has {total_years} {y} of job experience.")  # TODO maybe add example title?
-        return lines
+    def phone_formatted(self):
+        if self.phone_number is None:
+            return "Not provided"
+        return re.sub(r"(\d*)(\d{3})(\d{3})(\d{4})", r"\1(\2) \3 - \4", self.phone_number)
 
+    @property
+    def work_wanted_list(self):
+        wants = self.work_wanted.name.replace("_or_", "_").split("_")
+        if WorkTypes.any.name in wants:
+            wants = ["full", "part", "contract"]
+        return wants
+
+    @property
+    def work_wanted_abbv(self):
+        wants = self.work_wanted_list
+        abbvs = []
+        for w in wants:
+            if w == 'full':
+                abbvs.append("Ft")
+            elif w == 'part':
+                abbvs.append("Pt")
+            else:
+                abbvs.append("C")
+        return abbvs
+
+    @property
+    def min_edu_level(self) -> int:
+        """
+        Converts the education experience to a single int representing the minimum qualifications held.
+        This is one higher than the EducationLevel values (0 = no education, 1 = certification, etc.)
+        """
+        if len(self._history_edus) == 0:
+            return 0
+        # add one since allocating 0 for 'none'
+        return int(max([e.education_lvl for e in self._history_edus])) + 1
+
+    @property
+    def min_edu_abbv(self) -> str:
+        """
+        Get's the abbreviated degree name of the min education level.
+        """
+        lvl = self.min_edu_level
+        if lvl == 0:
+            return "None"
+        elif lvl == 1:
+            return "Cert"
+        elif lvl == 2:
+            return "A.S."
+        elif lvl == 3:
+            return "B.S."
+        elif lvl == 4:
+            return "M.S."
+        elif lvl == 5:
+            return "D.S."
+
+    @property
+    def years_job_experience(self) -> int:
+        """
+        Calculates the number of years of job experience held.
+        """
+        return sum([job.years_employed for job in self._history_jobs])
+
+    def get_tech_skills_levels(self):
+        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if
+                  skr_skl._skill.is_tech()]
+        output.sort(key=itemgetter(1), reverse=True)
+        return output
+
+    def get_tech_skills(self, only_max=False):
+        skl_lvls = self.get_tech_skills_levels()
+        if not skl_lvls:
+            return []
+        if not only_max:
+            return [s[0] for s in skl_lvls]
+        _max = skl_lvls[0][1]
+        skls = []
+        for skl, lvl in skl_lvls:
+            if lvl < _max:
+                break
+            skls.append(skl)
+        return skls
+
+    def get_biz_skills_levels(self) -> List[Tuple[str, int]]:
+        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if
+                  skr_skl._skill.is_biz()]
+        output.sort(key=itemgetter(1), reverse=True)
+        return output
+
+    def get_biz_skills(self, only_max=False) -> List[Union[str,Tuple[str, int]]]:
+        skl_lvls = self.get_biz_skills_levels()
+        if not skl_lvls:
+            return []
+        if not only_max:
+            return [s[0] for s in skl_lvls]
+        _max = skl_lvls[0][1]
+        skls = []
+        for skl, lvl in skl_lvls:
+            if lvl < _max:
+                break
+            skls.append(skl)
+        return skls
+
+    def get_attitudes(self) -> List[str]:
+        return [skr_att._attitude.title for skr_att in self._attitudes]
+
+    def is_within(self, distance_limit_mi, city, state) -> bool:
+        if not self.city and not self.state:
+            # always return true if user does not have a city or a state
+            return True
+
+        self_coords = LocationCoordinates.get(self.city, self.state)
+        other_coords = LocationCoordinates.get(city, state)
+
+        dist_mi = geodesic(self_coords, other_coords).miles
+        return dist_mi <= distance_limit_mi
+
+    def avatar(self, size=128):
+        # convert email to random number between 0 and 1
+        r01 = float(crc32(self._user.email.encode("utf-8")) & 0xffffffff) / 2 ** 32
+        rand_bg_hex = "".join([hex(int(round(255 * x)))[2:] for x in colorsys.hsv_to_rgb(r01, 0.25, 1.0)])
+        url = f"https://ui-avatars.com/api/?rounded=true&bold=true&color=00000" \
+              f"&size={size}&background={rand_bg_hex}&name={self.first_name}+{self.last_name}"
+        return url
+
+    def to_dict(self) -> dict:
+        """ Converts an instance of this class to a dictionary (e.g., for JSONifying it)"""
+        d = dict()
+        d['id'] = self.id
+        d['name'] = self.full_name
+        d['email'] = self._user.email
+        d['phone'] = self.phone_number
+        d['location'] = self.location
+        ww = int(self.work_wanted)
+        d['work_types'] = {
+            'full': ww & 1 > 0,
+            'part': ww & 2 > 0,
+            'contract': ww & 4 > 0,
+            'remote': self.remote_wanted}
+        d['descriptions'] = {
+            'tagline': self.tagline,
+            'summary': self.summary}
+        d['skills'] = {
+            '__comment': 'Range: [1-5]',
+            'tech': dict(self.get_tech_skills_levels()),
+            'biz': dict(self.get_biz_skills_levels())}
+        d['values'] = self.get_attitudes()
+        d['history'] = {
+            'education': [entry.to_dict() for entry in self._history_edus],
+            'work': [entry.to_dict() for entry in self._history_jobs]}
+        return d
+
+    def encode_tech_skills(self) -> int:
+        """
+        Converts technical skills possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        tskill_ids = [s.skill_id for s in self._skills if s._skill.is_tech()]
+        enc = ['0' for _ in range(Skill.count())]
+        for _id in tskill_ids:
+            enc[_id - 1] = '1'
+        return int(''.join(enc), base=2)
+
+    def encode_biz_skills(self) -> int:
+        """
+        Converts business skills possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        bskill_ids = [s.skill_id for s in self._skills if s._skill.is_biz()]
+        enc = ['0' for _ in range(Skill.count())]
+        for _id in bskill_ids:
+            enc[_id - 1] = '1'
+        return int(''.join(enc), base=2)
+
+    def encode_attitudes(self) -> int:
+        """
+        Converts attitudes possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        att_ids = [s.attitude_id for s in self._attitudes]
+        enc = ['0' for _ in range(Attitude.count())]
+        for _id in att_ids:
+            enc[_id - 1] = '1'
+        return int(''.join(enc), base=2)
 
 
 class SeekerSkill(db.Model):
@@ -376,6 +621,28 @@ class SeekerHistoryEducation(db.Model):
     def __repr__(self):
         return f"Seeker[{self.seeker_id}]-EduExp[{self.education_lvl}:{self.study_field}@{self.school}]"
 
+    @property
+    def education_lvl_abbv(self):
+        lvl = self.education_lvl
+        if lvl == 0:
+            return "Certification"
+        elif lvl == 1:
+            return "A.S."
+        elif lvl == 2:
+            return "B.S."
+        elif lvl == 3:
+            return "M.S."
+        elif lvl == 4:
+            return "D.S."
+        return "???"
+
+    def to_dict(self) -> dict:
+        d = dict()
+        d['school'] = self.school
+        d['type'] = self.education_lvl.name
+        d['field'] = self.study_field
+        return d
+
 
 class SeekerHistoryJob(db.Model):
     """
@@ -393,6 +660,12 @@ class SeekerHistoryJob(db.Model):
 
     def __repr__(self):
         return f"Seeker[{self.seeker_id}]-JobExp[{self.job_title}:{self.years_employed} years]"
+
+    def to_dict(self) -> dict:
+        d = dict()
+        d['title'] = self.job_title
+        d['years'] = self.years_employed
+        return d
 
 
 class SeekerApplication(db.Model):
@@ -450,6 +723,7 @@ class JobPost(db.Model):
     city = Column(String(191))
     state = Column(String(2))
     description = Column(Text)
+    work_type = Column(ENUM(WorkTypes), default=WorkTypes.any)
     is_remote = Column(Boolean, default=False)
     salary_min = Column(Integer)
     salary_max = Column(Integer)
@@ -477,10 +751,26 @@ class JobPost(db.Model):
             loc = f"{self.city}{self.state}"
         else:
             loc = "USA"
-
-        if self.is_remote:
-            loc += " (remote available)"
         return loc
+
+    def get_work_types_list(self):
+        wt = self.work_type or WorkTypes.any
+        types = wt.name.replace("_or_", "_").split("_")
+        if WorkTypes.any.name in types:
+            types = ["full", "part", "contract"]
+        return types
+
+    def get_work_types_abbv(self):
+        types = self.get_work_types_list()
+        abbvs = []
+        for t in types:
+            if t == 'full':
+                abbvs.append("Ft")
+            elif t == 'part':
+                abbvs.append("Pt")
+            else:
+                abbvs.append("C")
+        return abbvs
 
     @property
     def expected_salary(self):
@@ -493,6 +783,71 @@ class JobPost(db.Model):
         else:
             sal = f"Salary depends on experience"
         return sal
+
+    @property
+    def age(self) -> str:
+        """
+        A string to represent the age of this post.
+        It's intended to be in a phrasing that would work with the format: "Posted X ago".
+        """
+        tdelta = dt.now() - self.created_timestamp
+        if tdelta.days >= 548:  # enough to round it up to 2 years
+            return f'about {tdelta.days/365:.0f} years'
+        elif tdelta.days >= 345:  # enough to round it up to 1 year (so it doesn't report '12 months')
+            return f'about a year'
+        elif tdelta.days > 45:  # beyond 1 month (after rounding)
+            return f'about {tdelta.days/30:.0f} months'
+        elif tdelta.days > 24:  # enough to round it up to 1 month (so it doesn't report '4 weeks')
+            return f'about a month'
+        elif tdelta.days > 7:
+            # round to nearest half, dropping '.0' when whole
+            return f'{round((tdelta.days/7)*2)/2:g} weeks'
+        elif tdelta.days == 7:
+            return 'a week'
+        elif tdelta.days > 1:
+            return f'{tdelta.days} days'
+        elif tdelta.days == 1:
+            return f'a day'
+        # break it down into parts of a day
+        hours = tdelta.seconds // 3600
+        if hours > 1:
+            return f'{hours:.0f} hours'
+        elif hours == 1:
+            return f'an hour'
+        minutes = tdelta.seconds % 3600 / 60
+        if minutes > 1:
+            return f'{minutes:.0f} minutes'
+        elif minutes == 1:
+            return f'a minute'
+        return 'moments'
+
+    def to_dict(self):
+        d = dict()
+        d['id'] = self.id
+        d['creation'] = self.created_timestamp.isoformat()
+        d['active'] = self.active
+        d['company'] = {
+            'id': self.company_id,
+            'name': self._company.name
+        }
+        d['title'] = self.job_title
+        d['location'] = self.location
+        wt = int(self.work_type or WorkTypes.any)
+        d['work_types'] = {
+            'full': wt & 1 > 0,
+            'part': wt & 2 > 0,
+            'contract': wt & 4 > 0,
+            'remote': self.is_remote
+        }
+        d['salary'] = [self.salary_min, self.salary_max]
+        d['description'] = self.description
+        d['skills'] = {
+            '__comment': '(title, min. skill level [1-5], importance level [1-5])',
+            'tech': [(entry._skill.title, entry.skill_level_min, entry.importance_level) for entry in self._skills if entry._skill.is_tech()],
+            'biz': [(entry._skill.title, entry.skill_level_min, entry.importance_level) for entry in self._skills if entry._skill.is_biz()]
+        }
+        d['values'] = [(entry._attitude.title, entry.importance_level) for entry in self._attitudes]
+        return d
 
     def n_tech_skills(self):
         n = 0
@@ -511,7 +866,7 @@ class JobPost(db.Model):
     def n_skills(self):
         return len(self._skills)
 
-    def get_skills_data(self, type='all', name=False) -> List[Tuple[Union[str, int], int, int]]:
+    def get_skills_data(self, type_='all', name=False) -> List[Tuple[Union[str, int], int, int]]:
         """
         Gets a list of skills, where each entry contains:
             1. the id or name of the skill (depends on the value of `name`)
@@ -519,9 +874,9 @@ class JobPost(db.Model):
             3. the importance level (0-5)
         Can filter skills to either [t]ech, [b]iz, or [a]ll
         """
-        matches_type = lambda skl: type == 'all' or \
-                                   (type.startswith('t') and skl._skill.is_tech()) or \
-                                   (type.startswith('b') and skl._skill.is_biz())
+        matches_type = lambda skl: type_ == 'all' or \
+                                   (type_.startswith('t') and skl._skill.is_tech()) or \
+                                   (type_.startswith('b') and skl._skill.is_biz())
         return [(s._skill.title if name else s.skill_id, s.skill_level_min, s.importance_level)
                 for s in self._skills if matches_type(s)]
 
@@ -536,6 +891,53 @@ class JobPost(db.Model):
         """
         return [(a._attitude.title if name else a.attitude_id, a.importance_level)
                 for a in self._attitudes]
+
+    def is_within(self, distance_limit_mi, city, state) -> bool:
+        if not self.city and not self.state:
+            # always return true if user does not have a city or a state
+            return True
+
+        self_coords = LocationCoordinates.get(self.city, self.state)
+        other_coords = LocationCoordinates.get(city, state)
+
+        dist_mi = geodesic(self_coords, other_coords).miles
+        return dist_mi <= distance_limit_mi
+
+    def encode_tech_skills(self) -> int:
+        """
+        Converts technical skills possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        tskill_ids = [s.skill_id for s in self._skills if s._skill.is_tech()]
+        enc = ['0' for _ in range(Skill.count())]
+        for _id in tskill_ids:
+            enc[_id - 1] = '1'
+        return int(''.join(enc), base=2)
+
+    def encode_biz_skills(self) -> int:
+        """
+        Converts business skills possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        bskill_ids = [s.skill_id for s in self._skills if s._skill.is_biz()]
+        enc = ['0' for _ in range(Skill.count())]
+        for _id in bskill_ids:
+            enc[_id - 1] = '1'
+        return int(''.join(enc), base=2)
+
+    def encode_attitudes(self) -> int:
+        """
+        Converts attitudes possessed to an integer.
+        Only looks at whether the seeker added it to their profile.
+        """
+        # skill_id skill_level
+        att_ids = [s.attitude_id for s in self._attitudes]
+        enc = ['0' for _ in range(Attitude.count())]
+        for _id in att_ids:
+            enc[_id - 1] = '1'
+        return int(''.join(enc), base=2)
 
 
 class JobPostSkill(db.Model):
@@ -568,7 +970,7 @@ class JobPostAttitude(db.Model):
     __tablename__ = 'jobpost_attitude'
 
     id = Column(Integer, nullable=False, primary_key=True)
-    jobpost_id = Column(Integer, ForeignKey('jobpost.id', ondelete="CASCADE"), nullable= False)
+    jobpost_id = Column(Integer, ForeignKey('jobpost.id', ondelete="CASCADE"), nullable=False)
     attitude_id = Column(Integer, ForeignKey('attitude.id', ondelete="CASCADE"), nullable=False)
     importance_level = Column(ENUM(ImportanceLevel), default=ImportanceLevel.none)
 
@@ -580,31 +982,70 @@ class JobPostAttitude(db.Model):
 
 
 ##### SEARCHES #####
-'''
-class SeekerSearch(db.Model):
-    __tablename__='seeker_search'
-    id = Column(Integer, nullable=False, primary_key=True)
-    seeker_id = Column(Integer, ForeignKey('seeker.id'),nullable=False)
-    job_id = Column(Integer, ForeignKey('jobpost.id'),nullable=False)
-    label = Column(job_lables, nullable=False)
-
-    user = relationship('User')
-    skill = relationship('Skill', back_populates= 'SeekerSearch')
-'''
-
-'''
-
 class CompanySeekerSearch(db.Model):
-    __tablename__ = 'companyseekersearch'
-
+    __tablename__ = 'company_seeker_search'
     id = Column(Integer, nullable=False, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    label = Column(String, nullable=False)
+    query = Column(String, nullable=False)
 
-    seekrid = Column(Integer, ForeignKey('seekerprofile.seeker_id'), nullable=False)
-    seekr_city = Column(Integer, ForeignKey('seekerprofile.city'), nullable=False)
-    seekr_state = Column(Integer, ForeignKey('seekerprofile.state'), nullable=False)
-    seekr_skill = Column(ForeignKey('skill.title'), default='Not update yet')
-    seekr_type = Column(ForeignKey('skill.type'), default='Not update yet')
-    seekr_attitude = Column(ForeignKey('attitude.title'), nullable=False)
-    company = relationship("CompanyProfile", back_populates="companyseekersearch")
-'''
+    _user = relationship("User", back_populates="_seeker_searches")
 
+
+class SeekerJobSearch(db.Model):
+    __tablename__ = 'seeker_job_search'
+    id = Column(Integer, nullable=False, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    label = Column(String, nullable=False)
+    query = Column(String, nullable=False)
+
+    _user = relationship("User", back_populates="_job_searches")
+
+
+##### LOGGING/CACHE #####
+class LocationCoordinates(db.Model):
+    """
+    This table contains a mapping between a location string to the coordinates of that location.
+    It contains static functions to convert a given city/state to the expected format and to 'get' coordinates
+        (which will attempt to first retrieve from the table, then query the geolocator if not present).
+    Locations are in the format: `X, Y USA` where X is the city name and Y is the state's 2 letter abbreviation.
+    """
+    __tablename__ = 'location_coordinates'
+    location = Column(String, nullable=False, primary_key=True)
+    latitude = Column(Numeric)
+    longitude = Column(Numeric)
+
+    @staticmethod
+    def to_location(city: str = None, state: str = None) -> str:
+        """
+        Converts a city and state (both optional) to the key expected by this table.
+        """
+        if city is None and state is None:
+            return "USA"
+        elif city is None or state is None:
+            return f"{city or ''}{state or ''}, USA"
+        return f"{city}, {state} USA"
+
+    @staticmethod
+    def get(city: str = None, state: str = None, fallback=True) -> Tuple[float, float]:
+        """
+        Gets the coordinates for the given city and/or state.
+        If fallback is true, it will attempt to get the closest matching result
+            (just state if city cannot be found, otherwise just 'USA')
+        """
+        loc_id = LocationCoordinates.to_location(city, state)
+        row = LocationCoordinates.query.get(loc_id)
+        if row is None:
+            # not present, create then return
+            loc_obj = geolocator.geocode(loc_id)
+            if loc_obj is None or loc_obj.latitude is None:
+                if not fallback:
+                    raise ValueError(f"Cannot be found: '{loc_id}' (city: {city}, state: {state})")
+                if city is not None:  # try just getting the state
+                    return LocationCoordinates.get(None, state, fallback)
+                # otherwise just get 'USA'
+                return LocationCoordinates.get(None, None, fallback)
+            row = LocationCoordinates(location=loc_id, latitude=loc_obj.latitude, longitude=loc_obj.longitude)
+            db.session.add(row)
+            db.session.commit()
+        return row.latitude, row.longitude

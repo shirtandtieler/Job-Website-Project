@@ -58,7 +58,7 @@
 {% endblock %}
 
 {% block content %}
-	<div class="container">
+	<div class="container mt-5">
 		{% with messages = get_flashed_messages() %}
 		{% if messages %}
 		<ul>
@@ -87,10 +87,17 @@
 {{ super() }}
 <!--<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">-->
 <script src="https://kit.fontawesome.com/3ed42264b8.js" crossorigin="anonymous"></script>
+<link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
 <style>
 	body{
 		margin-left: 20px;
 		margin-right: 20px;
+	}
+	@media (max-width: 600px) {
+		body {
+			margin-left: 5px;
+			margin-right: 5px;
+		}
 	}
 </style>
 {% endblock %}
