@@ -1,57 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-        crossorigin="anonymous"></script>
-
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-        crossorigin="anonymous"></script>
-
-    <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="Stylesheet">
-    </link>
-    <link rel="stylesheet" href="profile_editor_styles.css">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-    <title>Document</title>
-
-
-    <script src="https://kit.fontawesome.com/3ed42264b8.js" crossorigin="anonymous"></script>
-    <link rel="shortcut icon" href="/static/images/favicon.ico">
-    <style>
-        body {
-            margin-left: 20px;
-            margin-right: 20px;
-        }
-
-        @media (max-width: 600px) {
-            body {
-                margin-left: 5px;
-                margin-right: 5px;
-            }
-        }
-    </style>
-
-    <style>
-        .invicon:hover {
-            color: red;
-        }
-    </style>
-</head>
-
-<body>
+{% block app_content %}
 
     <!-- Education Modal -->
     <div class="modal fade" data-backdrop="static" id="educationAddModal" tabindex="-1" role="dialog"
@@ -261,249 +210,323 @@
         </div>
     </div>
     </div>
-    <script>
+{% endblock %}
 
-        // Make an Education card based on input from add Education Modal
-        function saveEducation() {
+{% block scripts %}
+{{ super() }}
+<script>
 
-            // gather input from modal form:
-            const { schoolName, fieldOfStudy } = Array.from(document.querySelectorAll('#educationForm input')).reduce((acc, input) => ({ ...acc, [input.id]: input.value }), {});
-            // console.log(`School: ${schoolName} and Field: ${fieldOfStudy}`);
-            const degreeType = document.querySelector('#inlineFormCustomSelect').selectedOptions[0].label;
-            // console.log(`Degree selection: ${degreeType}`);
-            var ul = document.getElementById("education_experience");
+    // Make an Education card based on input from add Education Modal
+    function saveEducation() {
 
-            //generate a new education card that looks like this:
-            /*
-            <li class="list-group-item">
-                <p class="mb-0 pt-1" style="line-height:12px">Bachelor's Degree in Computer Science</p>
-                <small class="fw-light">DePaul University</small>
-            </li>
-            */
-            var li = document.createElement("li");
-            li.setAttribute("class", "list-group-item");
-            liChildAppend = ul.appendChild(li);
+        // gather input from modal form:
+        const { schoolName, fieldOfStudy } = Array.from(document.querySelectorAll('#educationForm input')).reduce((acc, input) => ({ ...acc, [input.id]: input.value }), {});
+        // console.log(`School: ${schoolName} and Field: ${fieldOfStudy}`);
+        const degreeType = document.querySelector('#inlineFormCustomSelect').selectedOptions[0].label;
+        // console.log(`Degree selection: ${degreeType}`);
+        var ul = document.getElementById("education_experience");
 
-            var p = document.createElement("p");
-            p.setAttribute("class", "mb-0 pt-1");
-            p.setAttribute("style", "line-height:12px");
-            pChildAppend = liChildAppend.appendChild(p);
-            pChildAppend.innerHTML = `${degreeType} in ${fieldOfStudy}`;
+        //generate a new education card that looks like this:
+        /*
+        <li class="list-group-item">
+            <p class="mb-0 pt-1" style="line-height:12px">Bachelor's Degree in Computer Science</p>
+            <small class="fw-light">DePaul University</small>
+        </li>
+        */
+        var li = document.createElement("li");
+        li.setAttribute("class", "list-group-item");
+        liChildAppend = ul.appendChild(li);
 
-            var small = document.createElement("small");
-            small.setAttribute("class", "fw-light");
-            smallChildAppend = liChildAppend.appendChild(small);
-            smallChildAppend.innerHTML = `${schoolName}`;
+        var p = document.createElement("p");
+        p.setAttribute("class", "mb-0 pt-1");
+        p.setAttribute("style", "line-height:12px");
+        pChildAppend = liChildAppend.appendChild(p);
+        pChildAppend.innerHTML = `${degreeType} in ${fieldOfStudy}`;
 
-            p2 = document.createElement("p");
-            liChildAppend.appendChild(p2);
+        var small = document.createElement("small");
+        small.setAttribute("class", "fw-light");
+        smallChildAppend = liChildAppend.appendChild(small);
+        smallChildAppend.innerHTML = `${schoolName}`;
 
-            var deleteButton = document.createElement("button");
-            deleteButton.setAttribute("class", "btn btn-secondary fas fa-trash invicon");
-            deleteButton.appendChild(document.createTextNode(" delete"));
-            liChildAppend.appendChild(deleteButton);
-            deleteButton.onclick = function () {
-                this.parentElement.style.display = "none";
-            }
+        p2 = document.createElement("p");
+        liChildAppend.appendChild(p2);
+
+        var deleteButton = document.createElement("button");
+        deleteButton.setAttribute("class", "btn btn-secondary fas fa-trash invicon");
+        deleteButton.appendChild(document.createTextNode(" delete"));
+        liChildAppend.appendChild(deleteButton);
+        deleteButton.onclick = function () {
+            this.parentElement.style.display = "none";
+        }
+    }
+
+    // Make an Professional Experience card based on input from add Professional Experience Modal
+    function saveProfessionExperience() {
+        // gather input from modal form:
+        const { jobTitle, yearsWorked } = Array.from(document.querySelectorAll('#professionalForm input')).reduce((acc, input) => ({ ...acc, [input.id]: input.value }), {});
+        // console.log(`Job: ${jobTitle} and Years: ${yearsWorked}`);
+        var ul = document.getElementById('professional_experience');
+
+        //generate a new professional card that looks like this:
+        /*
+        <li class="list-group-item">
+            <p class="mb-0 pt-1" style="line-height:12px">Job Title</p>
+            <small class="fw-light">N-num years</small>
+        </li>
+        */
+
+        var li = document.createElement("li");
+        li.setAttribute("class", "list-group-item");
+        liChildAppend = ul.appendChild(li);
+
+        var p = document.createElement("p");
+        p.setAttribute("class", "mb-0 pt-1");
+        p.setAttribute("style", "line-height:12px");
+        pChildAppend = liChildAppend.appendChild(p);
+        pChildAppend.innerHTML = `${jobTitle}`;
+
+        var small = document.createElement("small");
+        small.setAttribute("class", "fw-light");
+        smallChildAppend = liChildAppend.appendChild(small);
+        smallChildAppend.innerHTML = `${yearsWorked}`;
+
+        p2 = document.createElement("p");
+        liChildAppend.appendChild(p2);
+
+        var deleteButton = document.createElement("button");
+        deleteButton.setAttribute("class", "btn btn-secondary fas fa-trash invicon");
+        deleteButton.appendChild(document.createTextNode(" delete"));
+        liChildAppend.appendChild(deleteButton);
+        deleteButton.onclick = function () {
+            this.parentElement.style.display = "none";
+        }
+    }
+
+    var count_skills = 0; // global counters for how many items in the skills list
+    var count_attitudes = 0; // global counters for how many items in the att. list
+    var count_education = 0; // global counters for how many items in the education list
+
+    var skill_lvls = ["Novice", "Familiar", "Competent", "Proficient", "Expert"];
+    var importance_lvls = ["Very Low", "Low", "Medium", "High", "Very High"];
+
+    function on_trash_req() {
+        // event.target will be the input element.
+        var td = event.target.parentNode.parentNode.parentNode;
+        var tr = td.parentNode; // the row to be removed
+        tr.parentNode.removeChild(tr);
+    }
+
+    function new_req(name, is_skill, chosen_skill_lvl, chosen_imp_lvl) {
+        // setup default values
+        if (!chosen_skill_lvl) {
+            chosen_skill_lvl = 0;
+        }
+        if (!chosen_imp_lvl) {
+            chosen_imp_lvl = 0;
         }
 
-        // Make an Professional Experience card based on input from add Professional Experience Modal
-        function saveProfessionExperience() {
-            // gather input from modal form:
-            const { jobTitle, yearsWorked } = Array.from(document.querySelectorAll('#professionalForm input')).reduce((acc, input) => ({ ...acc, [input.id]: input.value }), {});
-            // console.log(`Job: ${jobTitle} and Years: ${yearsWorked}`);
-            var ul = document.getElementById('professional_experience');
-
-            //generate a new professional card that looks like this:
-            /*
-            <li class="list-group-item">
-                <p class="mb-0 pt-1" style="line-height:12px">Job Title</p>
-                <small class="fw-light">N-num years</small>
-            </li>
-            */
-
-            var li = document.createElement("li");
-            li.setAttribute("class", "list-group-item");
-            liChildAppend = ul.appendChild(li);
-
-            var p = document.createElement("p");
-            p.setAttribute("class", "mb-0 pt-1");
-            p.setAttribute("style", "line-height:12px");
-            pChildAppend = liChildAppend.appendChild(p);
-            pChildAppend.innerHTML = `${jobTitle}`;
-
-            var small = document.createElement("small");
-            small.setAttribute("class", "fw-light");
-            smallChildAppend = liChildAppend.appendChild(small);
-            smallChildAppend.innerHTML = `${yearsWorked}`;
-
-            p2 = document.createElement("p");
-            liChildAppend.appendChild(p2);
-
-            var deleteButton = document.createElement("button");
-            deleteButton.setAttribute("class", "btn btn-secondary fas fa-trash invicon");
-            deleteButton.appendChild(document.createTextNode(" delete"));
-            liChildAppend.appendChild(deleteButton);
-            deleteButton.onclick = function () {
-                this.parentElement.style.display = "none";
-            }
+        // setup references and ids
+        var ul = null;
+        var pfx = null; // id reference prefix
+        var sfx = null; // id reference suffix
+        if (is_skill) {
+            ul = document.getElementById("req_skills");
+            pfx = "req_skills-" + count_skills;
+            sfx = "skill";
+            count_skills++;
+        } else {
+            ul = document.getElementById("req_attitudes");
+            pfx = "req_attitudes-" + count_attitudes;
+            sfx = "att";
+            count_attitudes++;
         }
 
-        var count_skills = 0; // global counters for how many items in the skills list
-        var count_attitudes = 0; // global counters for how many items in the att. list
-        var count_education = 0; // global counters for how many items in the education list
+        // dynamically create new entry.
+        // based on code generated from rendering the form with a fixed number
+        //  of entries.
+        var li = document.createElement("li");
+        var tbl = document.createElement("table");
+        //tbl.setAttribute("name", pfx);
+        tbl.setAttribute("id", pfx);
 
-        var skill_lvls = ["Novice", "Familiar", "Competent", "Proficient", "Expert"];
-        var importance_lvls = ["Very Low", "Low", "Medium", "High", "Very High"];
+        // first row displays chosen skill/attitude
+        var tr1 = document.createElement("tr");
+        var td1 = document.createElement("td");
+        var sel1 = document.createElement("select");
+        sel1.setAttribute("id", pfx + "-" + sfx);
+        sel1.setAttribute("name", pfx + "-" + sfx);
+        var opt1 = document.createElement("option");
+        opt1.setAttribute("value", name);
+        opt1.appendChild(document.createTextNode(name));
+        sel1.appendChild(opt1);
+        td1.appendChild(sel1);
+        /*
+        // APPARENTLY CANT CREATE A DIFFERENT ELEMENT TYPE.
+        // So just recreated a select with only 1 option.
+        var inp1 = document.createElement("input");
+        inp1.setAttribute("type", "text");
+        inp1.setAttribute("readonly", "");
+        inp1.setAttribute("class", "form-control-plaintext");
+        inp1.setAttribute("id", pfx + "-" + sfx);
+        inp1.setAttribute("value", name);
+        td1.appendChild(inp1);
+        */
+        tr1.appendChild(td1);
 
-        function on_trash_req() {
-            // event.target will be the input element.
-            var td = event.target.parentNode.parentNode.parentNode;
-            var tr = td.parentNode; // the row to be removed
-            tr.parentNode.removeChild(tr);
-        }
+        // add icon to second column for deleting this cell
+        var td11 = document.createElement("td");
+        var i1 = document.createElement("i");
+        i1.setAttribute("class", "fas fa-trash invicon");
+        i1.setAttribute("style", "margin-left: 75%;");
+        i1.setAttribute("onclick", "on_trash_req()");
+        td11.appendChild(i1);
+        tr1.appendChild(td11);
 
-        function new_req(name, is_skill, chosen_skill_lvl, chosen_imp_lvl) {
-            // setup default values
-            if (!chosen_skill_lvl) {
-                chosen_skill_lvl = 0;
-            }
-            if (!chosen_imp_lvl) {
-                chosen_imp_lvl = 0;
-            }
+        // add row to table; move onto next option
+        tbl.appendChild(tr1);
 
-            // setup references and ids
-            var ul = null;
-            var pfx = null; // id reference prefix
-            var sfx = null; // id reference suffix
-            if (is_skill) {
-                ul = document.getElementById("req_skills");
-                pfx = "req_skills-" + count_skills;
-                sfx = "skill";
-                count_skills++;
-            } else {
-                ul = document.getElementById("req_attitudes");
-                pfx = "req_attitudes-" + count_attitudes;
-                sfx = "att";
-                count_attitudes++;
-            }
-
-            // dynamically create new entry.
-            // based on code generated from rendering the form with a fixed number
-            //  of entries.
-            var li = document.createElement("li");
-            var tbl = document.createElement("table");
-            //tbl.setAttribute("name", pfx);
-            tbl.setAttribute("id", pfx);
-
-            // first row displays chosen skill/attitude
-            var tr1 = document.createElement("tr");
-            var td1 = document.createElement("td");
-            var sel1 = document.createElement("select");
-            sel1.setAttribute("id", pfx + "-" + sfx);
-            sel1.setAttribute("name", pfx + "-" + sfx);
-            var opt1 = document.createElement("option");
-            opt1.setAttribute("value", name);
-            opt1.appendChild(document.createTextNode(name));
-            sel1.appendChild(opt1);
-            td1.appendChild(sel1);
-            /*
-            // APPARENTLY CANT CREATE A DIFFERENT ELEMENT TYPE.
-            // So just recreated a select with only 1 option.
-            var inp1 = document.createElement("input");
-            inp1.setAttribute("type", "text");
-            inp1.setAttribute("readonly", "");
-            inp1.setAttribute("class", "form-control-plaintext");
-            inp1.setAttribute("id", pfx + "-" + sfx);
-            inp1.setAttribute("value", name);
-            td1.appendChild(inp1);
-            */
-            tr1.appendChild(td1);
-
-            // add icon to second column for deleting this cell
-            var td11 = document.createElement("td");
-            var i1 = document.createElement("i");
-            i1.setAttribute("class", "fas fa-trash invicon");
-            i1.setAttribute("style", "margin-left: 75%;");
-            i1.setAttribute("onclick", "on_trash_req()");
-            td11.appendChild(i1);
-            tr1.appendChild(td11);
-
-            // add row to table; move onto next option
-            tbl.appendChild(tr1);
-
-            // have row minimum level required (only applicable to skills)
-            if (is_skill) {
-                var tr2 = document.createElement("tr");
-                // header for displaying label
-                var th2 = document.createElement("th");
-                var lbl2 = document.createElement("label");
-                lbl2.setAttribute("for", pfx + "-min_lvl");
-                lbl2.appendChild(document.createTextNode("Experience Level"));
-                th2.appendChild(lbl2);
-                tr2.appendChild(th2);
-                // data col for displaying competency level
-                var td2 = document.createElement("td");
-                var select2 = document.createElement("select");
-                select2.setAttribute("id", pfx + "-min_lvl");
-                select2.setAttribute("name", pfx + "-min_lvl");
-                for (i = 0; i < 5; i++) {
-                    var opt2 = document.createElement("option");
-                    opt2.setAttribute("value", (i + 1).toString());
-                    if (chosen_skill_lvl == i) {
-                        opt2.setAttribute("selected", "");
-                    }
-                    opt2.appendChild(document.createTextNode(skill_lvls[i]));
-                    select2.appendChild(opt2);
+        // have row minimum level required (only applicable to skills)
+        if (is_skill) {
+            var tr2 = document.createElement("tr");
+            // header for displaying label
+            var th2 = document.createElement("th");
+            var lbl2 = document.createElement("label");
+            lbl2.setAttribute("for", pfx + "-min_lvl");
+            lbl2.appendChild(document.createTextNode("Experience Level"));
+            th2.appendChild(lbl2);
+            tr2.appendChild(th2);
+            // data col for displaying competency level
+            var td2 = document.createElement("td");
+            var select2 = document.createElement("select");
+            select2.setAttribute("id", pfx + "-min_lvl");
+            select2.setAttribute("name", pfx + "-min_lvl");
+            for (i = 0; i < 5; i++) {
+                var opt2 = document.createElement("option");
+                opt2.setAttribute("value", (i + 1).toString());
+                if (chosen_skill_lvl == i) {
+                    opt2.setAttribute("selected", "");
                 }
-                td2.appendChild(select2);
-                tr2.appendChild(td2);
-                tbl.appendChild(tr2);
+                opt2.appendChild(document.createTextNode(skill_lvls[i]));
+                select2.appendChild(opt2);
             }
-
-            li.appendChild(tbl);
-            ul.appendChild(li);
+            td2.appendChild(select2);
+            tr2.appendChild(td2);
+            tbl.appendChild(tr2);
         }
 
-        var available_skills = ["Python", "Java", "C++", "Project Management"]; //{{ skill_list| safe }};
-        var available_attitudes = ["Team-player", "positive", "happy", "loud"]; //{{ attitude_list| safe}};
-        var init_skills_added = null; //{{ init_skills| safe or "null" }};
-        var init_attitudes_added = null; //{{ init_attitudes| safe or "null"}};
+        li.appendChild(tbl);
+        ul.appendChild(li);
+    }
 
-        $("#skill_selector").autocomplete({
-            autoFocus: true,
-            source: available_skills,
-            select: function (event, ui) {
-                new_req(ui.item.label, true);
-                document.getElementById('skill_selector').value = '';
-                return false;
-            },
-        });
+    var available_skills = ["Python", "Java", "C++", "Project Management"]; //{{ skill_list| safe }};
+    var available_attitudes = ["Team-player", "positive", "happy", "loud"]; //{{ attitude_list| safe}};
+    var init_skills_added = null; //{{ init_skills| safe or "null" }};
+    var init_attitudes_added = null; //{{ init_attitudes| safe or "null"}};
 
-        $("#attitude_selector").autocomplete({
-            autoFocus: true,
-            source: available_attitudes,
-            select: function (event, ui) {
-                new_req(ui.item.label, false);
-                document.getElementById('attitude_selector').value = '';
-                return false;
-            },
-        });
+    $("#skill_selector").autocomplete({
+        autoFocus: true,
+        source: available_skills,
+        select: function (event, ui) {
+            new_req(ui.item.label, true);
+            document.getElementById('skill_selector').value = '';
+            return false;
+        },
+    });
 
-        $(document).ready(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-            if (init_skills_added) {
-                for (i = 0; i < init_skills_added.length; i++) {
-                    new_req(init_skills_added[i][0], true, init_skills_added[i][1], init_skills_added[i][2]);
-                }
+    $("#attitude_selector").autocomplete({
+        autoFocus: true,
+        source: available_attitudes,
+        select: function (event, ui) {
+            new_req(ui.item.label, false);
+            document.getElementById('attitude_selector').value = '';
+            return false;
+        },
+    });
+
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+        if (init_skills_added) {
+            for (i = 0; i < init_skills_added.length; i++) {
+                new_req(init_skills_added[i][0], true, init_skills_added[i][1], init_skills_added[i][2]);
             }
-            if (init_attitudes_added) {
-                for (i = 0; i < init_attitudes_added.length; i++) {
-                    new_req(init_attitudes_added[i][0], false, init_attitudes_added[i][1], init_attitudes_added[i][2]);
-                }
+        }
+        if (init_attitudes_added) {
+            for (i = 0; i < init_attitudes_added.length; i++) {
+                new_req(init_attitudes_added[i][0], false, init_attitudes_added[i][1], init_attitudes_added[i][2]);
             }
-        });
-    </script>
-</body>
+        }
+    });
+</script>
+{% endblock %}
 
-</html>
+
+{% block styles %}
+{{ super() }}
+<style>
+        .invicon:hover {
+            color: red;
+        }
+
+        body {
+            margin: 0;
+            padding-top: 40px;
+            color: #2e323c;
+            background: #f5f6fa;
+            position: relative;
+            height: 100%;
+        }
+        .account-settings .user-profile {
+            margin: 0 0 1rem 0;
+            padding-bottom: 1rem;
+            text-align: center;
+        }
+        .account-settings .user-profile .user-avatar {
+            margin: 0 0 1rem 0;
+        }
+        .account-settings .user-profile .user-avatar img {
+            width: 90px;
+            height: 90px;
+            -webkit-border-radius: 100px;
+            -moz-border-radius: 100px;
+            border-radius: 100px;
+        }
+        .account-settings .user-profile h5.user-name {
+            margin: 0 0 0.5rem 0;
+        }
+        .account-settings .user-profile h6.user-email {
+            margin: 0;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #9fa8b9;
+        }
+        .account-settings .about {
+            margin: 2rem 0 0 0;
+            text-align: center;
+        }
+        .account-settings .about h5 {
+            margin: 0 0 15px 0;
+            color: #007ae1;
+        }
+        .account-settings .about p {
+            font-size: 0.825rem;
+        }
+        .form-control {
+            border: 1px solid #cfd1d8;
+            -webkit-border-radius: 2px;
+            -moz-border-radius: 2px;
+            border-radius: 2px;
+            font-size: .825rem;
+            background: #ffffff;
+            color: #2e323c;
+        }
+
+        .card {
+            background: #ffffff;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+            border: 0;
+            margin-bottom: 1rem;
+        }
+    </style>
+{% endblock %}
