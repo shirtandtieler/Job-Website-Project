@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.css" rel="Stylesheet">
+    </link>
+    <link rel="stylesheet" href="profile_editor_styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Document</title>
+
+
+    <script src="https://kit.fontawesome.com/3ed42264b8.js" crossorigin="anonymous"></script>
+    <link rel="shortcut icon" href="/static/images/favicon.ico">
+    <style>
+        body {
+            margin-left: 20px;
+            margin-right: 20px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                margin-left: 5px;
+                margin-right: 5px;
+            }
+        }
+    </style>
+
+    <style>
+        .invicon:hover {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Education Modal -->
+    <div class="modal fade" data-backdrop="static" id="educationAddModal" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Add Education</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="educationForm">
+                        <div class="row">
+                            <div class="col">
+                                <input type="text" id="schoolName" class="form-control" placeholder="School Name">
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col">
+                                <select class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+                                    <option selected>Degree...</option>
+                                    <option value="1">High School Diploma</option>
+                                    <option value="2">Associate's Degree</option>
+                                    <option value="3">Bachelor's Degree</option>
+                                    <option value="4">Master's Degree</option>
+                                    <option value="5">Doctor's Degree</option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <input type="text" id="fieldOfStudy" class="form-control" placeholder="Field of Study">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEducation()" data-dismiss="modal">Save
+                        changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Professional Modal -->
+    <div class="modal fade" data-backdrop="static" id="professionalAddModal" tabindex="-1" role="dialog"
+        aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Add Professional Experience</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="professionalForm">
+                        <div class="row">
+                            <div class="col">
+                                <input type="text" id="jobTitle" class="form-control" placeholder="Job title">
+                            </div>
+                        </div>
+                        <br>
+                        <div class="row">
+                            <div class="col">
+                                <input type="text" id="yearsWorked" class="form-control" placeholder="Years Worked">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveProfessionExperience()"
+                        data-dismiss="modal">Save
+                        changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row gutters">
+            <div class="col-xl-3 col-lg-3 col-md-12 col-sm-12 col-12">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="account-settings">
+                            <h3 class="mb-2 text-primary">Seeker Edit Profile</h3>
+                            <div class="user-profile">
+                                <div class="user-avatar">
+                                    <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="Maxwell Admin">
+                                </div>
+                                <h5 class="user-name">Job Seeker</h5>
+                                <h6 class="user-email">seeker@company.com</h6>
+                            </div>
+                            <div class="form-group">
+                                <label for="profilePicFile">Profile Picture Upload</label>
+                                <input type="file" class="form-control-file" id="profilePicFile">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-9 col-lg-9 col-md-12 col-sm-12 col-12">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="row gutters">
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <h6 class="mb-2 text-primary">Personal Details</h6>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label for="firstName">First Name</label>
+                                    <input type="text" class="form-control" id="firstName"
+                                        placeholder="Enter first name">
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label for="eMail">Email</label>
+                                    <input type="email" class="form-control" id="eMail"
+                                        placeholder="Enter email address">
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label for="lastName">Last Name</label>
+                                    <input type="url" class="form-control" id="lastName" placeholder="Enter last name">
+                                </div>
+                            </div>
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label for="phone">Phone</label>
+                                    <input type="text" class="form-control" id="phone" placeholder="Enter phone number">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row gutters">
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <h6 class="mt-3 mb-2 text-primary">Professional Details</h6>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="aboutMe">About Me</label>
+                            <textarea class="form-control" id="aboutMe" rows="3"
+                                placeholder="Give a brief summary about yourself and your career goals"></textarea>
+                        </div>
+                        <div class="row gutters">
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <div class="form-group">
+                                    <label for="education">Education</label>
+                                    <button class="btn btn-primary text-right" data-toggle="modal"
+                                        data-target="#educationAddModal">
+                                        Add</button>
+                                    <ul class="form-control" id="education_experience">
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row gutters">
+                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                                <div class="form-group">
+                                    <label for="experience">Professional Experience</label>
+                                    <button class="btn btn-primary text-right" data-toggle="modal"
+                                        data-target="#professionalAddModal">
+                                        Add</button>
+                                    <ul class="form-control" id="professional_experience">
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="skillList">Tech and Business Skills Entry</label>
+                            <input class="form-control" type="text" id="skill_selector" placeholder="Add skills...">
+                            <ul class="form-control" id="req_skills">
+
+                            </ul>
+                        </div>
+                        <div class="form-group">
+                            <label for="skillList">Attitudes and Values Entry</label>
+                            <input class="form-control" type="text" id="attitude_selector"
+                                placeholder="Add attitudes/values...">
+                            <ul class="form-control" id="req_attitudes">
+
+                            </ul>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="resumeFile">Resume Upload</label>
+                            <input type="file" class="form-control-file" id="resumeFile">
+                        </div>
+                    </div>
+                    <div class="row gutters">
+                        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                            <div class="text-right">
+                                <button type="button" id="submit" name="submit"
+                                    class="btn btn-secondary">Cancel</button>
+                                <button type="button" id="submit" name="submit" class="btn btn-primary">Update</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script>
+
+        // Make an Education card based on input from add Education Modal
+        function saveEducation() {
+
+            // gather input from modal form:
+            const { schoolName, fieldOfStudy } = Array.from(document.querySelectorAll('#educationForm input')).reduce((acc, input) => ({ ...acc, [input.id]: input.value }), {});
+            // console.log(`School: ${schoolName} and Field: ${fieldOfStudy}`);
+            const degreeType = document.querySelector('#inlineFormCustomSelect').selectedOptions[0].label;
+            // console.log(`Degree selection: ${degreeType}`);
+            var ul = document.getElementById("education_experience");
+
+            //generate a new education card that looks like this:
+            /*
+            <li class="list-group-item">
+                <p class="mb-0 pt-1" style="line-height:12px">Bachelor's Degree in Computer Science</p>
+                <small class="fw-light">DePaul University</small>
+            </li>
+            */
+            var li = document.createElement("li");
+            li.setAttribute("class", "list-group-item");
+            liChildAppend = ul.appendChild(li);
+
+            var p = document.createElement("p");
+            p.setAttribute("class", "mb-0 pt-1");
+            p.setAttribute("style", "line-height:12px");
+            pChildAppend = liChildAppend.appendChild(p);
+            pChildAppend.innerHTML = `${degreeType} in ${fieldOfStudy}`;
+
+            var small = document.createElement("small");
+            small.setAttribute("class", "fw-light");
+            smallChildAppend = liChildAppend.appendChild(small);
+            smallChildAppend.innerHTML = `${schoolName}`;
+
+            p2 = document.createElement("p");
+            liChildAppend.appendChild(p2);
+
+            var deleteButton = document.createElement("button");
+            deleteButton.setAttribute("class", "btn btn-secondary fas fa-trash invicon");
+            deleteButton.appendChild(document.createTextNode(" delete"));
+            liChildAppend.appendChild(deleteButton);
+            deleteButton.onclick = function () {
+                this.parentElement.style.display = "none";
+            }
+        }
+
+        // Make an Professional Experience card based on input from add Professional Experience Modal
+        function saveProfessionExperience() {
+            // gather input from modal form:
+            const { jobTitle, yearsWorked } = Array.from(document.querySelectorAll('#professionalForm input')).reduce((acc, input) => ({ ...acc, [input.id]: input.value }), {});
+            // console.log(`Job: ${jobTitle} and Years: ${yearsWorked}`);
+            var ul = document.getElementById('professional_experience');
+
+            //generate a new professional card that looks like this:
+            /*
+            <li class="list-group-item">
+                <p class="mb-0 pt-1" style="line-height:12px">Job Title</p>
+                <small class="fw-light">N-num years</small>
+            </li>
+            */
+
+            var li = document.createElement("li");
+            li.setAttribute("class", "list-group-item");
+            liChildAppend = ul.appendChild(li);
+
+            var p = document.createElement("p");
+            p.setAttribute("class", "mb-0 pt-1");
+            p.setAttribute("style", "line-height:12px");
+            pChildAppend = liChildAppend.appendChild(p);
+            pChildAppend.innerHTML = `${jobTitle}`;
+
+            var small = document.createElement("small");
+            small.setAttribute("class", "fw-light");
+            smallChildAppend = liChildAppend.appendChild(small);
+            smallChildAppend.innerHTML = `${yearsWorked}`;
+
+            p2 = document.createElement("p");
+            liChildAppend.appendChild(p2);
+
+            var deleteButton = document.createElement("button");
+            deleteButton.setAttribute("class", "btn btn-secondary fas fa-trash invicon");
+            deleteButton.appendChild(document.createTextNode(" delete"));
+            liChildAppend.appendChild(deleteButton);
+            deleteButton.onclick = function () {
+                this.parentElement.style.display = "none";
+            }
+        }
+
+        var count_skills = 0; // global counters for how many items in the skills list
+        var count_attitudes = 0; // global counters for how many items in the att. list
+        var count_education = 0; // global counters for how many items in the education list
+
+        var skill_lvls = ["Novice", "Familiar", "Competent", "Proficient", "Expert"];
+        var importance_lvls = ["Very Low", "Low", "Medium", "High", "Very High"];
+
+        function on_trash_req() {
+            // event.target will be the input element.
+            var td = event.target.parentNode.parentNode.parentNode;
+            var tr = td.parentNode; // the row to be removed
+            tr.parentNode.removeChild(tr);
+        }
+
+        function new_req(name, is_skill, chosen_skill_lvl, chosen_imp_lvl) {
+            // setup default values
+            if (!chosen_skill_lvl) {
+                chosen_skill_lvl = 0;
+            }
+            if (!chosen_imp_lvl) {
+                chosen_imp_lvl = 0;
+            }
+
+            // setup references and ids
+            var ul = null;
+            var pfx = null; // id reference prefix
+            var sfx = null; // id reference suffix
+            if (is_skill) {
+                ul = document.getElementById("req_skills");
+                pfx = "req_skills-" + count_skills;
+                sfx = "skill";
+                count_skills++;
+            } else {
+                ul = document.getElementById("req_attitudes");
+                pfx = "req_attitudes-" + count_attitudes;
+                sfx = "att";
+                count_attitudes++;
+            }
+
+            // dynamically create new entry.
+            // based on code generated from rendering the form with a fixed number
+            //  of entries.
+            var li = document.createElement("li");
+            var tbl = document.createElement("table");
+            //tbl.setAttribute("name", pfx);
+            tbl.setAttribute("id", pfx);
+
+            // first row displays chosen skill/attitude
+            var tr1 = document.createElement("tr");
+            var td1 = document.createElement("td");
+            var sel1 = document.createElement("select");
+            sel1.setAttribute("id", pfx + "-" + sfx);
+            sel1.setAttribute("name", pfx + "-" + sfx);
+            var opt1 = document.createElement("option");
+            opt1.setAttribute("value", name);
+            opt1.appendChild(document.createTextNode(name));
+            sel1.appendChild(opt1);
+            td1.appendChild(sel1);
+            /*
+            // APPARENTLY CANT CREATE A DIFFERENT ELEMENT TYPE.
+            // So just recreated a select with only 1 option.
+            var inp1 = document.createElement("input");
+            inp1.setAttribute("type", "text");
+            inp1.setAttribute("readonly", "");
+            inp1.setAttribute("class", "form-control-plaintext");
+            inp1.setAttribute("id", pfx + "-" + sfx);
+            inp1.setAttribute("value", name);
+            td1.appendChild(inp1);
+            */
+            tr1.appendChild(td1);
+
+            // add icon to second column for deleting this cell
+            var td11 = document.createElement("td");
+            var i1 = document.createElement("i");
+            i1.setAttribute("class", "fas fa-trash invicon");
+            i1.setAttribute("style", "margin-left: 75%;");
+            i1.setAttribute("onclick", "on_trash_req()");
+            td11.appendChild(i1);
+            tr1.appendChild(td11);
+
+            // add row to table; move onto next option
+            tbl.appendChild(tr1);
+
+            // have row minimum level required (only applicable to skills)
+            if (is_skill) {
+                var tr2 = document.createElement("tr");
+                // header for displaying label
+                var th2 = document.createElement("th");
+                var lbl2 = document.createElement("label");
+                lbl2.setAttribute("for", pfx + "-min_lvl");
+                lbl2.appendChild(document.createTextNode("Experience Level"));
+                th2.appendChild(lbl2);
+                tr2.appendChild(th2);
+                // data col for displaying competency level
+                var td2 = document.createElement("td");
+                var select2 = document.createElement("select");
+                select2.setAttribute("id", pfx + "-min_lvl");
+                select2.setAttribute("name", pfx + "-min_lvl");
+                for (i = 0; i < 5; i++) {
+                    var opt2 = document.createElement("option");
+                    opt2.setAttribute("value", (i + 1).toString());
+                    if (chosen_skill_lvl == i) {
+                        opt2.setAttribute("selected", "");
+                    }
+                    opt2.appendChild(document.createTextNode(skill_lvls[i]));
+                    select2.appendChild(opt2);
+                }
+                td2.appendChild(select2);
+                tr2.appendChild(td2);
+                tbl.appendChild(tr2);
+            }
+
+            li.appendChild(tbl);
+            ul.appendChild(li);
+        }
+
+        var available_skills = ["Python", "Java", "C++", "Project Management"]; //{{ skill_list| safe }};
+        var available_attitudes = ["Team-player", "positive", "happy", "loud"]; //{{ attitude_list| safe}};
+        var init_skills_added = null; //{{ init_skills| safe or "null" }};
+        var init_attitudes_added = null; //{{ init_attitudes| safe or "null"}};
+
+        $("#skill_selector").autocomplete({
+            autoFocus: true,
+            source: available_skills,
+            select: function (event, ui) {
+                new_req(ui.item.label, true);
+                document.getElementById('skill_selector').value = '';
+                return false;
+            },
+        });
+
+        $("#attitude_selector").autocomplete({
+            autoFocus: true,
+            source: available_attitudes,
+            select: function (event, ui) {
+                new_req(ui.item.label, false);
+                document.getElementById('attitude_selector').value = '';
+                return false;
+            },
+        });
+
+        $(document).ready(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+            if (init_skills_added) {
+                for (i = 0; i < init_skills_added.length; i++) {
+                    new_req(init_skills_added[i][0], true, init_skills_added[i][1], init_skills_added[i][2]);
+                }
+            }
+            if (init_attitudes_added) {
+                for (i = 0; i < init_attitudes_added.length; i++) {
+                    new_req(init_attitudes_added[i][0], false, init_attitudes_added[i][1], init_attitudes_added[i][2]);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
