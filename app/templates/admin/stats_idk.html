@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+
+
+{% block app_content %}
+
+<div id="mynetwork"></div>
+
+{% endblock %}
+
+
+{% block styles %}
+{{ super() }}
+<style>
+    #mynetwork {
+        width: 600px;
+        height: 400px;
+        border: 1px solid lightgray;
+    }
+</style>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+<script>
+    // create an array with nodes
+    var nodes = new vis.DataSet(
+        {{ nodes_ds|safe }}
+    );
+
+    // create an array with edges
+    var edges = new vis.DataSet(
+        {{ from_to_ds|safe }}
+    );
+
+    // create a network
+    var container = document.getElementById('mynetwork');
+
+    // provide the data in the vis format
+    var data = {
+        nodes: nodes,
+        edges: edges
+    };
+    var options = {};
+
+    // initialize your network!
+    var network = new vis.Network(container, data, options);
+</script>
+{% endblock %}

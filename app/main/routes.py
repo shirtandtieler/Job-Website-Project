@@ -373,7 +373,8 @@ def seeker_search_download():
 
 
 @bp.route("/maps")
-def maps():
+def stats_map():
+    # TODO only admin
     seeker_coord_info = get_coordinate_info(SeekerProfile, True, True)
     job_coord_info = get_coordinate_info(JobPost, True, True)
     company_coord_info = get_coordinate_info(CompanyProfile, True, True)
@@ -381,3 +382,49 @@ def maps():
                            seeker_coords=seeker_coord_info,
                            job_coords=job_coord_info,
                            company_coords=company_coord_info)
+
+
+@bp.route("/stats")
+def stats():
+    # grouped bar graph - for comparing what seekers have vs what job posts are looking for
+    # percent with a given skill/attitude
+    # average level per skill
+    #
+    # THIS WORKS BUT IS SLOW -- could have a dropdown to query for a specific skill...
+    # skill relationship graph (if user had python, what else did they have)
+    # value relationship graph (if user had teamwork, what else did they have)
+    #
+    # num seekers over time
+    # num companies over time
+    # num job posts over time
+    # jobs per company
+
+    # TODO only admin
+    nodes = [{"id": s.id, "label": s.title} for s in Skill.query.all() if s.is_tech() and len(s._seekers) > 0]
+
+    # [a, b, c, d, e]
+    pair_counts = dict()
+    count_max = 1
+    for sprofile in SeekerProfile.query.all():
+        sids = [s._skill.id for s in sprofile._skills if s._skill.is_tech()]
+        for i, sid1 in enumerate(sids):
+            for sid2 in sids[i+1:]:
+                if sid1 in pair_counts and sid2 in pair_counts[sid1]:
+                    pair_counts[sid1][sid2] += 1
+                    count_max = max(count_max, pair_counts[sid1][sid2])
+                elif sid2 in pair_counts and sid1 in pair_counts[sid2]:
+                    pair_counts[sid2][sid1] += 1
+                    count_max = max(count_max, pair_counts[sid2][sid1])
+                elif sid1 in pair_counts:
+                    pair_counts[sid1][sid2] = 1
+                elif sid2 in pair_counts:
+                    pair_counts[sid2][sid1] = 1
+                else:
+                    pair_counts[sid1] = {sid2: 1}
+    connections = []
+    for key1, key2s in pair_counts.items():
+        for key2, count in key2s.items():
+            connections.append({"from": key1, "to": key2, "weight": 1 if count_max == 1 else 1 + 5*((count-1)/(count_max-1))})
+    #print(json.dumps(pair_counts, sort_keys=True, indent=4))
+    #print(count_max)
+    return render_template('admin/stats_idk.html', nodes_ds = nodes, from_to_ds = connections)

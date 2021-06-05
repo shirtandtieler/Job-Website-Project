@@ -39,3 +39,4 @@ def get_coordinate_info(table, describe=False, merge=False):
     # slice tuple if not wanting the location description
     i = 3 if describe else 2
     return [x for y in [[k[:i] for _ in range(v)] for k, v in counts.items()] for x in y]
+
