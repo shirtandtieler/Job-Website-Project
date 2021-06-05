@@ -1,5 +1,6 @@
 # Routes are the different URLs that the application implements.
 # The functions below handle the routing/behavior.
+from typing import Union
 
 from flask import render_template, flash, redirect, url_for, request
 
@@ -52,15 +53,11 @@ def index():
 
 
 @bp.route('/profile')
+@login_required
 def profile():
     """
     Displays the user's own profile (the same as the public view, but with some extra logic)
     """
-
-    if current_user.is_anonymous:
-        flash('Login required for this operation')
-        return redirect(url_for('main.login'))
-
     if current_user.account_type == AccountTypes.s:
         # Show seeker's public profile page
         return seeker_profile(current_user._seeker.id)
@@ -112,6 +109,27 @@ def company_profile(company_id: int):
 
     return render_template('company/profile.html', company_name=_name, citystate=_loc, url=_url,
                            job_posts=_job_posts)
+
+
+@bp.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    """
+    Enters or submits for the current user's profile editing page
+    """
+    if request.method == 'POST':
+        flash("TODO - SUBMIT CHANGES FROM FORM")
+        return profile()
+
+    if current_user.account_type == AccountTypes.s:
+        # Seeker's profile editor
+        return render_template('seeker/profile_editor.html', current_user._seeker)
+    elif current_user.account_type == AccountTypes.c:
+        # Company's profile editor
+        return render_template('company/profile_editor.html', current_user._company)
+    else:  # Admins
+        flash("You don't have a profile, silly...")
+        return redirect(url_for('main.index'))
 
 
 @bp.route("/job/new", methods=['GET', 'POST'])
