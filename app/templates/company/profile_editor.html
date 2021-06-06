@@ -1,47 +1,128 @@
 {% extends "base.html" %}
 
 {% block app_content %}
+<div class="main">
+    <h3>Editing Company Profile</h3>
+    <form method="post" enctype="multipart/form-data">
 
-<div class="container">
-    <div class="main">
-        <h3>Editing Company Profile</h3>
         <div class="banner">
-            <img src="{{url_for('static', filename='images/blue_banner.jpg')}}" alt="blue company banner">
+            <img src="{{ company.banner((1000,100)) }}">
         </div>
-        <div class="form-group">
-            <label for="bannerFile">Change Banner:</label>
-            <input type="file" class="form-control-file" id="bannerFile">
-        </div>
-        <div class="float-container">
-            <div class="company_logo float-child-left">
-                <img src="{{url_for('static', filename='images/blue_company.jpg')}}" alt="blue company logo">
-            </div>
-            <div class="form-group">
-                <label for="logoFile">Change Logo:</label>
-                <input type="file" class="form-control-file" id="logoFile">
-            </div>
-            <div class="header_info float-child-right">
-                <h2>{{company_name}}</h2>
-                <div class="form-group">
-                    <label for="companyName">Edit Company Name</label>
-                    <input type="text" class="form-control" id="companyName" placeholder="XYZ Company">
-                </div>
-                <p>{{ citystate }}</p>
-                <div class="form-group">
-                    <label for="address">Edit Address</label>
-                    <input type="text" class="form-control" id="address" placeholder="Chicago, IL">
-                </div>
 
+        <div class="mt-1 mb-3">
+            <label for="bannerFile">Banner</label>
+            <input type="file" class="form-control-file" accept="image/png, image/jpeg" id="bannerFile" name="bannerFile">
+        </div>
+
+        <div class="row float-container pb-0">
+            <div class="col-3 company_logo">
+                <img src="{{ company.avatar() }}">
             </div>
-            <div class="row gutters">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                    <div class="text-right">
-                        <button type="button" id="submit" name="submit" class="btn btn-secondary">Cancel</button>
-                        <button type="button" id="submit" name="submit" class="btn btn-primary">Update</button>
+
+            <div class="col header_info ps-5">
+                <div class="row g-1">
+                    <div class="col-md-6">
+                        <label for="companyName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="companyName" name="name" placeholder="XYZ Company" value="{{ company.name }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="website" class="form-label">Website</label>
+                        <input type="text" class="form-control" id="website" name="website" placeholder="http://..." value="{{ company.website or '' }}">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="city" class="form-label">City</label>
+                        <input type="text" class="form-control" id="city" name="city" placeholder="Chicago" value="{{ company.city or '' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="state" class="form-label">State</label>
+                        <input type="text" class="form-control" id="state" name="state" placeholder="IL" value="{{ company.state or '' }}">
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <div>
+            <label for="logoFile">Logo</label>
+            <input type="file" class="form-control-file" accept="image/png, image/jpeg" id="logoFile" name="logoFile">
+        </div>
+
+        <div class="float-container ps-0">
+            <div class="col-md-12">
+                <label for="tagline" class="form-label">Tagline</label>
+                <small id="tagline-counter"></small>
+                <input type="text" class="form-control" id="tagline" name="tagline" maxlength="100"
+                       placeholder="One-liner to capture the essence of your company" value="{{ company.tagline or '' }}">
+            </div>
+
+            <div class="col-md-12 py-2">
+                <label for="summary" class="form-label">Summary</label>
+                <textarea class="form-control" id="summary" name="summary" rows="5"
+                          placeholder="Give a descrion of what your company is and what you represent" value="{{ company.summary or '' }}"></textarea>
+            </div>
+        </div>
+
+
+        <div class="row gutters">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                <div class="text-right">
+                    <button type="submit" id="submit" class="btn btn-primary">Update</button>
+                    <a href="/profile" type="button" id="cancel" class="btn btn-secondary">Cancel</a>
+
+                </div>
+            </div>
+        </div>
+    </form>
 </div>
+
 {% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+        .main {
+            width: 65em;
+            display: flex;
+            flex-direction: column;
+            margin: auto;
+        }
+
+        img {
+            width:inherit;
+        }
+
+        .banner {
+            width: inherit;
+        }
+
+        .company_logo {
+            width: 10em;
+        }
+
+        .float-container {
+            border: 3px solid #fff;
+            padding: 20px;
+        }
+
+        .float-child-left {
+            width: 10em;
+            float: left;
+            padding: 0px 20px 0px 0px;
+        }
+        .float-child-right {
+            width: max-content;
+            float: left;
+            padding: 0px 0px 0px 20px;
+        }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    $('#tagline').keyup(function () {
+        $('#tagline-counter').text("(" + this.value.length + "/100)");
+        $('#tagline-counter').css('color', this.value.length == 100 ? 'red' : 'black');
+    });
+</script>
+{% endblock%}
