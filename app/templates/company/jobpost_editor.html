@@ -139,6 +139,7 @@
         // based on code generated from rendering the form with a fixed number
         //  of entries.
         var li = document.createElement("li");
+        li.setAttribute("class", "list-group-item");
         var tbl = document.createElement("table");
         //tbl.setAttribute("name", pfx);
         tbl.setAttribute("id", pfx);
@@ -154,17 +155,6 @@
         opt1.appendChild(document.createTextNode(name));
         sel1.appendChild(opt1);
         td1.appendChild(sel1);
-        /*
-        // APPARENTLY CANT CREATE A DIFFERENT ELEMENT TYPE.
-        // So just recreated a select with only 1 option.
-        var inp1 = document.createElement("input");
-        inp1.setAttribute("type", "text");
-        inp1.setAttribute("readonly", "");
-        inp1.setAttribute("class", "form-control-plaintext");
-        inp1.setAttribute("id", pfx + "-" + sfx);
-        inp1.setAttribute("value", name);
-        td1.appendChild(inp1);
-        */
         tr1.appendChild(td1);
 
         // add icon to second column for deleting this cell
