@@ -3,20 +3,20 @@
 import json
 from datetime import datetime
 from io import BytesIO
-from typing import Union
 
 from flask import render_template, flash, redirect, url_for, send_file, Response
 from flask import request
 from flask_login import current_user, login_required
+from werkzeug.utils import secure_filename
 
 import app
 from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
     job_form_to_url_params
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
+from app.api.profile import update_seeker
 from app.api.seeker_query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
     seeker_url_args_to_input_states
 from app.api.routing import modify_query
-#from app.api.statistics import get_coordinates_seekers, get_coordinates_companies, get_coordinates_jobs
 from app.api.users import save_seeker_search, delete_seeker_search, save_job_search, delete_job_search
 from app.main import bp
 from app.main.forms import JobPostForm
@@ -160,15 +160,35 @@ def edit_profile():
     Enters or submits for the current user's profile editing page
     """
     if request.method == 'POST':
-        flash("TODO - SUBMIT CHANGES FROM FORM")
-        return profile()
+        print(request.form)
+        print(request.files)
+        if current_user.account_type == AccountTypes.s:
+            update_seeker(current_user._seeker, request.form, request.files)
+            flash("Updated!")
+        else:  # company user
+            flash("TODO")
+        return redirect(url_for('main.profile'))
 
     if current_user.account_type == AccountTypes.s:
         # Seeker's profile editor
-        return render_template('seeker/profile_editor.html', current_user._seeker)
+        # simplify jinja by passing experience data in a convenient way
+        skr = current_user._seeker
+        _current_skills = [[s._skill.title, int(s.skill_level)] for s in skr._skills]
+        _current_attitudes = [a._attitude.title for a in skr._attitudes]
+        _current_eduexps = [[e.school, e.study_field, int(e.education_lvl)] for e in skr._history_edus]
+        _current_jobexps = [[j.job_title, int(j.years_employed)] for j in skr._history_jobs]
+
+        #print(f"Skills = {_current_skills}\nAtts = {_current_attitudes}\nEdus = {_current_eduexps}\nJobs = {_current_jobexps}")
+
+        return render_template('seeker/profile_editor.html',
+                               seeker=skr,
+                               skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES,
+                               init_skills=_current_skills, init_attitudes=_current_attitudes,
+                               init_edus=_current_eduexps, init_jobs=_current_jobexps
+                               )
     elif current_user.account_type == AccountTypes.c:
         # Company's profile editor
-        return render_template('company/profile_editor.html', current_user._company)
+        return render_template('company/profile_editor.html', company=current_user._company)
     else:  # Admins
         flash("You don't have a profile, silly...")
         return redirect(url_for('main.index'))
@@ -273,9 +293,9 @@ def job_search():
     # get lower and upper page count for (up to) 5 surrounding pages
     max_window = min(5, pager.pages)
     pg_lower = pg_upper = page_num
-    while pg_upper-pg_lower+1 < max_window:
-        pg_lower = max(1, pg_lower-1)
-        pg_upper = min(pager.pages, pg_upper+1)
+    while pg_upper - pg_lower + 1 < max_window:
+        pg_lower = max(1, pg_lower - 1)
+        pg_upper = min(pager.pages, pg_upper + 1)
 
     filter_options_set = job_url_args_to_input_states(request.args)
 
@@ -360,9 +380,9 @@ def seeker_search():
     # get lower and upper page count for (up to) 5 surrounding pages
     max_window = min(5, pager.pages)
     pg_lower = pg_upper = page_num
-    while pg_upper-pg_lower+1 < max_window:
-        pg_lower = max(1, pg_lower-1)
-        pg_upper = min(pager.pages, pg_upper+1)
+    while pg_upper - pg_lower + 1 < max_window:
+        pg_lower = max(1, pg_lower - 1)
+        pg_upper = min(pager.pages, pg_upper + 1)
 
     filter_options_set = seeker_url_args_to_input_states(request.args)
 
@@ -389,7 +409,6 @@ def seeker_search_download():
     return Response(json.dumps(output, indent=4),
                     mimetype='text/json',
                     headers={'Content-disposition': 'attachment; filename=seeker_search_results.json'})
-
 
 # @bp.route("/maps")
 # def maps():
