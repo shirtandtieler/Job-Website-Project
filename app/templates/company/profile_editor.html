@@ -62,9 +62,8 @@
             </div>
         </div>
 
-
         <div class="row gutters">
-            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+            <div class="col-12">
                 <div class="text-right">
                     <button type="submit" id="submit" class="btn btn-primary">Update</button>
                     <a href="/profile" type="button" id="cancel" class="btn btn-secondary">Cancel</a>
@@ -123,6 +122,11 @@
     $('#tagline').keyup(function () {
         $('#tagline-counter').text("(" + this.value.length + "/100)");
         $('#tagline-counter').css('color', this.value.length == 100 ? 'red' : 'black');
+    });
+
+    $(document).ready(function () {
+        // initialize tagline counter
+        $('#tagline').val($('#tagline').val()).trigger('keyup');
     });
 </script>
 {% endblock%}
