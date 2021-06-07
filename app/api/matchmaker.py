@@ -116,10 +116,7 @@ def get_jobs_sorted(seeker_id, jobs_list=None, limit=50):
             jobs_by_score.append((job_id, score))
 
     jobs_by_score_sorted = sorted(jobs_by_score, key=lambda tup: tup[1])
-
-    # I'm bad at programming and I don't know how to do this below I'm sorry :')
-    # jobs_by_score = sorted(jobs_list, key=lambda jid: get_score(seeker_id, jid))
-
+    jobs_by_score_sorted.reverse()
     return jobs_by_score_sorted[:limit]
 
 
@@ -139,4 +136,5 @@ def get_seekers_sorted(job_id, seeker_list=None, limit=50):
             seekers_by_score.append((seeker_id, score))
 
     seekers_by_score_sorted = sorted(seekers_by_score, key=lambda tup: tup[1])
-    return seekers_by_score_sorted
+    seekers_by_score_sorted.reverse()
+    return seekers_by_score_sorted[:limit]
