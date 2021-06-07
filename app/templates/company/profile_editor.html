@@ -58,7 +58,7 @@
             <div class="col-md-12 py-2">
                 <label for="summary" class="form-label">Summary</label>
                 <textarea class="form-control" id="summary" name="summary" rows="5"
-                          placeholder="Give a descrion of what your company is and what you represent" value="{{ company.summary or '' }}"></textarea>
+                          placeholder="Give a description of what your company is and what you represent">{{ company.summary or '' }}</textarea>
             </div>
         </div>
 
@@ -67,7 +67,6 @@
                 <div class="text-right">
                     <button type="submit" id="submit" class="btn btn-primary">Update</button>
                     <a href="/profile" type="button" id="cancel" class="btn btn-secondary">Cancel</a>
-
                 </div>
             </div>
         </div>
