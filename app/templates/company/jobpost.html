@@ -61,7 +61,7 @@
             <img src="{{ job._company.avatar() }}" class="card-img-top">
             <div class="card-body">
                 <h5 class="card-title">{{ job._company.name }}</h5>
-<!--                <p class="card-text"></p>-->
+                <p class="card-text" style="font-style:italic; text-align:center">{{ job._company.tagline }}</p>
             </div>
             <ul class="list-group list-group-flush">
                 <li class="list-group-item">
@@ -69,12 +69,15 @@
                     {{ job._company.location }}
                 </li>
             </ul>
-            <div class="card-body">
-                <a href="{{ url_for('main.company_profile', company_id=job._company.id) }}">Our Profile</a>
+            <div class="card-body pb-0">
+                <a href="{{ url_for('main.company_profile', company_id=job._company.id) }}" class="card-link">
+                    <i class="fas fa-building"></i> Our Profile
+                </a>
             </div>
             {% if job._company.website %}
             <div class="card-body">
-                <a href="{{ job._company.website }}" class="card-link">Our website</a>
+                <a href="{{ job._company.website }}" class="card-link">
+                    <i class="fas fa-globe"></i> Our website</a>
             </div>
             {% endif %}
         </div>

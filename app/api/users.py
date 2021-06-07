@@ -3,7 +3,7 @@ from typing import Union
 
 from app import db
 from app.models import AccountTypes, WorkTypes, SkillLevels, SeekerSkill, SeekerAttitude, EducationLevel, \
-    SeekerHistoryEducation, SeekerHistoryJob, CompanySeekerSearch, SeekerJobSearch
+    SeekerHistoryEducation, SeekerHistoryJob, CompanySeekerSearch, SeekerJobSearch, Skill, Attitude
 from app.models import User, CompanyProfile, SeekerProfile
 
 
@@ -81,6 +81,9 @@ def edit_company(company_id,
     if state is not None:
         profile.state = state
     if website is not None:
+        # > 0 check to make sure user isn't just wanting to delete the website url
+        if len(website) > 0 and not website.startswith("http"):
+            website = "http://" + website
         profile.website = website
     if tagline is not None:
         profile.tagline = tagline
@@ -136,6 +139,7 @@ def edit_seeker(seeker_id,
                 phone_number: str = None,
                 city: str = None, state: str = None,
                 work_wanted: WorkTypes = None, remote_wanted: bool = False,
+                tagline: str = None, summary: str = None,
                 resume: bin = None
                 ):
     """
@@ -158,15 +162,46 @@ def edit_seeker(seeker_id,
         profile.work_wanted = work_wanted
     if remote_wanted is not None:
         profile.remote_wanted = remote_wanted
+    if tagline is not None:
+        profile.tagline = tagline
+    if summary is not None:
+        profile.summary = summary
     if resume is not None:
         profile.resume = resume
     db.session.commit()
 
 
-def update_seeker_skill(seeker_id: int, skill_id: int, skill_level: Union[int, SkillLevels]):
+def reset_seeker(seeker_id: int, skills=False, attitudes=False, educations=False, jobs=False):
+    seeker = SeekerProfile.query.filter_by(id=seeker_id).first()
+    counts = []
+    if skills:
+        counts.append(len(seeker._skills))
+        for entry in seeker._skills:
+            db.session.delete(entry)
+    if attitudes:
+        counts.append(len(seeker._attitudes))
+        for entry in seeker._attitudes:
+            db.session.delete(entry)
+    if educations:
+        counts.append(len(seeker._history_edus))
+        for entry in seeker._history_edus:
+            db.session.delete(entry)
+    if jobs:
+        counts.append(len(seeker._history_jobs))
+        for entry in seeker._history_jobs:
+            db.session.delete(entry)
+    db.session.commit()
+    return counts
+
+
+def update_seeker_skill(seeker_id: int, skill: Union[int, str], skill_level: Union[int, SkillLevels]):
     """ Adds or updates a seeker's skill """
     if isinstance(skill_level, int):
         skill_level = SkillLevels(skill_level)
+    if isinstance(skill, str):
+        skill_id = Skill.query.filter_by(id=skill).first()
+    else:
+        skill_id = skill
     # check if adding or updating
     entry = SeekerSkill.query.filter_by(seeker_id=seeker_id, skill_id=skill_id).first()
     if entry is None:
@@ -188,8 +223,9 @@ def remove_seeker_skill(seeker_id, skill_id):
     db.session.commit()
 
 
-def add_seeker_attitude(seeker_id: int, attitude_id: int, error_if_fail=True):
+def add_seeker_attitude(seeker_id: int, attitude: Union[int, str], error_if_fail=False):
     """ Adds a seeker's attitude. """
+    attitude_id = attitude if isinstance(attitude, int) else Attitude.query.filter_by(title=attitude).first()
     entry = SeekerAttitude.query.filter_by(seeker_id=seeker_id, attitude_id=attitude_id).first()
     if entry is not None:  # already added
         if error_if_fail:
