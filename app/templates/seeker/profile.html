@@ -4,16 +4,28 @@
 
 <div class="container pt-5">
     <div class="row">
+        {% if request.path == "/profile" or (current_user._seeker != None and request.path == url_for('main.seeker_profile', seeker_id=current_user._seeker.id)) %}
+        <h5 style="text-align:right">
+            <a href="{{ url_for('main.edit_profile') }}">Edit <i class="fas fa-edit"></i></a>
+        </h5>
+        {% endif %}
         <div class="col-md-4 mb-3">
+
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex flex-column align-items-center text-center">
-                        <img src="{{ seeker.avatar() }}" class="rounded-circle" width="150">
+                        <div style="width:150px">
+                            {% if not seeker._user.is_active %}
+                            <!-- good enough -->
+                            <span style="position:absolute;font-size:50px;transform: rotate(45deg);color:red;padding-left:30%;padding-bottom:5%;padding-right:50%">Inactive</span>
+                            {% endif %}
+                            <img src="{{ seeker.avatar() }}" class="rounded-circle">
+                        </div>
                         <div class="mt-3">
                             <h4>{{ seeker.full_name }}</h4>
                             <p class="text-secondary mb-1">{{ seeker.location }}</p>
                             <p class="text-secondary mb-1"><i class="fas fa-business-time"></i> {{ " • ".join(seeker.work_wanted_list) }} </p>
-                            {% if seeker.remote %}
+                            {% if seeker.remote_wanted %}
                             <p class="text-secondary mb-1"><i class="fas fa-laptop-house"></i> remote</p>
                             {% endif %}
                         </div>
@@ -69,9 +81,7 @@
                         <div class="col-sm-2">
                             <h6 class="mt-1 mb-1 fw-bold" style="letter-spacing: 1.5px;"><i class="fas fa-user-circle me-1"></i>About</h6>
                         </div>
-                        <div class="col-sm-10 text-secondary">
-                            {{ seeker.summary }}
-                        </div>
+                        <div class="col-sm-10 text-secondary" style="white-space: pre-wrap">{{ seeker.summary }}</div>
                     </div>
                     <hr>
                     <div class="row">

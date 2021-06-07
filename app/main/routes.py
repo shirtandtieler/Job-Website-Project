@@ -7,11 +7,13 @@ from io import BytesIO
 from flask import render_template, flash, redirect, url_for, send_file, Response
 from flask import request
 from flask_login import current_user, login_required
+from werkzeug.utils import secure_filename
 
 import app
 from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
     job_form_to_url_params
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
+from app.api.profile import update_seeker, update_company
 from app.api.seeker_query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
     seeker_url_args_to_input_states
 from app.api.routing import modify_query
@@ -20,7 +22,8 @@ from app.api.users import save_seeker_search, delete_seeker_search, save_job_sea
 from app.main import bp
 from app.main.forms import JobPostForm
 from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
-# TODO Routes needed for editing profile page, searching, sending messages, etc.
+
+## TODO Routes needed for editing profile page, searching, sending messages, etc.
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
 
 
@@ -33,6 +36,7 @@ def index():
 
     if current_user.account_type == AccountTypes.s:  # seeker
         prof = current_user._seeker
+        _is_profile_complete = prof.is_profile_complete()
         _first_name = prof.first_name
         _last_name = prof.last_name
         _name = _first_name + ' ' + _last_name
@@ -40,38 +44,33 @@ def index():
         _phone_number = prof.phone_number
         _city = prof.city
         _state = prof.state
+        _tagline = prof.tagline
+        _summary = prof.summary
         _resume = prof.resume
         _skills = prof._skills
         _attitudes = prof._attitudes
         _history_edus = prof._history_edus
         _history_jobs = prof._history_jobs
         return render_template("seeker/dashboard.html",
+                               is_profile_complete=_is_profile_complete,
                                fullname=_name, first_name=_first_name, last_name=_last_name,
                                email=_email, phone_number=_phone_number, city=_city, state=_state,
+                               tagline=_tagline, summary=_summary,
                                resume=_resume, skills=_skills, attitudes=_attitudes,
                                history_edus=_history_edus, history_jobs=_history_jobs)
     elif current_user.account_type == AccountTypes.c:  # company
         profile = current_user._company
-        _name = profile.name
-        _city = profile.city
-        _state = profile.state
-        _website = profile.website
-
-        return render_template("company/dashboard.html", name=_name, city=_city, state=_state, website=_website)
+        return render_template("company/dashboard.html", company=profile)
     else:  # admin
         return render_template("admin/dashboard.html")
 
 
 @bp.route('/profile')
+@login_required
 def profile():
     """
     Displays the user's own profile (the same as the public view, but with some extra logic)
     """
-
-    if current_user.is_anonymous:
-        flash('Login required for this operation')
-        return redirect(url_for('main.login'))
-
     if current_user.account_type == AccountTypes.s:
         # Show seeker's public profile page
         return seeker_profile(current_user._seeker.id)
@@ -155,6 +154,48 @@ def company_profile(company_id: int):
                            job_posts=_job_posts)
 
 
+@bp.route('/profile/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    """
+    Enters or submits for the current user's profile editing page
+    """
+    if request.method == 'POST':
+        #print(request.form)
+        #print(request.files)
+        if current_user.account_type == AccountTypes.s:
+            update_seeker(current_user._seeker, request.form, request.files)
+            flash("Updated!")
+        else:  # company user
+            update_company(current_user._company, request.form, request.files)
+            flash("Updated!")
+        return redirect(url_for('main.profile'))
+
+    if current_user.account_type == AccountTypes.s:
+        # Seeker's profile editor
+        # simplify jinja by passing experience data in a convenient way
+        skr = current_user._seeker
+        _current_skills = skr.get_tech_skills_levels() + skr.get_biz_skills_levels()
+        # [[s._skill.title, int(s.skill_level)] for s in skr._skills]
+        _current_attitudes = [a._attitude.title for a in skr._attitudes]
+        _current_eduexps = [[e.school, e.study_field, int(e.education_lvl)] for e in skr._history_edus]
+        _current_jobexps = [[j.job_title, int(j.years_employed)] for j in skr._history_jobs]
+
+        #print(f"Skills = {_current_skills}\nAtts = {_current_attitudes}\nEdus = {_current_eduexps}\nJobs = {_current_jobexps}")
+        return render_template('seeker/profile_editor.html',
+                               seeker=skr,
+                               skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES,
+                               init_skills=_current_skills, init_attitudes=_current_attitudes,
+                               init_edus=_current_eduexps, init_jobs=_current_jobexps
+                               )
+    elif current_user.account_type == AccountTypes.c:
+        # Company's profile editor
+        return render_template('company/profile_editor.html', company=current_user._company)
+    else:  # Admins
+        flash("You don't have a profile, silly...")
+        return redirect(url_for('main.index'))
+
+
 @bp.route("/job/new", methods=['GET', 'POST'])
 @login_required
 def new_job():
@@ -215,7 +256,7 @@ def job_search():
     Navigate to the job search page.
     """
     # TODO limit access to only seekers/admins?
-    print(f"JOBS PAGE-{request.method}\n\tFORM: {request.form}\n\tARGS: {request.args}")
+    #print(f"JOBS PAGE-{request.method}\n\tFORM: {request.form}\n\tARGS: {request.args}")
     if request.method == 'POST':
         saved_name = request.form.get('query_saveas', '')
         delete_info = request.form.get('query_delete', '')
@@ -428,3 +469,13 @@ def stats():
     #print(json.dumps(pair_counts, sort_keys=True, indent=4))
     #print(count_max)
     return render_template('admin/stats_idk.html', nodes_ds = nodes, from_to_ds = connections)
+
+# @bp.route("/maps")
+# def maps():
+#     seeker_coordinates = get_coordinates_seekers()
+#     job_coordinates = get_coordinates_jobs()
+#     company_coordinates = get_coordinates_companies()
+#     return render_template('admin/user_map.html',
+#                            seeker_coords = seeker_coordinates,
+#                            job_coords = job_coordinates,
+#                            company_coords = company_coordinates)

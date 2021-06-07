@@ -90,6 +90,18 @@ def create_app(config_class=Config):
             args[key] = val
         return f"{request.path}?{url_encode(args)}"
 
+    @app.template_global()
+    def bitwise_and(lhs, rhs) -> bool:
+        """ Checks if the LHS & RHS > 0 """
+        return lhs & rhs > 0
+
+    @app.template_global()
+    def _print(*content):
+        for item in content:
+            print(item, end=" ")
+        print()
+        return ""
+
     return app
 
 
