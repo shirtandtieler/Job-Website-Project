@@ -13,7 +13,7 @@ import app
 from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
     job_form_to_url_params
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
-from app.api.profile import update_seeker
+from app.api.profile import update_seeker, update_company
 from app.api.seeker_query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
     seeker_url_args_to_input_states
 from app.api.routing import modify_query
@@ -54,12 +54,7 @@ def index():
                                history_edus=_history_edus, history_jobs=_history_jobs)
     elif current_user.account_type == AccountTypes.c:  # company
         profile = current_user._company
-        _name = profile.name
-        _city = profile.city
-        _state = profile.state
-        _website = profile.website
-
-        return render_template("company/dashboard.html", name=_name, city=_city, state=_state, website=_website)
+        return render_template("company/dashboard.html", company=profile)
     else:  # admin
         return render_template("admin/dashboard.html")
 
@@ -160,26 +155,27 @@ def edit_profile():
     Enters or submits for the current user's profile editing page
     """
     if request.method == 'POST':
-        print(request.form)
-        print(request.files)
+        #print(request.form)
+        #print(request.files)
         if current_user.account_type == AccountTypes.s:
             update_seeker(current_user._seeker, request.form, request.files)
             flash("Updated!")
         else:  # company user
-            flash("TODO")
+            update_company(current_user._company, request.form, request.files)
+            flash("Updated!")
         return redirect(url_for('main.profile'))
 
     if current_user.account_type == AccountTypes.s:
         # Seeker's profile editor
         # simplify jinja by passing experience data in a convenient way
         skr = current_user._seeker
-        _current_skills = [[s._skill.title, int(s.skill_level)] for s in skr._skills]
+        _current_skills = skr.get_tech_skills_levels() + skr.get_biz_skills_levels()
+        # [[s._skill.title, int(s.skill_level)] for s in skr._skills]
         _current_attitudes = [a._attitude.title for a in skr._attitudes]
         _current_eduexps = [[e.school, e.study_field, int(e.education_lvl)] for e in skr._history_edus]
         _current_jobexps = [[j.job_title, int(j.years_employed)] for j in skr._history_jobs]
 
         #print(f"Skills = {_current_skills}\nAtts = {_current_attitudes}\nEdus = {_current_eduexps}\nJobs = {_current_jobexps}")
-
         return render_template('seeker/profile_editor.html',
                                seeker=skr,
                                skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES,
@@ -254,7 +250,7 @@ def job_search():
     Navigate to the job search page.
     """
     # TODO limit access to only seekers/admins?
-    print(f"JOBS PAGE-{request.method}\n\tFORM: {request.form}\n\tARGS: {request.args}")
+    #print(f"JOBS PAGE-{request.method}\n\tFORM: {request.form}\n\tARGS: {request.args}")
     if request.method == 'POST':
         saved_name = request.form.get('query_saveas', '')
         delete_info = request.form.get('query_delete', '')

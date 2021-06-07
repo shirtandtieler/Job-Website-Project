@@ -251,7 +251,7 @@ class User(UserMixin, db.Model):
 
 @login.user_loader
 def load_user(id_):
-    print(f"Loading user w/id {id_}")
+    #print(f"Loading user w/id {id_}")
     return User.query.get(int(id_))
 
 
@@ -297,6 +297,9 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
         if acct.account_type != AccountTypes.c:
             raise ValueError(f"Account type is not a Company")
         return company_id
+
+    def is_profile_complete(self):
+        return self.name and self.city and self.state and self.website and self.tagline and self.summary
 
     def avatar(self, size=128):
         _hashstr = re.sub(r"\W", "", self.name)
@@ -439,7 +442,7 @@ class SeekerProfile(db.Model):
         return sum([job.years_employed for job in self._history_jobs])
 
     def get_tech_skills_levels(self):
-        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if
+        output = [[skr_skl._skill.title, int(skr_skl.skill_level)] for skr_skl in self._skills if
                   skr_skl._skill.is_tech()]
         output.sort(key=itemgetter(1), reverse=True)
         return output
@@ -459,7 +462,7 @@ class SeekerProfile(db.Model):
         return skls
 
     def get_biz_skills_levels(self) -> List[Tuple[str, int]]:
-        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if
+        output = [[skr_skl._skill.title, int(skr_skl.skill_level)] for skr_skl in self._skills if
                   skr_skl._skill.is_biz()]
         output.sort(key=itemgetter(1), reverse=True)
         return output

@@ -99,7 +99,6 @@ def job_form_to_url_params(form: ImmutableMultiDict) -> str:
         acmp = _compress(alist, Attitude.count())
         args['att'] = acmp
 
-    print(f'URL ENCODED {form} TO {args}')
     return url_encode(args)
 
 
@@ -151,7 +150,6 @@ def job_url_args_to_input_states(req_args: ImmutableMultiDict) -> dict:
     if arg_att:
         options['sel_atts'] = _decompress(arg_att)
 
-    print(f'INPUT SET {req_args} TO {options}')
     return options
 
 
@@ -204,7 +202,6 @@ def job_url_args_to_query_args(req_args: ImmutableMultiDict) -> dict:
         kwargs['atts'] = _decompress(arg_att, output="int")
     # if arg_att.isdigit():  # for when arg is an int
     #     kwargs['atts'] = int(arg_att)
-    print(f'CONVERTED {req_args} TO {kwargs}')
     return kwargs
 
 
