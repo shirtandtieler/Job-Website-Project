@@ -7,9 +7,9 @@ def get_score(jobpost_id, seeker_id):
     # Point values
     WITHIN_50_MILES = 25
     WITHIN_100_MILES = 15
-    SKILL_HIGH_IMPORTANCE = 6
-    SKILL_LOW_IMPORTANCE = 4
-    SAME_ATTITUDE = 6
+    SKILL_HIGH_IMPORTANCE = 7
+    SKILL_LOW_IMPORTANCE = 5
+    SAME_ATTITUDE = 4
 
     post = JobPost.query.filter_by(id=jobpost_id).first()
     if post is None:
@@ -26,13 +26,11 @@ def get_score(jobpost_id, seeker_id):
 
     seeker_points = 0  # initiate seeker points to 0
 
-    #if post.is_remote is False:
-    #    print(post.city)
-    #    print(post.state)
-    #    if seeker.is_within(50, post.city, post.state):
-    #        seeker_points += WITHIN_50_MILES
-    #    elif seeker.is_within(100, post.city, post.state):
-    #        seeker_points += WITHIN_100_MILES
+    if post.is_remote is False:
+        if seeker.is_within(50, post.city, post.state):
+            seeker_points += WITHIN_50_MILES
+        elif seeker.is_within(100, post.city, post.state):
+            seeker_points += WITHIN_100_MILES
 
     job_skills = post.get_skills_data()
     seeker_skills = seeker.get_tech_skills_levels() + seeker.get_biz_skills_levels()
