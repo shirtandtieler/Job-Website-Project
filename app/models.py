@@ -365,6 +365,13 @@ class SeekerProfile(db.Model):
             raise ValueError(f"Account type is not a Seeker")
         return seeker_id
 
+    def is_profile_complete(self):
+        return all([
+            self.first_name, self.last_name, self.phone_number, self.city, self.state,
+            self.tagline, self.summary, self.resume, len(self._skills), len(self._attitudes),
+            len(self._history_edus), len(self._history_jobs)
+        ])
+
     @property
     def full_name(self):
         return f"{self.first_name} {self.last_name}"

@@ -35,6 +35,7 @@ def index():
 
     if current_user.account_type == AccountTypes.s:  # seeker
         prof = current_user._seeker
+        _is_profile_complete = prof.is_profile_complete()
         _first_name = prof.first_name
         _last_name = prof.last_name
         _name = _first_name + ' ' + _last_name
@@ -42,14 +43,18 @@ def index():
         _phone_number = prof.phone_number
         _city = prof.city
         _state = prof.state
+        _tagline = prof.tagline
+        _summary = prof.summary
         _resume = prof.resume
         _skills = prof._skills
         _attitudes = prof._attitudes
         _history_edus = prof._history_edus
         _history_jobs = prof._history_jobs
         return render_template("seeker/dashboard.html",
+                               is_profile_complete=_is_profile_complete,
                                fullname=_name, first_name=_first_name, last_name=_last_name,
                                email=_email, phone_number=_phone_number, city=_city, state=_state,
+                               tagline=_tagline, summary=_summary,
                                resume=_resume, skills=_skills, attitudes=_attitudes,
                                history_edus=_history_edus, history_jobs=_history_jobs)
     elif current_user.account_type == AccountTypes.c:  # company
