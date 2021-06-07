@@ -1,6 +1,6 @@
 # TODO implement funcs for performing matching
 # (Maybe split into separate sub-library if needed and have this as a public end-point)
-from app.models import SeekerProfile, JobPost, CompanyProfile
+from app.models import SeekerProfile, JobPost, CompanyProfile, Skill, Attitude
 
 
 def get_score(jobpost_id, seeker_id):
@@ -26,11 +26,13 @@ def get_score(jobpost_id, seeker_id):
 
     seeker_points = 0  # initiate seeker points to 0
 
-    if post.is_remote is False:
-        if seeker.is_within(50, post.city, post.state):
-            seeker_points += WITHIN_50_MILES
-        elif seeker.is_within(100, post.city, post.state):
-            seeker_points += WITHIN_100_MILES
+    #if post.is_remote is False:
+    #    print(post.city)
+    #    print(post.state)
+    #    if seeker.is_within(50, post.city, post.state):
+    #        seeker_points += WITHIN_50_MILES
+    #    elif seeker.is_within(100, post.city, post.state):
+    #        seeker_points += WITHIN_100_MILES
 
     job_skills = post.get_skills_data()
     seeker_skills = seeker.get_tech_skills_levels() + seeker.get_biz_skills_levels()
@@ -38,11 +40,16 @@ def get_score(jobpost_id, seeker_id):
 
     # match and give points for skills
     for job_skill in job_skills:
-        if job_skill._skill.title not in seeker_skill_lookup:
+
+        # get job title from id
+        skill_id = job_skill[0]
+        skill = Skill.query.filter_by(id=skill_id).first()
+        title = skill.title
+
+        if title not in seeker_skill_lookup:
             continue
 
         # get attribute from jobpost tuple
-        title = job_skill[0]
         job_skill_level = job_skill[1]
         importance_level = job_skill[2]
 
@@ -68,17 +75,25 @@ def get_score(jobpost_id, seeker_id):
 
     # match and give points for attitudes
     job_attitudes = post.get_attitude_data()  # list of tuples
+
     job_attitudes_list = []  # list of attitudes only from job post # to intersect with seeker_attitudes
     for job_attitude_tuple in job_attitudes:
-        job_attitudes_list.append(job_attitude_tuple[0])
+
+        attitude_id = job_attitude_tuple[0]
+        attitude = Attitude.query.filter_by(id=attitude_id).first()
+        title = attitude.title
+
+        job_attitudes_list.append(title)
 
     seeker_attitudes = seeker.get_attitudes()
     matching_attitudes = set(job_attitudes_list).intersection(set(seeker_attitudes))
 
     for matching_attitude in matching_attitudes:
-        matching_index = [i[0] for i in job_attitudes].index(
-            matching_attitude)  # get index of current attitudes in job attitudes
-        importance_level = job_attitudes[matching_attitude][1]  # get importance level from 2nd index of tuple
+
+        matching_attitude_id = Attitude.query.filter_by(title=matching_attitude).first().id # get id of the attitude
+        matching_index = [i[0] for i in job_attitudes].index(matching_attitude_id)  # get index of tuble of the current matching_attitude in job_attitudes
+        importance_level = job_attitudes[matching_index][1]  # get importance level from 2nd index of tuple
+
         multiplier = importance_level / 2
         seeker_points += SAME_ATTITUDE * multiplier
 
@@ -97,7 +112,8 @@ def get_jobs_sorted(seeker_id, jobs_list=None, limit=50):
     jobs_by_score = []
     for job_id in jobs_list:
         score = get_score(job_id, seeker_id)
-        jobs_by_score.append((job_id, score))
+        if score > 0:
+            jobs_by_score.append((job_id, score))
 
     jobs_by_score_sorted = sorted(jobs_by_score, key=lambda tup: tup[1])
 
@@ -119,7 +135,8 @@ def get_seekers_sorted(job_id, seeker_list=None, limit=50):
     seekers_by_score = []
     for seeker_id in seeker_list:
         score = get_score(job_id, seeker_id)
-        seekers_by_score.append((seeker_id, score))
+        if score > 0:
+            seekers_by_score.append((seeker_id, score))
 
     seekers_by_score_sorted = sorted(seekers_by_score, key=lambda tup: tup[1])
     return seekers_by_score_sorted
