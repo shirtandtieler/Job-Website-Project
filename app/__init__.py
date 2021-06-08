@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask, Blueprint, request
@@ -101,6 +102,13 @@ def create_app(config_class=Config):
             print(item, end=" ")
         print()
         return ""
+
+    @app.template_filter('filename')
+    def filename(s):
+        l = re.findall('\'([^\']*).html', str(s))
+        if l:
+            return l[0]
+        return None
 
     return app
 

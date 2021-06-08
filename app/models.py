@@ -171,6 +171,7 @@ class Skill(db.Model):
 
     @staticmethod
     def to_tech_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        """ Gets the title and ID of all tech skill entries """
         global TSKILL_TITLEIDS
         if TSKILL_TITLEIDS is None:
             TSKILL_TITLEIDS = [(s.title, s.id) for s in Skill.query.all() if s.is_tech()]
@@ -187,6 +188,7 @@ class Skill(db.Model):
 
     @staticmethod
     def to_biz_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        """ Gets the title and ID of all business skill entries """
         global BSKILL_TITLEIDS
         if BSKILL_TITLEIDS is None:
             BSKILL_TITLEIDS = [(s.title, s.id) for s in Skill.query.all() if s.is_biz()]
@@ -1044,6 +1046,7 @@ class LocationCoordinates(db.Model):
             (just state if city cannot be found, otherwise just 'USA')
         """
         loc_id = LocationCoordinates.to_location(city, state)
+
         row = LocationCoordinates.query.get(loc_id)
         if row is None:
             # not present, create then return
@@ -1051,10 +1054,10 @@ class LocationCoordinates(db.Model):
             if loc_obj is None or loc_obj.latitude is None:
                 if not fallback:
                     raise ValueError(f"Cannot be found: '{loc_id}' (city: {city}, state: {state})")
-                if city is not None:  # try just getting the state
+                if state is not None:  # try just getting the state
                     return LocationCoordinates.get(None, state, fallback)
-                # otherwise just get 'USA'
-                return LocationCoordinates.get(None, None, fallback)
+                # otherwise place in bermuda
+                return 32.3078, -64.7505
             row = LocationCoordinates(location=loc_id, latitude=loc_obj.latitude, longitude=loc_obj.longitude)
             db.session.add(row)
             db.session.commit()

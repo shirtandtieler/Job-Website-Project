@@ -1,9 +1,21 @@
 {% extends 'bootstrap/base.html' %}
 
 {% block title %}
-{% if title %}{{ title }} {% else %} {{ "Team 3 Project" }}{% endif %}
+{% if title %}{{ title }} {% else %} {{ (self | filename).replace("_"," ").replace("/"," ").title() }}{% endif %}
 {% endblock %}
 
+{% block head %}
+{{ super() }}
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-86ZPSGMD1N"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-86ZPSGMD1N');
+</script>
+{% endblock %}
 
 {% block navbar %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -79,8 +91,6 @@
 
 {% block scripts %}
 {{ super() }}
-<script>
-</script>
 {% endblock %}
 
 {% block styles %}
