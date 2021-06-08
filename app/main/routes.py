@@ -8,12 +8,10 @@ from io import BytesIO
 from flask import render_template, flash, redirect, url_for, send_file, Response
 from flask import request
 from flask_login import current_user, login_required
-from werkzeug.utils import secure_filename
 
 import app
 from app.api.colors import lerp_color
 from app.api.db import count_rows
-from app.api.google_analytics import run_realtime_report
 from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
     job_form_to_url_params
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
@@ -28,7 +26,6 @@ from app.api.statistics import get_coordinate_info, get_seeker_counts_by_skill, 
 from app.api.users import save_seeker_search, delete_seeker_search, save_job_search, delete_job_search
 from app.main import bp
 from app.main.forms import JobPostForm
-from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
 from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude, \
     SeekerSkill  # , MatchScores
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
