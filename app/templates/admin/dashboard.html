@@ -3,9 +3,36 @@
 {% block app_content %}
 
 <h2>Welcome admin, to your dashboard.</h2>
-<a href="{{ url_for('main.stats_map') }}">To maps</a><br/>
-<a href="{{ url_for('main.stats_connections') }}">To connection graph</a><br/>
-<a href="{{ url_for('main.stats_report') }}">To G-Analytics</a><br/>
-<a href="{{ url_for('main.stats_realtime') }}">To G-Realtime</a><br/>
+<div class="row mt-5">
+    <div class="col-1"></div>
+    <div class="col-4">
+        <a class="nolink" href="{{ url_for('main.stats_overview') }}">
+            <div class="card pt-3"  style="box-shadow: 3px 3px 1px gray;">
+                <i class="fas fa-chart-bar" style="font-size:150px; text-align:center"></i><br/>
+                <div class="card-body" style="font-size:32px; text-align:center">To analytics</div>
 
+            </div>
+        </a>
+    </div>
+    <div class="col-2"></div>
+    <div class="col-4">
+        <a class="nolink" href="#">
+            <div class="card pt-3" style="box-shadow: 3px 3px 1px gray;">
+                <i class="fas fa-database" style="font-size:150px; text-align:center"></i><br/>
+                <div class="card-body" style="font-size:32px; text-align:center">To DB editor</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-1"></div>
+</div>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .nolink {
+        text-decoration: none;
+        color: black;
+    }
+</style>
 {% endblock %}

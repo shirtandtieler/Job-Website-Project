@@ -1,9 +1,8 @@
 from werkzeug.datastructures import ImmutableMultiDict
-from werkzeug.utils import secure_filename
 
 from app.api.users import edit_seeker, reset_seeker, update_seeker_skill, add_seeker_attitude, remove_seeker_skill, \
     remove_seeker_attitude, add_seeker_education, add_seeker_job, edit_company
-from app.models import SeekerProfile, WorkTypes, Skill, Attitude, EducationLevel, CompanyProfile
+from app.models import SeekerProfile, WorkTypes, Skill, Attitude, CompanyProfile
 
 
 ## [FOR SEEKER]

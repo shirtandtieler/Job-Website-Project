@@ -1,0 +1,262 @@
+{% extends "admin/stats__base.html" %}
+
+{% block head %}
+{{ super() }}
+<!-- Load in Leaflet mapping library -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+      crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+        integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+        crossorigin=""></script>
+{% endblock %}
+
+
+{% block app_content %}
+<div class="row">
+    <div class="col-5">
+        <h5 class="stats-h5">Account Distribution</h5>
+        <div id="account-pie"></div>
+    </div>
+    <div class="col-2 ">
+        <!--        <div id="job-counter"></div>-->
+    </div>
+    <div class="col-5">
+        <h5 class="stats-h5">Active Status By Type</h5>
+        <div id="activeness-pies"></div>
+    </div>
+</div>
+<div class="row">
+    <h5 class="stats-h5 mt-3">Locations By type</h5>
+    <div id="map" style="height:500px"></div>
+</div>
+{% endblock %}
+
+
+{% block styles %}
+{{ super() }}
+<style>
+    .stats-h5 {
+        text-align: center;
+        letter-spacing: 2px;
+    }
+</style>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/plotly-2.0.0.min.js') }}"></script>
+<script>
+    var account_data = [{
+        type: 'pie',
+        values: [49, 25],
+        labels: ['Seekers', 'Companies'],
+        hoverinfo: 'label+percent',
+        textinfo: 'value'
+    }];
+    var account_layout = {
+        height: 200,
+        margin: { t: 0, b: 0, l: 0, r: 0 }
+    };
+    Plotly.newPlot('account-pie', account_data, account_layout);
+
+    /*
+    var job_data = [
+        {
+            type: "indicator",
+            mode: "number",
+            value: 450,
+            title: {
+                text: "Jobs"
+            },
+            domain: { x: [0, 1], y: [0.1, 0.6] }
+        }
+    ];
+    var job_layout = {
+        //width: 150,
+        height: 200,
+        margin: { t: 0, b: 0, l: 0, r: 0 }
+    };
+    Plotly.newPlot('job-counter', job_data, job_layout);
+    */
+
+    var activeness_data = [{
+        type: 'pie',
+        values: [200, 10],
+        labels: ['Active', 'Inactive' ],
+        textposition: 'inside',
+        domain: {column: 0},
+        title: {text: 'Seekers'},
+        name: 'Seekers',
+        hoverinfo: 'label+value+name',
+        marker: {
+            colors: ['rgb(60, 179, 113)', 'rgb(255, 102, 102)']
+        },
+    },{
+        type: 'pie',
+        values: [15, 2],
+        labels: ['Active', 'Inactive' ],
+        title: {text: 'Companies'},
+        name: 'Companies',
+        textposition: 'inside',
+        domain: {column: 1},
+        hoverinfo: 'label+value+name',
+        marker: {
+            colors: ['rgb(60, 179, 113)', 'rgb(255, 102, 102)']
+        },
+    },{
+        type: 'pie',
+        values: [60, 8],
+        labels: ['Active', 'Inactive' ],
+        title: {text: 'Jobs'},
+        name: 'Jobs',
+        textposition: 'inside',
+        domain: {column: 2},
+        hoverinfo: 'label+value+name',
+        marker: {
+            colors: ['rgb(60, 179, 113)', 'rgb(255, 102, 102)']
+        },
+    }];
+    var activeness_layout = {
+        height: 200,
+        grid: { rows: 1, columns: 3, pattern: "independent" },
+        margin: { t: 0, b: 0, l: 0, r: 0 },
+        showlegend: false
+    };
+    Plotly.newPlot('activeness-pies', activeness_data, activeness_layout);
+</script>
+<script>
+    // https://leafletjs.com/reference-1.7.1.html
+
+    var seeker_markers = [
+    {% for lat, lng, loc, count in seeker_coords %}
+    L.circleMarker([{{ lat }}, {{ lng }}], {
+    radius: 5,
+    color: '#3388ff',
+    title: 'Seeker|{{ loc }}|x' + {{ count }}
+    }),
+    {% endfor %}
+    ];
+    var seeker_group = L.layerGroup(seeker_markers);
+
+    var company_markers = [
+    {% for lat, lng, loc, count in company_coords %}
+    L.circleMarker([{{ lat }}, {{ lng }}], {
+    radius: 5,
+    color: '#ff8833',
+    title: 'Company|{{ loc }}|x' + {{ count }}
+    }),
+    {% endfor %}
+    ];
+    var company_group = L.layerGroup(company_markers);
+
+    var job_markers = [
+    {% for lat, lng, loc, count in job_coords %}
+    L.circleMarker([{{ lat }}, {{ lng }}], {
+    radius: 5,
+    color: '#ff3388',
+    title: 'Job|{{ loc }}|x' + {{ count }}
+    }),
+    {% endfor %}
+    ];
+    var job_group = L.layerGroup(job_markers);
+
+    var mapboxUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    mapboxAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+    var base_layer = L.tileLayer(mapboxUrl, {attribution: mapboxAttribution}),
+    types_layer = L.tileLayer(mapboxUrl, {id: 'map', tileSize: 512, zoomOffset: -1, attribution: mapboxAttribution});
+
+    var map = L.map('map', {
+    center: [38.1, -94.65],
+    zoom: 4.5,
+    layers: [base_layer, types_layer],
+    maxBounds: [[15,-25], [75,-190]],
+    minZoom: 3,
+    maxZoom: 10,
+    zoomSnap: 0.5,
+    zoomDelta: 0.5,
+    wheelPxPerZoomLevel: 120
+    });
+
+    var baseMaps = {
+    "View": base_layer
+    };
+    var overlayMaps = {
+    "Seekers": seeker_group,
+    "Comapanies": company_group,
+    "Jobs": job_group
+    };
+    // add all layers to the map so they're enabled by default
+    map.addLayer(seeker_group);
+    map.addLayer(company_group);
+    map.addLayer(job_group);
+    // also add the controls to the layer button
+    L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+    // add legend
+    // from: https://gis.stackexchange.com/a/133745
+    var legend = L.control({position: 'bottomleft'});
+    legend.onAdd = function (map) {
+    var div = L.DomUtil.create('div', 'px-1 bg-white leaflet-bar');
+    var labels = ['<strong>Legend</strong>'];
+    var categories = ['Seeker', 'Company', 'Job'];
+    var categoryColors = ['#3388ff', '#ff8833', '#ff3388'];
+    for (var i = 0; i < categories.length; i++) {
+    div.innerHTML +=
+    labels.push(
+    '<i class="fas fa-circle" style="color:' + categoryColors[i] + '"></i> '
+    + categories[i]);
+
+    }
+    div.innerHTML = labels.join('<br>');
+    return div;
+    };
+    legend.addTo(map);
+
+    // add custom tooltip with location/count information
+    var info = L.control({position: 'bottomright'});
+    info.onAdd = function (map) {
+    this._div = L.DomUtil.create('div', 'px-1 bg-white leaflet-bar');
+    this.update();
+    return this._div;
+    };
+
+    // method that we will use to update the control based on feature properties passed
+    info.update = function (props) {
+    if (props) {
+    // set appearance of a specific node
+    var parts = props.options.title.split("|");
+    this._div.innerHTML = '<strong style="color: #777">' + parts[0] + ' Info</strong>'
+    + '<br/><b>' + parts[1] + '</b> - ' + parts[2];
+    } else {
+    // resetting appearance
+    this._div.innerHTML = '<strong style="color: #777">Info</strong>'
+    + '<br/>Hover over a node';
+    }
+    };
+
+    function highlightFeature(e) {
+    var layer = e.target;
+    info.update(layer);
+    }
+
+    function resetHighlight(e) {
+    info.update();
+    }
+
+    seeker_markers.forEach(e => {e.on({
+    mouseover: highlightFeature,
+    mouseout: resetHighlight
+    });});
+    company_markers.forEach(e => {e.on({
+    mouseover: highlightFeature,
+    mouseout: resetHighlight
+    });});
+    job_markers.forEach(e => {e.on({
+    mouseover: highlightFeature,
+    mouseout: resetHighlight
+    });});
+    info.addTo(map);
+</script>
+{% endblock %}

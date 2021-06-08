@@ -1,6 +1,7 @@
 # Routes are the different URLs that the application implements.
 # The functions below handle the routing/behavior.
 import json
+import os
 from datetime import datetime
 from io import BytesIO
 
@@ -11,27 +12,47 @@ from werkzeug.utils import secure_filename
 
 import app
 from app.api.colors import lerp_color
+from app.api.db import count_rows
+from app.api.google_analytics import run_realtime_report
 from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
     job_form_to_url_params
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
+from app.api.matchmaker import update_cache
 from app.api.profile import update_seeker, update_company
 from app.api.seeker_query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
     seeker_url_args_to_input_states
 from app.api.routing import modify_query
-from app.api.statistics import get_coordinate_info
+from app.api.statistics import get_coordinate_info, get_seeker_counts_by_skill, get_post_counts_by_skill, \
+    get_seeker_counts_by_attitude, get_post_counts_by_attitude
 from app.api.users import save_seeker_search, delete_seeker_search, save_job_search, delete_job_search
 from app.main import bp
 from app.main.forms import JobPostForm
-from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
-
-## TODO Routes needed for editing profile page, searching, sending messages, etc.
+from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude, \
+    SeekerSkill  # , MatchScores
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
+
+
+## TODO FAILED TO DEL SEEKERID:
+# File "D:\Documents\Escuela\CSC 394 Software Projects\_ProjectRepo\Job-Website-Project\app\main\routes.py", line 191, in edit_profile
+# update_seeker(current_user._seeker, request.form, request.files)
+# File "D:\Documents\Escuela\CSC 394 Software Projects\_ProjectRepo\Job-Website-Project\app\api\profile.py", line 67, in update_seeker
+# remove_seeker_skill(seeker.id, ss.skill_id)
+# File "D:\Documents\Escuela\CSC 394 Software Projects\_ProjectRepo\Job-Website-Project\app\api\users.py", line 222, in remove_seeker_skill
+# db.session.delete(entry)
+# File "<string>", line 2, in delete
+#
+# File "D:\Documents\Escuela\CSC 394 Software Projects\_ProjectRepo\Job-Website-Project\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2563, in delete
+# util.raise_(
+#     File "D:\Documents\Escuela\CSC 394 Software Projects\_ProjectRepo\Job-Website-Project\venv\Lib\site-packages\sqlalchemy\util\compat.py", line 211, in raise_
+# raise exception
+# sqlalchemy.orm.exc.UnmappedInstanceError: Class 'flask_sqlalchemy.BaseQuery' is not mapped
 
 
 @bp.route("/")
 @bp.route("/index")
 def index():
     """ Home page / dashboard for logged in users """
+    print(run_realtime_report())
     if current_user.is_anonymous:
         return render_template("index.html", title="Home")
 
@@ -83,7 +104,7 @@ def profile():
 
 
 @bp.route("/seeker/<seeker_id>")
-# @login_required
+@login_required
 def seeker_profile(seeker_id):
     """
     Navigate to a specific seeker's profile page.
@@ -162,10 +183,12 @@ def edit_profile():
     Enters or submits for the current user's profile editing page
     """
     if request.method == 'POST':
-        #print(request.form)
-        #print(request.files)
+        # print(request.form)
+        # print(request.files)
         if current_user.account_type == AccountTypes.s:
             update_seeker(current_user._seeker, request.form, request.files)
+            # also update the match score cache
+            # update_cache(seeker_id = current_user._seeker.id)
             flash("Updated!")
         else:  # company user
             update_company(current_user._company, request.form, request.files)
@@ -182,7 +205,7 @@ def edit_profile():
         _current_eduexps = [[e.school, e.study_field, int(e.education_lvl)] for e in skr._history_edus]
         _current_jobexps = [[j.job_title, int(j.years_employed)] for j in skr._history_jobs]
 
-        #print(f"Skills = {_current_skills}\nAtts = {_current_attitudes}\nEdus = {_current_eduexps}\nJobs = {_current_jobexps}")
+        # print(f"Skills = {_current_skills}\nAtts = {_current_attitudes}\nEdus = {_current_eduexps}\nJobs = {_current_jobexps}")
         return render_template('seeker/profile_editor.html',
                                seeker=skr,
                                skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES,
@@ -257,7 +280,7 @@ def job_search():
     Navigate to the job search page.
     """
     # TODO limit access to only seekers/admins?
-    #print(f"JOBS PAGE-{request.method}\n\tFORM: {request.form}\n\tARGS: {request.args}")
+    # print(f"JOBS PAGE-{request.method}\n\tFORM: {request.form}\n\tARGS: {request.args}")
     if request.method == 'POST':
         saved_name = request.form.get('query_saveas', '')
         delete_info = request.form.get('query_delete', '')
@@ -414,20 +437,25 @@ def seeker_search_download():
                     headers={'Content-disposition': 'attachment; filename=seeker_search_results.json'})
 
 
-@bp.route("/maps")
-def stats_map():
-    # TODO only admin
+@bp.route("/analytics")
+@login_required
+def stats_overview():
+    if current_user.account_type != AccountTypes.a:
+        flash(f"Operation not allowed.")
+        return redirect(url_for('main.index'))
     seeker_coord_info = get_coordinate_info(SeekerProfile, True, True)
     job_coord_info = get_coordinate_info(JobPost, True, True)
     company_coord_info = get_coordinate_info(CompanyProfile, True, True)
-    return render_template('admin/stats_map.html',
+
+    return render_template('admin/stats_overview.html',
                            seeker_coords=seeker_coord_info,
                            job_coords=job_coord_info,
                            company_coords=company_coord_info)
 
 
-@bp.route("/connections")
-def stats_connections():
+@bp.route("/analytics/relationships")
+@login_required
+def stats_relationships():
     # grouped bar graph - for comparing what seekers have vs what job posts are looking for
     # percent with a given skill/attitude
     # average level per skill
@@ -443,6 +471,9 @@ def stats_connections():
     #
 
     # jobs per company
+    if current_user.account_type != AccountTypes.a:
+        flash(f"Operation not allowed.")
+        return redirect(url_for('main.index'))
 
     # TODO only admin
     nodes = [{"id": s.id, "label": s.title} for s in Skill.query.all() if s.is_tech() and len(s._seekers) > 0]
@@ -453,7 +484,7 @@ def stats_connections():
     for sprofile in SeekerProfile.query.all():
         sids = [s._skill.id for s in sprofile._skills if s._skill.is_tech()]
         for i, sid1 in enumerate(sids):
-            for sid2 in sids[i+1:]:
+            for sid2 in sids[i + 1:]:
                 if sid1 in pair_counts and sid2 in pair_counts[sid1]:
                     pair_counts[sid1][sid2] += 1
                     count_max = max(count_max, pair_counts[sid1][sid2])
@@ -469,19 +500,57 @@ def stats_connections():
     connections = []
     for key1, key2s in pair_counts.items():
         for key2, count in key2s.items():
-            size_ratio = max(0, 1 if count_max == 1 else (count-1)/(count_max-1))
+            size_ratio = max(0, 1 if count_max == 1 else (count - 1) / (count_max - 1))
             connections.append({"from": key1, "to": key2,
-                                "weight": 1 + 5*size_ratio,
+                                "weight": 1 + 5 * size_ratio,
                                 "color": lerp_color(size_ratio, '#1010a3', '#bb0000')})
-    #print(json.dumps(pair_counts, sort_keys=True, indent=4))
-    #print(count_max)
-    return render_template('admin/stats_connections.html', nodes_ds = nodes, from_to_ds = connections)
+    # print(json.dumps(pair_counts, sort_keys=True, indent=4))
+    # print(count_max)
+    return render_template('admin/stats_attribute_relationships.html', nodes_ds=nodes, from_to_ds=connections)
 
-@bp.route("/greport")
+
+@bp.route("/analytics/rankings")
+@login_required
+def stats_rankings():
+    if current_user.account_type != AccountTypes.a:
+        flash(f"Operation not allowed.")
+        return redirect(url_for('main.index'))
+
+    if 'attr' not in request.args:
+        return redirect(url_for('main.stats_rankings', attr='t'))
+
+    attr = request.args.get('attr')
+    if attr == 't':  # for tech skills
+        names, counts_seeker = zip(*get_seeker_counts_by_skill('t'))
+        _, counts_job = zip(*get_post_counts_by_skill('t'))
+    elif attr == 'b':  # for biz skills
+        names, counts_seeker = zip(*get_seeker_counts_by_skill('b'))
+        _, counts_job = zip(*get_post_counts_by_skill('b'))
+    elif attr == 'v':  # for values/attitudes
+        names, counts_seeker = zip(*get_seeker_counts_by_attitude())
+        _, counts_job = zip(*get_post_counts_by_attitude())
+    else:
+        raise ValueError(f"Unknown attribute type: {attr}")
+
+    return render_template('admin/stats_attribute_rankings.html',
+                           column_names=list(names),
+                           counts_seeker=list(counts_seeker), counts_job=list(counts_job),
+                           lengths=[count_rows(SeekerProfile), count_rows(JobPost)])
+
+
+@bp.route("/analytics/report")
+@login_required
 def stats_report():
+    if current_user.account_type != AccountTypes.a:
+        flash(f"Operation not allowed.")
+        return redirect(url_for('main.index'))
     return render_template('admin/stats_google_studio_report.html')
 
-@bp.route("/grealtime")
-def stats_realtime():
-    return render_template('admin/stats_google_realtime.html')
 
+@bp.route("/analytics/realtime")
+@login_required
+def stats_realtime():
+    if current_user.account_type != AccountTypes.a:
+        flash(f"Operation not allowed.")
+        return redirect(url_for('main.index'))
+    return render_template('admin/stats_google_realtime.html')

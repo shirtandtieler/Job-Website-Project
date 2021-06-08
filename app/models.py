@@ -171,6 +171,7 @@ class Skill(db.Model):
 
     @staticmethod
     def to_tech_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        """ Gets the title and ID of all tech skill entries """
         global TSKILL_TITLEIDS
         if TSKILL_TITLEIDS is None:
             TSKILL_TITLEIDS = [(s.title, s.id) for s in Skill.query.all() if s.is_tech()]
@@ -187,6 +188,7 @@ class Skill(db.Model):
 
     @staticmethod
     def to_biz_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        """ Gets the title and ID of all business skill entries """
         global BSKILL_TITLEIDS
         if BSKILL_TITLEIDS is None:
             BSKILL_TITLEIDS = [(s.title, s.id) for s in Skill.query.all() if s.is_biz()]
