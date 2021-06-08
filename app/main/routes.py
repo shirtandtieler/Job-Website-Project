@@ -59,7 +59,12 @@ def index():
 
         return render_template("company/dashboard.html", name=_name, city=_city, state=_state, website=_website)
     else:  # admin
-        return render_template("admin/dashboard.html")
+        seekerdata=SeekerProfile.query.all()
+        companydata = CompanyProfile.query.all()
+        attitudedata= Attitude.query.all()
+        skillsdata=Skill.query.all()
+        jopostdata=JobPost.query.all()
+        return render_template("admin/dashboard.html", datajobposts=jopostdata, dataskills=skillsdata, dataseekers=seekerdata, datacompanies=companydata, dataattitudes=attitudedata)
 
 
 @bp.route('/profile')
@@ -381,3 +386,26 @@ def seeker_search_download():
 #                            seeker_coords = seeker_coordinates,
 #                            job_coords = job_coordinates,
 #                            company_coords = company_coordinates)
+
+
+# @bp.route("/admins",method=['GET','POST'])
+# @login_required
+# def admin_edit():
+#     # if request.method == 'POST':
+#     #     th = request.form["op"]
+#     #     val = request.form["val"]
+#     #     print(request.form)
+#     #     print(request.files)
+#     #     if th.account_type == "Search":
+#     #         return
+#     #     elif th == "Display_All":
+#     #         return
+#     # elif request.method == 'GET':
+#     #     th = request.args.get("op")
+#     #     val = request.args.get("val")
+#     #     if th == "Search":
+#     #         return
+#     #     elif th == "Display_All":
+#     #         return
+#     data = SeekerProfile.query.all()
+#     return render_template('admin/dashboard.html',dataseeker=data)
