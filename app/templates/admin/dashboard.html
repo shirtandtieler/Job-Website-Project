@@ -18,7 +18,103 @@ function myFunction() {
   var input, filter, table, tr, td, i, txtValue;
   input = document.getElementById("myInput");
   filter = input.value.toUpperCase();
+
   table = document.getElementById("myTable");
+  tr = table.getElementsByTagName("tr");
+
+  // Loop through all table rows, and hide those who don't match the search query
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[0];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+
+
+function myFunction2() {
+  // Declare variables
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("myInput2");
+  filter = input.value.toUpperCase();
+
+  table = document.getElementById("myTable2");
+  tr = table.getElementsByTagName("tr");
+
+  // Loop through all table rows, and hide those who don't match the search query
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[0];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+
+
+function myFunction3() {
+  // Declare variables
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("myInput3");
+  filter = input.value.toUpperCase();
+
+  table = document.getElementById("myTable3");
+  tr = table.getElementsByTagName("tr");
+
+  // Loop through all table rows, and hide those who don't match the search query
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[0];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+
+function myFunction4() {
+  // Declare variables
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("myInput4");
+  filter = input.value.toUpperCase();
+
+  table = document.getElementById("myTable4");
+  tr = table.getElementsByTagName("tr");
+
+  // Loop through all table rows, and hide those who don't match the search query
+  for (i = 0; i < tr.length; i++) {
+    td = tr[i].getElementsByTagName("td")[0];
+    if (td) {
+      txtValue = td.textContent || td.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        tr[i].style.display = "";
+      } else {
+        tr[i].style.display = "none";
+      }
+    }
+  }
+}
+
+
+function myFunction5() {
+  // Declare variables
+  var input, filter, table, tr, td, i, txtValue;
+  input = document.getElementById("myInput5");
+  filter = input.value.toUpperCase();
+
+  table = document.getElementById("myTable5");
   tr = table.getElementsByTagName("tr");
 
   // Loop through all table rows, and hide those who don't match the search query
@@ -52,11 +148,11 @@ function myFunction() {
 <div class="main_left">
   <div class="medium-4 columns" style="background-color:#f1f1f1;">
     <ul class="side-nav">
-      <li><a href="#">Seeker_Data</a></li>
-      <li><a href="#">Company_Data</a></li>
-      <li><a href="#">Skill_Data</a></li>
-      <li><a href="#">Attitute_Data</a></li>
-      <li><a href="#">Jobpost_Data</a></li>
+      <li><a href="admin/dashboard.html?data_type=seeker_Data" target="rightFrame1">Seeker_Data</a></li>
+      <li><a href="admin/dashboard.html?data_type=company_Data" target="rightFrame2">Company_Data</a></li>
+      <li><a href="admin/dashboard.html?data_type=skill_Data" target="rightFrame3">Skill_Data</a></li>
+      <li><a href="admin/dashboard.html?data_type=attitute_Data" target="rightFrame4">Attitute_Data</a></li>
+      <li><a href="admin/dashboard.html?data_type=jobpost_Data" target="rightFrame5">Jobpost_Data</a></li>
 
     </ul>
   </div>
@@ -64,8 +160,7 @@ function myFunction() {
 
 
 <div class="medium-8 columns">
-	<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names..">
-
+	<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for Seeker names...">
 	<table id="myTable">
 	  <tr class="header">
 	    <th style="width:20%;">Seeker_NAME</th>
@@ -89,6 +184,8 @@ function myFunction() {
 		{% endfor %}
 	</table>
 
+
+	<input type="text" id="myInput2" onkeyup="myFunction2()" placeholder="Search for Company names...">
 		<table id="myTable2">
 	  <tr class="header">
 	    <th style="width:20%;">company_NAME</th>
@@ -111,6 +208,8 @@ function myFunction() {
 		{% endfor %}
 	</table>
 
+
+	<input type="text" id="myInput3" onkeyup="myFunction3()" placeholder="Search for Skill title...">
 	<table id="myTable3">
 	  <tr class="header">
 	    <th style="width:20%;">Skill_TITLE</th>
@@ -131,7 +230,7 @@ function myFunction() {
 		{% endfor %}
 	</table>
 
-
+	<input type="text" id="myInput4" onkeyup="myFunction4()" placeholder="Search for Attitue title...">
 	<table id="myTable4">
 	  <tr class="header">
 	    <th style="width:20%;">Attitue_TITLE</th>
@@ -150,6 +249,7 @@ function myFunction() {
 		{% endfor %}
 	</table>
 
+		<input type="text" id="myInput5" onkeyup="myFunction5()" placeholder="Search for Job Post title...">
 	<table id="myTable5">
 	  <tr class="header">
 	    <th style="width:20%;">Jobpost_TITLE</th>
@@ -249,7 +349,7 @@ function myFunction() {
 			cursor: pointer;
 		}
 
-		#myInput {
+		#myInput, #myInput2, #myInput3, #myInput4, #myInput5 {
 		  background-image: url('/css/searchicon.png'); /* Add a search icon to input */
 		  background-position: 10px 12px; /* Position the search icon */
 		  background-repeat: no-repeat; /* Do not repeat the icon image */
@@ -267,17 +367,17 @@ function myFunction() {
 		  font-size: 18px; /* Increase font-size */
 		}
 
-		#myTable th, #myTable td {
+		#myTable th, #myTable td ,#myTable2 th, #myTable2 td, #myTable3 th, #myTable3 td, #myTable4 th, #myTable4 td, #myTable5 th, #myTable5 td{
 		  text-align: left; /* Left-align text */
 		  padding: 12px; /* Add padding */
 		}
 
-		#myTable tr {
+		#myTable tr, #myTable2 tr, #myTable3 tr, #myTable5 tr, #myTable4 tr {
 		  /* Add a bottom border to all table rows */
 		  border-bottom: 1px solid #ddd;
 		}
 
-		#myTable tr.header, #myTable tr:hover {
+		#myTable tr.header, #myTable tr:hover, #myTable2 tr.header, #myTable2 tr:hover, #myTable3 tr.header, #myTable3 tr:hover, #myTable4 tr.header, #myTable4 tr:hover, #myTable5 tr.header, #myTable5 tr:hover{
 		  /* Add a grey background color to the table header and on hover */
 		  background-color: #f1f1f1;
 		}
