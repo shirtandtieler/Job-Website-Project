@@ -17,6 +17,7 @@ from app.api.google_analytics import run_realtime_report
 from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
     job_form_to_url_params
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
+from app.api.profile import update_seeker, update_company
 from app.api.matchmaker import update_cache
 from app.api.profile import update_seeker, update_company
 from app.api.seeker_query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
@@ -27,6 +28,7 @@ from app.api.statistics import get_coordinate_info, get_seeker_counts_by_skill, 
 from app.api.users import save_seeker_search, delete_seeker_search, save_job_search, delete_job_search
 from app.main import bp
 from app.main.forms import JobPostForm
+from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
 from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude, \
     SeekerSkill  # , MatchScores
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
@@ -52,7 +54,6 @@ from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
 @bp.route("/index")
 def index():
     """ Home page / dashboard for logged in users """
-    print(run_realtime_report())
     if current_user.is_anonymous:
         return render_template("index.html", title="Home")
 
@@ -280,7 +281,7 @@ def job_search():
     Navigate to the job search page.
     """
     # TODO limit access to only seekers/admins?
-    # print(f"JOBS PAGE-{request.method}\n\tFORM: {request.form}\n\tARGS: {request.args}")
+    #print(f"JOBS PAGE-{request.method}\n\tFORM: {request.form}\n\tARGS: {request.args}")
     if request.method == 'POST':
         saved_name = request.form.get('query_saveas', '')
         delete_info = request.form.get('query_delete', '')
