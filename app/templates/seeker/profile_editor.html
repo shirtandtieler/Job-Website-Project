@@ -1,0 +1,697 @@
+{% extends "base.html" %}
+
+{% block app_content %}
+<!-- Education Modal -->
+<div class="modal fade" data-bs-backdrop="static" id="educationAddModal" tabindex="-1" role="dialog"
+    aria-labelledby="addEduExp" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addEduExp">Add Education</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="educationForm">
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" id="schoolName" class="form-control" placeholder="School Name">
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col">
+                            <select class="custom-select mr-sm-2" id="inlineFormCustomSelect">
+                                <option selected>Degree...</option>
+                                <option value="0">Certification</option>
+                                <option value="1">Associate's Degree</option>
+                                <option value="2">Bachelor's Degree</option>
+                                <option value="3">Master's Degree</option>
+                                <option value="4">Doctor's Degree</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <input type="text" id="fieldOfStudy" class="form-control" placeholder="Field of Study">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveEducation()" data-bs-dismiss="modal">Save
+                    changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Professional Modal -->
+<div class="modal fade" data-bs-backdrop="static" id="professionalAddModal" tabindex="-1" role="dialog"
+    aria-labelledby="addProfExp" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addProfExp">Add Professional Experience</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="professionalForm">
+                    <div class="row">
+                        <div class="col">
+                            <input type="text" id="jobTitle" class="form-control" placeholder="Job title">
+                        </div>
+                    </div>
+                    <br/>
+                    <div class="row">
+                        <div class="col">
+                            <input type="number" id="yearsWorked" class="form-control" placeholder="Years Worked">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveProfessionExperience()"
+                    data-bs-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="container">
+        <div class="row gutters">
+            <div class="col-lg-3 col-12">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="account-settings">
+                            <h3 class="mb-2 text-primary">Seeker Edit Profile</h3>
+                            <div class="user-profile">
+                                <div class="user-avatar">
+                                    <img src="{{ seeker.avatar() }}" alt="Seeker avatar">
+                                </div>
+                                <h6 class="user-email">{{ seeker._user.email }}</h6>
+                            </div>
+                            <div class="form-group">
+                                <label for="profilePicFile">Profile Picture Upload</label>
+                                <input type="file" class="form-control-file" accept="image/png, image/jpeg" id="profilePicFile" name="profilePicFile">
+                            </div>
+                            <div class="form-group">
+                                <label for="resumeFile">Resume Upload</label>
+                                <input type="file" class="form-control-file" accept=".docx,.pdf" id="resumeFile" name="resumeFile">
+                            </div>
+                            <div class="">
+                                <h6 class="mt-3 mb-2 text-primary">Work type</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="1" id="chk-ft" name="worktype" {% if bitwise_and(seeker.work_wanted, 1) %}checked{% endif %}>
+                                    <label class="form-check-label" for="chk-ft">
+                                        Full time
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="2" id="chk-pt" name="worktype" {% if bitwise_and(seeker.work_wanted, 2) %}checked{% endif %}>
+                                    <label class="form-check-label" for="chk-pt">
+                                        Part time
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="4" id="chk-contract" name="worktype" {% if bitwise_and(seeker.work_wanted, 4) %}checked{% endif %}>
+                                    <label class="form-check-label" for="chk-contract">
+                                        Contract
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="true" id="chk-remote" name="remote" {% if seeker.remote_wanted %}checked{% endif %}>
+                                    <label class="form-check-label" for="chk-remote">
+                                        Open to remote
+                                    </label>
+                                </div>
+                            </div>
+                            <hr/>
+                            {% if seeker._user.is_active %}
+                            <div class="form-check border border-2 border-danger rounded-3 px-2 py-1" style="width:85%">
+                                <input class="form-check-input mx-1" type="checkbox" value="1" id="chk-deactivate" name="deactivate">
+                                <label class="form-check-label" for="chk-deactivate">
+                                    Deactivate account
+                                </label>
+                            </div>
+                            {% else %}
+                            <div class="form-check border border-2 border-success rounded-3 px-2 py-1" style="width:85%">
+                                <input class="form-check-input mx-1" type="checkbox" value="1" id="chk-reactivate" name="reactivate">
+                                <label class="form-check-label" for="chk-reactivate">
+                                    Reactivate account
+                                </label>
+                            </div>
+                            {% endif %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-9 col-12">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="row gutters">
+                            <div class="col-12">
+                                <h6 class="mb-2 text-primary">Personal Details</h6>
+                            </div>
+                            <div class="col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label for="firstName">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName"
+                                        placeholder="Enter first name" value="{{ seeker.first_name }}">
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label for="lastName">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName"
+                                           placeholder="Enter last name"  value="{{ seeker.last_name }}">
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label for="phone">Phone</label>
+                                    <input type="text" class="form-control" id="phone" name="phone"
+                                           placeholder="Enter phone number" value="{{ seeker.phone_number or '' }}">
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-12">
+                                <div class="form-group">
+                                    <label for="city">City</label>
+                                    <input type="text" class="form-control" id="city" name="city"
+                                           placeholder="Enter city" value="{{ seeker.city or ''}}">
+                                </div>
+                            </div>
+                            <div class="col-sm-2 col-12">
+                                <div class="form-group">
+                                    <label for="state">State</label>
+                                    <input type="text" class="form-control" id="state" name="state"
+                                           placeholder="Abbv. State" value="{{ seeker.state or ''}}">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row gutters">
+                            <div class="col-12">
+                                <h6 class="mt-3 mb-2 text-primary">Professional Details</h6>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="tagline">Tagline</label>
+                            <small id="tagline-counter"></small>
+                            <input type="text" class="form-control" id="tagline" name="tagline" maxlength="100"
+                                      placeholder="Give a one-liner overview about who you are" value="{{ seeker.tagline or '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="aboutMe">About Me</label>
+                            <textarea class="form-control" id="aboutMe" name="aboutMe" rows="3"
+                                placeholder="Give a brief summary about yourself and your career goals">{{ seeker.summary or ''}}</textarea>
+                        </div>
+
+                        <div class="row gutters mt-2">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="education_list">Education</label>
+                                    <button type="button" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#educationAddModal">
+                                        Add</button>
+                                    <input type="hidden" name="max_count_eduexps" value="0">
+                                    <ul class="form-control" id="education_list">
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row gutters">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="job_list">Professional Experience</label>
+                                    <button type="button" class="btn btn-primary btn-sm text-right" data-bs-toggle="modal" data-bs-target="#professionalAddModal">
+                                        Add</button>
+                                    <input type="hidden" name="max_count_jobexps" value="0">
+                                    <ul class="form-control" id="job_list">
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label for="skill_selector">Tech and Business Skills Entry</label>
+                                    <input class="form-control" type="text" id="skill_selector" placeholder="Add skills...">
+                                    <input type="hidden" name="max_count_skills" value="0">
+                                    <ul class="form-control" id="req_skills">
+
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 col-12">
+                                <div class="form-group">
+                                    <label for="attitude_selector">Attitudes and Values Entry</label>
+                                    <input class="form-control" type="text" id="attitude_selector"
+                                           placeholder="Add attitudes/values...">
+                                    <input type="hidden" name="max_count_attitudes" value="0">
+                                    <ul class="form-control" id="req_attitudes">
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row gutters">
+                        <div class="col-12">
+                            <div class="text-right">
+                                <button type="submit" id="submit" class="btn btn-primary">Update</button>
+                                <a href="/profile" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+
+    // counters for items in list
+    var count_skills = 0;
+    var count_attitudes = 0;
+    var count_eduexp = 0;
+    var count_jobexp = 0;
+
+    var skill_lvls = ["Novice", "Familiar", "Competent", "Proficient", "Expert"];
+    var degree_texts = ["Certification", "Associate's Degree", "Bachelor's Degree", "Master's Degree", "Doctor's Degree"];
+
+    var available_skills = {{ skill_list|safe or "null" }};
+    var available_attitudes = {{ attitude_list|safe or "null" }};
+    var init_skills_added = {{ init_skills|safe or "null" }};
+    var init_attitudes_added = {{ init_attitudes|safe or "null"}};
+    var init_edus_added = {{ init_edus|safe or "null" }};
+    var init_jobs_added = {{ init_jobs|safe or "null" }};
+
+    function saveEducation() {
+        // gather input from modal form:
+        const { schoolName, fieldOfStudy } = Array.from(document.querySelectorAll('#educationForm input')).reduce((acc, input) => ({ ...acc, [input.id]: input.value }), {});
+        const degreeType = document.querySelector('#inlineFormCustomSelect').selectedOptions[0].value;
+        //console.log(`School: ${schoolName} and Field: ${fieldOfStudy}`);
+        //console.log(`Degree selection: ${degreeType}`);
+
+        new_eduexp(schoolName, fieldOfStudy, degreeType);
+    }
+
+    // Make an Education card based on input from add Education Modal
+    function new_eduexp(schoolName, fieldOfStudy, degreeType) {
+        //generate a new education card that looks like this:
+        /*
+        <li class="list-group-item">
+            <p class="mb-0 pt-1" style="line-height:12px">Bachelor's Degree in Computer Science</p>
+            <small class="fw-light">DePaul University</small>
+            <button...>delete</button>
+            <input type='hidden' ...>
+            <input type='hidden' ...>
+            <input type='hidden' ...>
+        </li>
+        */
+
+        var ul = document.getElementById("education_list");
+        var li = document.createElement("li");
+        li.setAttribute("class", "list-group-item");
+        liChildAppend = ul.appendChild(li);
+
+        var p = document.createElement("p");
+        p.setAttribute("class", "mb-0 pt-1");
+        p.setAttribute("style", "line-height:12px");
+        pChildAppend = liChildAppend.appendChild(p);
+        pChildAppend.innerHTML = `${degree_texts[degreeType]} in ${fieldOfStudy}`;
+
+        var small = document.createElement("small");
+        small.setAttribute("class", "fw-light");
+        smallChildAppend = liChildAppend.appendChild(small);
+        smallChildAppend.innerHTML = `${schoolName}`;
+
+        var deleteButton = document.createElement("button");
+        deleteButton.setAttribute("class", "btn btn-secondary fas fa-trash invicon");
+        deleteButton.setAttribute("style", "float:right;margin-top:-15px");
+        deleteButton.appendChild(document.createTextNode(" delete"));
+        liChildAppend.appendChild(deleteButton);
+        deleteButton.setAttribute("onclick", "on_trash_exp()");
+
+        // need to add hidden input fields b/c this was implemented differently than the skills/attitudes setup
+        // <input type="hidden" id="" name="" value="">
+        var inpSchool = document.createElement("input");
+        inpSchool.setAttribute("type", "hidden");
+        inpSchool.setAttribute("name", "eduexp-" + count_eduexp + "-school");
+        inpSchool.setAttribute("value", schoolName);
+        liChildAppend.append(inpSchool);
+
+        var inpField = document.createElement("input");
+        inpField.setAttribute("type", "hidden");
+        inpField.setAttribute("name", "eduexp-" + count_eduexp + "-field");
+        inpField.setAttribute("value", fieldOfStudy);
+        liChildAppend.append(inpField);
+
+        var inpDegree = document.createElement("input");
+        inpDegree.setAttribute("type", "hidden");
+        inpDegree.setAttribute("name", "eduexp-" + count_eduexp + "-degree");
+        inpDegree.setAttribute("value", degreeType);
+        liChildAppend.append(inpDegree);
+
+        // increment counter
+        count_eduexp++;
+        // update hidden input
+        $('input[name=max_count_eduexps]').attr('value', count_eduexp);
+    }
+
+    function saveProfessionExperience() {
+        // gather input from modal form:
+        const { jobTitle, yearsWorked } = Array.from(document.querySelectorAll('#professionalForm input')).reduce((acc, input) => ({ ...acc, [input.id]: input.value }), {});
+        //console.log(`Job: ${jobTitle} and Years: ${yearsWorked}`);
+
+        new_jobexp(jobTitle, yearsWorked);
+    }
+
+    // Make an Professional Experience card based on input from add Professional Experience Modal
+    function new_jobexp(jobTitle, yearsWorked) {
+        //generate a new professional card that looks like this:
+        /*
+        <li class="list-group-item">
+            <p class="mb-0 pt-1" style="line-height:12px">Job Title</p>
+            <small class="fw-light">N-num years</small>
+            <button...>delete</button>
+            <input type='hidden' ...>
+            <input type='hidden' ...>
+        </li>
+        */
+
+        var ul = document.getElementById('job_list');
+        var li = document.createElement("li");
+        li.setAttribute("class", "list-group-item");
+        liChildAppend = ul.appendChild(li);
+
+        var p = document.createElement("p");
+        p.setAttribute("class", "mb-0 pt-1");
+        p.setAttribute("style", "line-height:12px");
+        pChildAppend = liChildAppend.appendChild(p);
+        pChildAppend.innerHTML = `${jobTitle}`;
+
+        var small = document.createElement("small");
+        small.setAttribute("class", "fw-light");
+        smallChildAppend = liChildAppend.appendChild(small);
+        smallChildAppend.innerHTML = `${yearsWorked} years`;
+
+        var deleteButton = document.createElement("button");
+        deleteButton.setAttribute("class", "btn btn-secondary fas fa-trash invicon");
+        deleteButton.setAttribute("style", "float:right;margin-top:-15px");
+        deleteButton.appendChild(document.createTextNode(" delete"));
+        liChildAppend.appendChild(deleteButton);
+        deleteButton.setAttribute("onclick", "on_trash_exp()");
+
+        // need to add hidden input fields b/c this was implemented differently than the skills/attitudes setup
+        // <input type="hidden" id="" name="" value="">
+        var inpTitle = document.createElement("input");
+        inpTitle.setAttribute("type", "hidden");
+        inpTitle.setAttribute("name", "jobexp-" + count_jobexp + "-title");
+        inpTitle.setAttribute("value", jobTitle);
+        liChildAppend.append(inpTitle);
+
+        var inpYears = document.createElement("input");
+        inpYears.setAttribute("type", "hidden");
+        inpYears.setAttribute("name", "jobexp-" + count_jobexp + "-years");
+        inpYears.setAttribute("value", yearsWorked);
+        liChildAppend.append(inpYears);
+
+        // increment counter
+        count_jobexp++;
+        // update hidden input
+        $('input[name=max_count_jobexps]').attr('value', count_jobexp);
+    }
+
+    function on_trash_exp() {
+        // when the user deletes an edu or job history entry
+        // event.target will be the input element
+        var td = event.target;
+        var tr = td.parentNode; // the row to be removed
+        tr.parentNode.removeChild(tr);
+    }
+
+    function on_trash_req() {
+        // when the user deletes a skill/attitude entry
+        // event.target will be the input element.
+        var td = event.target.parentNode.parentNode.parentNode;
+        var tr = td.parentNode; // the row to be removed
+        tr.parentNode.removeChild(tr);
+    }
+
+    function new_req(name, is_skill, chosen_skill_lvl) {
+        // setup default values
+        if (!chosen_skill_lvl) {
+            chosen_skill_lvl = 0;
+        }
+
+        // setup references and ids
+        var ul = null;
+        var pfx = null; // id reference prefix
+        var sfx = null; // id reference suffix
+        if (is_skill) {
+            ul = document.getElementById("req_skills");
+            pfx = "skill-" + count_skills;
+            sfx = "title";
+            count_skills++;
+            // update hidden input
+            $('input[name=max_count_skills]').attr('value', count_skills);
+        } else {
+            ul = document.getElementById("req_attitudes");
+            pfx = "attitude-" + count_attitudes;
+            sfx = "title";
+            count_attitudes++;
+            // update hidden input
+            $('input[name=max_count_attitudes]').attr('value', count_attitudes);
+        }
+
+        // dynamically create new entry.
+        // based on code generated from rendering the form with a fixed number
+        //  of entries.
+        var li = document.createElement("li");
+        li.setAttribute("class", "list-group-item");
+        var tbl = document.createElement("table");
+        //tbl.setAttribute("name", pfx);
+        tbl.setAttribute("id", pfx);
+        tbl.setAttribute("style", "width:100%");
+
+        // first row displays chosen skill/attitude
+        var tr1 = document.createElement("tr");
+        var td1 = document.createElement("td");
+        var sel1 = document.createElement("select");
+        sel1.setAttribute("id", pfx + "-" + sfx);
+        sel1.setAttribute("name", pfx + "-" + sfx);
+        var opt1 = document.createElement("option");
+        opt1.setAttribute("value", name);
+        opt1.setAttribute("selected", "");
+        opt1.appendChild(document.createTextNode(name));
+        sel1.appendChild(opt1);
+        td1.appendChild(sel1);
+        tr1.appendChild(td1);
+
+        // add icon to second column for deleting this cell
+        var td11 = document.createElement("td");
+        var i1 = document.createElement("i");
+        i1.setAttribute("class", "fas fa-trash invicon");
+        i1.setAttribute("style", "margin-left: 90%;");
+        i1.setAttribute("onclick", "on_trash_req()");
+        td11.appendChild(i1);
+        tr1.appendChild(td11);
+
+        // add row to table; move onto next option
+        tbl.appendChild(tr1);
+
+        // have row for competency level (only applicable to skills)
+        if (is_skill) {
+            var tr2 = document.createElement("tr");
+            // header for displaying label
+            var th2 = document.createElement("th");
+            var lbl2 = document.createElement("label");
+            lbl2.setAttribute("for", pfx + "-lvl");
+            lbl2.appendChild(document.createTextNode("Experience Level"));
+            th2.appendChild(lbl2);
+            tr2.appendChild(th2);
+            // data col for displaying competency level
+            var td2 = document.createElement("td");
+            var select2 = document.createElement("select");
+            select2.setAttribute("id", pfx + "-lvl");
+            select2.setAttribute("name", pfx + "-lvl");
+            select2.setAttribute("style", "float:right");
+            for (i = 0; i < 5; i++) {
+                var opt2 = document.createElement("option");
+                opt2.setAttribute("value", (i + 1).toString());
+                if (chosen_skill_lvl-1 == i) {
+                    opt2.setAttribute("selected", "");
+                }
+                opt2.appendChild(document.createTextNode(skill_lvls[i]));
+                select2.appendChild(opt2);
+            }
+            td2.appendChild(select2);
+            tr2.appendChild(td2);
+            tbl.appendChild(tr2);
+        }
+
+        li.appendChild(tbl);
+        ul.appendChild(li);
+    }
+
+    /*
+    LOADING DATA IN THE MODAL
+    document.getElementById('educationAddModal').addEventListener('show.bs.modal', function(event) {
+        // Button that triggered the modal
+        var button = event.relatedTarget
+        // Extract info from data-bs-* attributes
+        var recipient = button.getAttribute('data-bs-whatever')
+        // If necessary, you could initiate an AJAX request here
+        // and then do the updating in a callback.
+        //
+        // Update the modal's content.
+        var modalTitle = exampleModal.querySelector('.modal-title')
+        var modalBodyInput = exampleModal.querySelector('.modal-body input')
+
+        modalTitle.textContent = 'New message to ' + recipient
+        modalBodyInput.value = recipient
+    });
+    */
+
+    $("#skill_selector").autocomplete({
+        autoFocus: true,
+        source: available_skills,
+        select: function (event, ui) {
+            new_req(ui.item.label, true);
+            document.getElementById('skill_selector').value = '';
+            return false;
+        },
+    });
+
+    $("#attitude_selector").autocomplete({
+        autoFocus: true,
+        source: available_attitudes,
+        select: function (event, ui) {
+            new_req(ui.item.label, false);
+            document.getElementById('attitude_selector').value = '';
+            return false;
+        },
+    });
+
+    $('#tagline').keyup(function () {
+        $('#tagline-counter').text("(" + this.value.length + "/100)");
+        $('#tagline-counter').css('color', this.value.length == 100 ? 'red' : 'black');
+    });
+
+    $(document).ready(function () {
+        // initialize tooltips on page
+        $('[data-toggle="tooltip"]').tooltip();
+
+        // initialize tagline counter
+        $('#tagline').val($('#tagline').val()).trigger('keyup');
+
+        // load in skills
+        if (init_skills_added) {
+            //console.log("Adding skills x" + init_skills_added.length);
+            for (var i = 0; i < init_skills_added.length; i++) {
+                //console.log("-> " + init_skills_added[i]);
+                new_req(init_skills_added[i][0], true, init_skills_added[i][1]);
+            }
+        }
+
+        // load in attitudes
+        if (init_attitudes_added) {
+            //console.log("Adding atts x" + init_attitudes_added.length);
+            for (var i = 0; i < init_attitudes_added.length; i++) {
+                //console.log("-> " + init_attitudes_added[i]);
+                new_req(init_attitudes_added[i], false, null);
+            }
+        }
+
+        // load in education experiences
+        if (init_edus_added) {
+            //console.log("Adding edus x" + init_edus_added.length);
+            for (var i = 0; i < init_edus_added.length; i++) {
+                //console.log("-> " + init_edus_added[i]);
+                new_eduexp(init_edus_added[i][0], init_edus_added[i][1], init_edus_added[i][2]);
+            }
+        }
+
+        // load in job experiences
+        if (init_jobs_added) {
+            //console.log("Adding jobs x" + init_jobs_added.length);
+            for (var i = 0; i < init_jobs_added.length; i++) {
+                //console.log("-> " + init_jobs_added[i]);
+                //console.log("-> " + init_jobs_added[i]);
+                new_jobexp(init_jobs_added[i][0], init_jobs_added[i][1]);
+            }
+        }
+    });
+</script>
+{% endblock %}
+
+
+{% block styles %}
+{{ super() }}
+<style>
+        .invicon:hover {
+            color: red;
+        }
+        .account-settings .user-profile {
+            margin: 0 0 1rem 0;
+            padding-bottom: 1rem;
+            text-align: center;
+        }
+        .account-settings .user-profile .user-avatar {
+            margin: 0 0 1rem 0;
+        }
+        .account-settings .user-profile .user-avatar img {
+            width: 90px;
+            height: 90px;
+            -webkit-border-radius: 100px;
+            -moz-border-radius: 100px;
+            border-radius: 100px;
+        }
+        .account-settings .user-profile h5.user-name {
+            margin: 0 0 0.5rem 0;
+        }
+        .account-settings .user-profile h6.user-email {
+            margin: 0;
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #9fa8b9;
+        }
+        .account-settings .about {
+            margin: 2rem 0 0 0;
+            text-align: center;
+        }
+        .account-settings .about h5 {
+            margin: 0 0 15px 0;
+            color: #007ae1;
+        }
+        .account-settings .about p {
+            font-size: 0.825rem;
+        }
+        .form-control {
+            border: 1px solid #cfd1d8;
+            -webkit-border-radius: 2px;
+            -moz-border-radius: 2px;
+            border-radius: 2px;
+            font-size: .825rem;
+            background: #ffffff;
+            color: #2e323c;
+        }
+
+        .card {
+            background: #ffffff;
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+            border: 0;
+            margin-bottom: 1rem;
+        }
+    </style>
+{% endblock %}

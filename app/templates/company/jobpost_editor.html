@@ -21,7 +21,7 @@
                 <label class="control-label">Job Title</label>
                 {{ form.title(class_="form-control") }}
             </div>
-            <br/>
+            <br />
 
             <div class="form-row">
                 <label class="control-label">Location</label>
@@ -37,12 +37,14 @@
                     {{ form.remote }} Remote available
                 </label>
             </div>
-            <br/>
+            <br />
 
             <div class="form-row">
                 <label class="control-label">Salary range</label>
-                <span><i class="fas fa-info-circle" style="color:gray;" data-toggle="tooltip" title="Tip #1: You can leave min or max empty to indicate 'up to' or 'at least' salaries."></i></span>
-                <span><i class="fas fa-info-circle" style="color:gray;" data-toggle="tooltip" title="Tip #2: You can type 'k' to indicate thousands."></i></span>
+                <span><i class="fas fa-info-circle" style="color:gray;" data-toggle="tooltip"
+                        title="Tip #1: You can leave min or max empty to indicate 'up to' or 'at least' salaries."></i></span>
+                <span><i class="fas fa-info-circle" style="color:gray;" data-toggle="tooltip"
+                        title="Tip #2: You can type 'k' to indicate thousands."></i></span>
                 <div class="input-group">
                     <span class="input-group-addon" style="margin-top:5px">$</span>
                     {{ form.salary_min(class_="form-control", placeholder="Min") }}
@@ -50,24 +52,25 @@
                     {{ form.salary_max(class_="form-control", placeholder="Max") }}
                 </div>
             </div>
-            <br/>
+            <br />
 
             <div class="form-group "><label class="control-label">Description</label>
                 {{ form.description(class_="form-control") }}
             </div>
-            <br/>
+            <br />
 
             <div class="form-group ">
                 {{ form.active }} Job is active
             </div>
-            <br/>
+            <br />
 
             {{ form.submit(class_="btn btn-primary btn-lg") }}
         </div>
         <div class="col">
             <h4>
                 Seeker Attributes
-                <i class="fas fa-info-circle" style="color:gray;" data-toggle="tooltip" title="For best matches, add job requirements and their importance level in both categories."></i>
+                <i class="fas fa-info-circle" style="color:gray;" data-toggle="tooltip"
+                    title="For best matches, add job requirements and their importance level in both categories."></i>
             </h4>
             <div class="row">
                 <div class="col form-group">
@@ -136,6 +139,7 @@
         // based on code generated from rendering the form with a fixed number
         //  of entries.
         var li = document.createElement("li");
+        li.setAttribute("class", "list-group-item");
         var tbl = document.createElement("table");
         //tbl.setAttribute("name", pfx);
         tbl.setAttribute("id", pfx);
@@ -151,17 +155,6 @@
         opt1.appendChild(document.createTextNode(name));
         sel1.appendChild(opt1);
         td1.appendChild(sel1);
-        /*
-        // APPARENTLY CANT CREATE A DIFFERENT ELEMENT TYPE.
-        // So just recreated a select with only 1 option.
-        var inp1 = document.createElement("input");
-        inp1.setAttribute("type", "text");
-        inp1.setAttribute("readonly", "");
-        inp1.setAttribute("class", "form-control-plaintext");
-        inp1.setAttribute("id", pfx + "-" + sfx);
-        inp1.setAttribute("value", name);
-        td1.appendChild(inp1);
-        */
         tr1.appendChild(td1);
 
         // add icon to second column for deleting this cell
@@ -182,18 +175,18 @@
             // header for displaying label
             var th2 = document.createElement("th");
             var lbl2 = document.createElement("label");
-            lbl2.setAttribute("for", pfx+"-min_lvl");
+            lbl2.setAttribute("for", pfx + "-min_lvl");
             lbl2.appendChild(document.createTextNode("Min. competency required"));
             th2.appendChild(lbl2);
             tr2.appendChild(th2);
             // data col for displaying competency level
             var td2 = document.createElement("td");
             var select2 = document.createElement("select");
-            select2.setAttribute("id", pfx+"-min_lvl");
-            select2.setAttribute("name", pfx+"-min_lvl");
+            select2.setAttribute("id", pfx + "-min_lvl");
+            select2.setAttribute("name", pfx + "-min_lvl");
             for (i = 0; i < 5; i++) {
                 var opt2 = document.createElement("option");
-                opt2.setAttribute("value", (i+1).toString());
+                opt2.setAttribute("value", (i + 1).toString());
                 if (chosen_skill_lvl == i) {
                     opt2.setAttribute("selected", "");
                 }
@@ -210,18 +203,18 @@
         // header for displaying label
         var th3 = document.createElement("th");
         var lbl3 = document.createElement("label");
-        lbl3.setAttribute("for", pfx+"-importance");
+        lbl3.setAttribute("for", pfx + "-importance");
         lbl3.appendChild(document.createTextNode("Importance to position"));
         th3.appendChild(lbl3);
         tr3.appendChild(th3);
         // data col for displaying importance level
         var td3 = document.createElement("td");
         var select3 = document.createElement("select");
-        select3.setAttribute("id", pfx+"-importance");
-        select3.setAttribute("name", pfx+"-importance");
+        select3.setAttribute("id", pfx + "-importance");
+        select3.setAttribute("name", pfx + "-importance");
         for (i = 0; i < 5; i++) {
             var opt3 = document.createElement("option");
-            opt3.setAttribute("value", (i+1).toString());
+            opt3.setAttribute("value", (i + 1).toString());
             if (chosen_imp_lvl == i) {
                 opt3.setAttribute("selected", "");
             }
@@ -236,64 +229,64 @@
         ul.appendChild(li);
     }
 
-    var available_skills = {{ skill_list|safe }};
-    var available_attitudes = {{ attitude_list|safe}};
-    var init_skills_added = {{ init_skills|safe or "null" }};
-    var init_attitudes_added = {{ init_attitudes|safe or "null"}};
+    var available_skills = {{ skill_list| safe }};
+    var available_attitudes = {{ attitude_list| safe}};
+    var init_skills_added = {{ init_skills| safe or "null" }};
+    var init_attitudes_added = {{ init_attitudes| safe or "null"}};
 
     $("#skill_selector").autocomplete({
-	    autoFocus: true,
+        autoFocus: true,
         source: available_skills,
         select: function (event, ui) {
             new_req(ui.item.label, true);
             document.getElementById('skill_selector').value = '';
             return false;
-  	    },
+        },
     });
 
     $("#attitude_selector").autocomplete({
-	    autoFocus: true,
+        autoFocus: true,
         source: available_attitudes,
         select: function (event, ui) {
             new_req(ui.item.label, false);
             document.getElementById('attitude_selector').value = '';
             return false;
-  	    },
+        },
     });
 
-    $('#{{ form.salary_min.id }}').keyup(function(event) {
+    $('#{{ form.salary_min.id }}').keyup(function (event) {
 
         // skip for arrow keys
-        if(event.which >= 37 && event.which <= 40) return;
+        if (event.which >= 37 && event.which <= 40) return;
 
         // format number
-        $(this).val(function(index, value) {
+        $(this).val(function (index, value) {
             // first replace 'k' with extra 0s
             value = value.replace("k", "000");
             return value
                 .replace(/\D/g, "")
                 .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            ;
+                ;
         });
     });
 
-    $('#{{ form.salary_max.id }}').keyup(function(event) {
+    $('#{{ form.salary_max.id }}').keyup(function (event) {
 
         // skip for arrow keys
-        if(event.which >= 37 && event.which <= 40) return;
+        if (event.which >= 37 && event.which <= 40) return;
 
         // format number
-        $(this).val(function(index, value) {
+        $(this).val(function (index, value) {
             // first replace 'k' with extra 0s
             value = value.replace("k", "000");
             return value
                 .replace(/\D/g, "")
                 .replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            ;
+                ;
         });
     });
 
-    $(document).ready(function(){
+    $(document).ready(function () {
         $('[data-toggle="tooltip"]').tooltip();
         if (init_skills_added) {
             for (i = 0; i < init_skills_added.length; i++) {
@@ -312,8 +305,8 @@
 {% block styles %}
 {{ super() }}
 <style>
-	.invicon:hover {
-		color: red;
-	}
+    .invicon:hover {
+        color: red;
+    }
 </style>
 {% endblock %}

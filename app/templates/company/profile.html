@@ -2,30 +2,33 @@
 
 {% block app_content %}
 
-
 <div class="main">
+    {# NOTE: 'request' is a global var; shows an edit button when this is the user's profile #}
+    {% if request.path == "/profile"  or (current_user._company != None and request.path == url_for('main.company_profile', company_id=current_user._company.id)) %}
+    <h5 style="text-align:right;">
+        <a href="/profile/edit">Edit <i class="fas fa-edit"></i></a>
+    </h5>
+    {% endif %}
     <div class="banner">
-        <img src="{{ company.banner() }}">
+        <img src="{{ company.banner((1000,100)) }}">
 <!--        <img src="{{url_for('static', filename='images/blue_banner.jpg')}}" alt="blue company banner">-->
     </div>
 
     <div class="float-container">
-        <div class="company_logo float-child-left">
+        <div class="company_logo float-child-left" style="margin-top:1%">
             <img src="{{ company.avatar() }}">
 <!--            <img src="{{url_for('static', filename='images/blue_company.jpg')}}" alt="blue company logo">-->
         </div>
 
-        <div class="header_info float-child-right">
+        <div class="header_info">
             <h2>{{ company.name }}</h2>
-            <p>{{ company.location }}</p>
-            {# NOTE: 'request' is a global var; shows an edit button when this is the user's profile #}
-            {% if request.path == "/profile" %}
-            <p>
-                <a href="/profile/edit/{{ current_user.id }}">Edit <i class="fas fa-edit"></i></a>
-            </p>
+            <p class="text-secondary mb-1">{{ company.location }}</p>
+            {% if company.summary %}
+            <div class="mb-2" style="white-space: pre-wrap">{{ company.summary }}</div>
             {% endif %}
-<!--            Removed the share button for now because we did not plan to do anything with this.-->
-<!--            <button>share</button>-->
+            {% if company.website %}
+            <p>Visit us at <a href="{{ company.website }}">{{ company.website }}</a></p>
+            {% endif %}
         </div>
     </div>
 
@@ -34,7 +37,7 @@
     <div class="blog-card">
         <div class="meta">
             <div class="photo {% if not job_post.active %}tint{% endif %}"
-                style="background-image: url(https://storage.googleapis.com/chydlx/codepen/blog-cards/image-1.jpg)">
+                style="background-image: url('{{ url_for('static', filename='images/generic_job.jpg') }}')">
             </div>
         </div>
         <div class="description">
@@ -105,16 +108,6 @@
 
         /* begin job post card styles: */
 
-         * {
-             box-sizing: border-box;
-        }
-        /* Removed by tyler b/c it's incongruent with the rest of the pages and causes display issues w/the navbar.
-        If we want the whole site like this, then that can be changed.
-         body {
-             background: #f1f1f1;
-             margin: 2rem;
-        }
-        */
          .blog-card {
              display: flex;
              flex-direction: column;
@@ -125,9 +118,6 @@
              border-radius: 5px;
              overflow: hidden;
              z-index: 0;
-        }
-         .blog-card a {
-             color: inherit;
         }
          .blog-card:hover .photo {
              transform: scale(1.3) rotate(3deg);
@@ -140,7 +130,7 @@
          .blog-card .photo {
              position: absolute;
              top: 0;
-             right: 0;
+             right: 500px; /* will get overriden in minwidth for large screens */
              bottom: 0;
              left: 0;
              background-size: cover;
@@ -220,14 +210,19 @@
          @media (min-width: 640px) {
              .blog-card {
                  flex-direction: row;
-                 max-width: 700px;
+                 width: 700px;
+                 align-self: center;
+
+            }
+            .blog-card .photo {
+                right: 0px;
             }
              .blog-card .meta {
-                 flex-basis: 40%;
+                 flex-basis: 20%;
                  height: auto;
             }
              .blog-card .description {
-                 flex-basis: 60%;
+                 flex-basis: 80%;
             }
              .blog-card .description:before {
                  transform: skewX(-3deg);
