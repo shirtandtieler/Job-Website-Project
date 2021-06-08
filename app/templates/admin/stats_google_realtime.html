@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block head %}
+{{ super() }}
+<script src="https://apis.google.com/js/api.js"></script>
+{% endblock %}
+
+{% block app_content %}
+https://stackoverflow.com/a/53791128
+<button onclick="authenticate().then(loadClient)">authorize and load</button>
+<button onclick="execute1()">execute</button>
+<button onclick="execute2()">execute</button>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script>
+  /**
+   * Sample JavaScript code for analyticsdata.properties.runRealtimeReport
+   * See instructions for running APIs Explorer code samples locally:
+   * https://developers.google.com/explorer-help/guides/code_samples#javascript
+   */
+
+  function authenticate() {
+    return gapi.auth2.getAuthInstance()
+        .signIn({scope: "https://www.googleapis.com/auth/analytics https://www.googleapis.com/auth/analytics.readonly"})
+        .then(function() { console.log("Sign-in successful"); },
+              function(err) { console.error("Error signing in", err); });
+  }
+  function loadClient() {
+    gapi.client.setApiKey("AIzaSyAYpXYZVYxSB-UWW4os7en-o99CRIM0ijw");
+    return gapi.client.load("https://analyticsdata.googleapis.com/$discovery/rest?version=v1beta")
+        .then(function() { console.log("GAPI client loaded for API"); },
+              function(err) { console.error("Error loading GAPI client for API", err); });
+  }
+  // Make sure the client is loaded and sign-in is complete before calling this method.
+  function execute1() {
+    return gapi.client.analyticsdata.properties.runRealtimeReport({
+      "property": "properties/274997505",
+      "prettyPrint": false,
+      "resource": {
+        "dimensions": [
+          {
+            "name": "unifiedScreenName"
+          }
+        ],
+        "metrics": [
+          {
+            "name": "screenPageViews"
+          },
+          {
+            "name": "activeUsers"
+          },
+          {
+            "name": "eventCount"
+          }
+        ],
+        "orderBys": [
+          {
+            "dimension": {
+              "dimensionName": "unifiedScreenName"
+            }
+          }
+        ]
+      }
+    })
+        .then(function(response) {
+                // Handle the results here (response.result has the parsed body).
+                console.log("Response", response);
+              },
+              function(err) { console.error("Execute error", err); });
+  }
+  function execute2() {
+    return gapi.client.analyticsdata.properties.runRealtimeReport({
+      "property": "properties/274997505",
+      "prettyPrint": false,
+      "resource": {
+        "dimensions": [
+          {
+            "name": "city"
+          },
+          {
+            "name": "deviceCategory"
+          }
+        ],
+        "metrics": [
+          {
+            "name": "activeUsers"
+          }
+        ]
+      }
+    })
+        .then(function(response) {
+                // Handle the results here (response.result has the parsed body).
+                console.log("Response", response);
+              },
+              function(err) { console.error("Execute error", err); });
+  }
+  gapi.load("client:auth2", function() {
+    gapi.auth2.init({client_id: "369053932557-vkl0qrvnqg18kdvpclar42feta8apidt.apps.googleusercontent.com"});
+  });
+
+  $( document ).ready(function() {
+    authenticate().then(loadClient);
+  });
+</script>
+{% endblock %}

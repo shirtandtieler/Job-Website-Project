@@ -3,7 +3,9 @@
 {% block app_content %}
 
 <h2>Welcome admin, to your dashboard.</h2>
-<a href="{{ url_for('main.stats_map') }}">To maps</a>
-<a href="{{ url_for('main.stats') }}">To calendar</a>
+<a href="{{ url_for('main.stats_map') }}">To maps</a><br/>
+<a href="{{ url_for('main.stats_connections') }}">To connection graph</a><br/>
+<a href="{{ url_for('main.stats_report') }}">To G-Analytics</a><br/>
+<a href="{{ url_for('main.stats_realtime') }}">To G-Realtime</a><br/>
 
 {% endblock %}

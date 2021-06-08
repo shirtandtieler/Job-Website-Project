@@ -10,6 +10,7 @@ from flask_login import current_user, login_required
 from werkzeug.utils import secure_filename
 
 import app
+from app.api.colors import lerp_color
 from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
     job_form_to_url_params
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
@@ -425,8 +426,8 @@ def stats_map():
                            company_coords=company_coord_info)
 
 
-@bp.route("/stats")
-def stats():
+@bp.route("/connections")
+def stats_connections():
     # grouped bar graph - for comparing what seekers have vs what job posts are looking for
     # percent with a given skill/attitude
     # average level per skill
@@ -435,9 +436,12 @@ def stats():
     # skill relationship graph (if user had python, what else did they have)
     # value relationship graph (if user had teamwork, what else did they have)
     #
-    # num seekers over time
-    # num companies over time
-    # num job posts over time
+    # TIME GRAPH:
+    #   num active seekers over time
+    #   num active companies over time
+    #   num active job posts over time
+    #
+
     # jobs per company
 
     # TODO only admin
@@ -465,17 +469,19 @@ def stats():
     connections = []
     for key1, key2s in pair_counts.items():
         for key2, count in key2s.items():
-            connections.append({"from": key1, "to": key2, "weight": 1 if count_max == 1 else 1 + 5*((count-1)/(count_max-1))})
+            size_ratio = max(0, 1 if count_max == 1 else (count-1)/(count_max-1))
+            connections.append({"from": key1, "to": key2,
+                                "weight": 1 + 5*size_ratio,
+                                "color": lerp_color(size_ratio, '#1010a3', '#bb0000')})
     #print(json.dumps(pair_counts, sort_keys=True, indent=4))
     #print(count_max)
-    return render_template('admin/stats_idk.html', nodes_ds = nodes, from_to_ds = connections)
+    return render_template('admin/stats_connections.html', nodes_ds = nodes, from_to_ds = connections)
 
-# @bp.route("/maps")
-# def maps():
-#     seeker_coordinates = get_coordinates_seekers()
-#     job_coordinates = get_coordinates_jobs()
-#     company_coordinates = get_coordinates_companies()
-#     return render_template('admin/user_map.html',
-#                            seeker_coords = seeker_coordinates,
-#                            job_coords = job_coordinates,
-#                            company_coords = company_coordinates)
+@bp.route("/greport")
+def stats_report():
+    return render_template('admin/stats_google_studio_report.html')
+
+@bp.route("/grealtime")
+def stats_realtime():
+    return render_template('admin/stats_google_realtime.html')
+

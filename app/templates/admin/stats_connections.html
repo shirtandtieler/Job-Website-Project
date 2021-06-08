@@ -3,8 +3,10 @@
 
 
 {% block app_content %}
-
-<div id="mynetwork"></div>
+<h2>Tech Skill relationships by Seeker</h2>
+<h6>Full graph may take a long time to load.</h6>
+<small>Note to devs: Consider providing an option to filter.</small>
+<div id="technetwork"></div>
 
 {% endblock %}
 
@@ -12,9 +14,9 @@
 {% block styles %}
 {{ super() }}
 <style>
-    #mynetwork {
-        width: 600px;
-        height: 400px;
+    #technetwork {
+        width: 85%;
+        height: 700px;
         border: 1px solid lightgray;
     }
 </style>
@@ -36,14 +38,18 @@
     );
 
     // create a network
-    var container = document.getElementById('mynetwork');
+    var container = document.getElementById('technetwork');
 
     // provide the data in the vis format
     var data = {
         nodes: nodes,
         edges: edges
     };
-    var options = {};
+    var options = {
+        layout: {
+            improvedLayout: false
+        },
+    };
 
     // initialize your network!
     var network = new vis.Network(container, data, options);
