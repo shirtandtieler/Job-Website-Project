@@ -12,6 +12,7 @@ import app
 from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
     job_form_to_url_params
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
+from app.api.matchmaker import get_score, update_cache
 from app.api.seeker_query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
     seeker_url_args_to_input_states
 from app.api.routing import modify_query
@@ -19,7 +20,7 @@ from app.api.routing import modify_query
 from app.api.users import save_seeker_search, delete_seeker_search, save_job_search, delete_job_search
 from app.main import bp
 from app.main.forms import JobPostForm
-from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
+from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude, MatchScores
 # TODO Routes needed for editing profile page, searching, sending messages, etc.
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
 
@@ -28,6 +29,9 @@ from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
 @bp.route("/index")
 def index():
     """ Home page / dashboard for logged in users """
+    # for entry in JobPost.query.join(MatchScores, JobPost.id == MatchScores.jobpost_id).order_by(MatchScores.score).all():
+    #     print(entry)
+
     if current_user.is_anonymous:
         return render_template("index.html", title="Home")
 
@@ -166,6 +170,10 @@ def new_job():
     if form.validate_on_submit():
         deets = extract_details(form)
         post_id = new_jobpost(current_user._company.id, deets.pop('title'), **deets)
+
+        # now update the cache for this new post
+        update_cache(jobpost_id=post_id)
+
         flash(f"Created job post with ID {post_id}")
         return redirect(url_for('main.job_page', job_id=post_id))
     return render_template('company/jobpost_editor.html',
@@ -187,6 +195,10 @@ def edit_job(job_id):
     if form.validate_on_submit():  # using POST; push changes
         deets = extract_details(form)
         edit_jobpost(job_id, **deets)
+
+        # now update the cache for this post
+        update_cache(jobpost_id=job_id)
+
         flash(f"Edited job successfully.")
         return redirect(url_for('main.job_page', job_id=job_id))
 
@@ -207,15 +219,13 @@ def edit_job(job_id):
                            init_skills=_skls, init_attitudes=_atts
                            )
 
-
 @bp.route("/jobs", methods=['GET', 'POST'])
-# @login_required
+@login_required
 def job_search():
     """
     Navigate to the job search page.
     """
     # TODO limit access to only seekers/admins?
-    print(f"JOBS PAGE-{request.method}\n\tFORM: {request.form}\n\tARGS: {request.args}")
     if request.method == 'POST':
         saved_name = request.form.get('query_saveas', '')
         delete_info = request.form.get('query_delete', '')
@@ -241,6 +251,10 @@ def job_search():
     # query.all can be replaced with query.paginate to iteratively get that page's results.
     # https://flask-sqlalchemy.palletsprojects.com/en/2.x/api/#flask_sqlalchemy.BaseQuery.paginate
     req_kwargs = job_url_args_to_query_args(request.args)
+
+    # add in seeker's ID if that's who is conducting the search
+    if current_user._seeker is not None:
+        req_kwargs['seeker_id'] = current_user._seeker.id
 
     pager = get_job_query(**req_kwargs).paginate(
         page_num, app.Config.RESULTS_PER_PAGE, False)
@@ -269,6 +283,7 @@ def job_search():
                            plwr=pg_lower, pupr=pg_upper,
                            dprev=prev_link_clz, prev_url=prev_url,
                            dnext=next_link_clz, next_url=next_url,
+                           get_match_score=lambda jp, s: f"{float(get_score(jp, s)):g}",
                            show_saveload=False,
                            opts=filter_options_set
                            )

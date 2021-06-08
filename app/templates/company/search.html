@@ -346,9 +346,19 @@
                                         <p> {{ job.description }} </p>
                                     </div>
                                 </div>
-                                <div class="row" title="{{ job.created_timestamp.strftime('%b %d %Y @ %I:%M %p') }}">
+                                <div class="row">
+                                    {% if current_user._seeker != None %}
+                                    <!-- Score -->
+                                    <div class="col-8">
+                                        <span class="border border-warning rounded-3 p-1">
+                                            Match score: <b>{{ get_match_score(job.id, current_user._seeker.id) }}</b>
+                                        </span>
+                                    </div>
+                                    {% endif %}
                                     <!-- Posted timestamp -->
-                                    <small style="text-align: right; color: gray">Posted {{ job.age }} ago</small>
+                                    <div class="col-4" style="text-align: right; color: gray" title="{{ job.created_timestamp.strftime('%b %d %Y @ %I:%M %p') }}">
+                                        <small>Posted {{ job.age }} ago</small>
+                                    </div>
                                 </div>
                             </div>
 
