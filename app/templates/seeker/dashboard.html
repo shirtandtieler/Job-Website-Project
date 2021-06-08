@@ -23,9 +23,11 @@
 </div>
 
 {% if not is_profile_complete %}
-<h4 class="ms-5 mt-5 ps-2 border-start border-primary border-5">Your profile needs some updating...</h4>
-<div class="row section ms-5" style="justify-content:start">
-    <div class="col-md-3 col-md-offset-1 card pt-2">
+<div class="row">
+   <h4 class="border-start border-primary border-3 col-md-4 center">Your profile needs some updating...</h4>
+</div>
+<div class="row" style="justify-content:start">
+    <div class="col-md-4 center card pt-2">
         <h4>
             {% if first_name %}
             <i class="far fa-check-square"></i>
@@ -155,6 +157,10 @@
     }
 
     .display-flex-center {
+        margin:auto;
+    }
+
+    .center{
         margin:auto;
     }
 
