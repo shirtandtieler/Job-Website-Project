@@ -7,7 +7,6 @@ from io import BytesIO
 from flask import render_template, flash, redirect, url_for, send_file, Response
 from flask import request
 from flask_login import current_user, login_required
-from werkzeug.utils import secure_filename
 
 import app
 from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
@@ -21,8 +20,6 @@ from app.api.routing import modify_query
 from app.api.users import save_seeker_search, delete_seeker_search, save_job_search, delete_job_search
 from app.main import bp
 from app.main.forms import JobPostForm
-from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude, MatchScores
-# TODO Routes needed for editing profile page, searching, sending messages, etc.
 from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
 
 ## TODO Routes needed for editing profile page, searching, sending messages, etc.
