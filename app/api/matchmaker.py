@@ -1,9 +1,40 @@
-# TODO implement funcs for performing matching
-# (Maybe split into separate sub-library if needed and have this as a public end-point)
-from app.models import SeekerProfile, JobPost, CompanyProfile, Skill, Attitude
+from app import db
+from app.models import SeekerProfile, JobPost, CompanyProfile, Skill, Attitude, MatchScores
 
 
-def get_score(jobpost_id, seeker_id):
+def update_cache(jobpost_id: int = None, seeker_id: int = None):
+    """
+    Update the database cache for the given job post and/or the seeker
+        (when nothing is passed, everything will be updated)
+    """
+    posts = JobPost.query
+    if jobpost_id is not None:
+        posts = posts.filter_by(id = jobpost_id)
+    posts = posts.all()
+
+    seekers = SeekerProfile.query
+    if seeker_id is not None:
+        seekers = seekers.filter_by(id=seeker_id)
+    seekers = seekers.all()
+
+    for post in posts:
+        for seeker in seekers:
+            entry = MatchScores(jobpost_id=post.id, seeker_id=seeker.id,
+                                score=get_score(post.id, seeker.id, False))
+            db.session.add(entry)
+    db.session.commit()
+
+
+def get_score(jobpost_id, seeker_id, from_cache=True):
+    if from_cache:
+        entry = MatchScores.query.filter_by(jobpost_id=jobpost_id, seeker_id=seeker_id).first()
+        if entry is None:  # not in cache!
+            score = get_score(jobpost_id, seeker_id, False)
+            entry = MatchScores(jobpost_id=jobpost_id, seeker_id=seeker_id, score=score)
+            db.session.add(entry)
+            db.session.commit()
+        return entry.score
+
     # Point values
     WITHIN_50_MILES = 25
     WITHIN_100_MILES = 15
