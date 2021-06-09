@@ -3,9 +3,9 @@ from typing import Tuple, List
 from itertools import groupby
 
 from werkzeug.datastructures import ImmutableMultiDict
-from werkzeug.urls import url_encode
+from werkzeug.urls import url_encode, url_decode
 
-from app.models import SeekerProfile, Skill, Attitude
+from app.models import SeekerProfile, Skill, Attitude, MatchScores
 
 
 def _compress(indices: List[int], max_size: int) -> str:
@@ -64,13 +64,15 @@ def _decompress(cstr, output=None):
     return [i + 1 for i, v in enumerate(bin_str) if v == '1']  # add 1 to get ID
 
 
-def seeker_form_to_url_params(form: ImmutableMultiDict) -> str:
+def seeker_form_to_url_params(form: ImmutableMultiDict, existing_query_str: str = None) -> str:
     """
     Converts the form results from a seeker search to the proper URL arguments.
     The keys in 'form' are based on the name attribute in the search HTML.
+    Can pass an existing query_str to load the values from (mostly just used for updating job select in company search).
     The keys in the output are URL parameters, whose names are based on abbreviations of what they're searching for.
     """
     # --- use get(type=X)
+    # job-select: # (Only for company users)
     # lf_ft, lf_pt, lf_contract, lf_remote: 1 or ''
     # edulvl_lower, edulvl_upper: 0-5
     # workyrs_lower, workyrs_upper: 0-11
@@ -80,15 +82,25 @@ def seeker_form_to_url_params(form: ImmutableMultiDict) -> str:
     # dist_state: str
     # techs, bizs, atts: list[int] --- use getlist(type=int)
     args = dict()
+
+    arg_jselect = form.get('job-select', -1, type=int)  # ignore job select arg if it's -1
+    if 'job-select' in form and arg_jselect > 0:
+        args['sortby'] = form.get('job-select', type=int)
+        if existing_query_str is not None and len(form) == 1:  # only want this to fire when POSTing from job select field
+            existing_args = url_decode(existing_query_str)  # remove job select/sort by so it doesn't override
+            _ = existing_args.pop('sortby', None)
+            args.update(existing_args)
+            return url_encode(args)
+
     args['worktype'] = form.get('lf_ft', '0') + form.get('lf_pt', '0') + form.get('lf_contract', '0') + form.get(
         'lf_remote', '0')
     args['eduexp'] = form.get('edulvl_lower', '0') + form.get('edulvl_upper', '5')
     # need to convert to int so that it can be converted to hex (since nums can go up to 11)
     args['workexp'] = format(form.get('workyrs_lower', 0, type=int), 'x') + \
                       format(form.get('workyrs_upper', 11, type=int), 'x')
-    if not form.get('dist_choice', type=int):
+    if not form.get('dist_choice', 1, type=int):
         # False = within the given distance
-        args['dist'] = "-".join([form.get('dist_miles', '50'), form.get('dist_city'), form.get('dist_state')])
+        args['dist'] = "-".join([form.get('dist_miles', '50'), form.get('dist_city', ''), form.get('dist_state', '')])
 
     tlist = form.getlist('techs', type=int)
     if tlist:
@@ -172,6 +184,10 @@ def seeker_url_args_to_query_args(req_args: ImmutableMultiDict) -> dict:
     The keys in the output dictionary are based on the parameter names given to the `get_seeker_query` function.
     """
     kwargs = dict()
+    arg_postid = req_args.get('sortby', -1, type=int)
+    if arg_postid >= 0:
+        kwargs['jobpost_id'] = arg_postid
+
     arg_worktype = req_args.get('worktype', '')
     if arg_worktype.isdigit():
         binstr = bin(int(arg_worktype))
@@ -224,7 +240,8 @@ def get_seeker_query(
         worktype: Tuple[bool, bool, bool, bool] = None,
         edu_range: Tuple[int, int] = None, work_range: Tuple[int, int] = None,
         loc_distance: int = None, loc_citystate: Tuple[str, str] = None,
-        tech_skills: int = None, biz_skills: int = None, atts: int = None):
+        tech_skills: int = None, biz_skills: int = None, atts: int = None,
+        jobpost_id: int = None):
     """
     Performs a search query on the seekers based on the provided filters.
     Returns a 'query' object that can then be passed to 'paginate'.
@@ -274,4 +291,8 @@ def get_seeker_query(
 
     match_ids = [m.id for m in matches]
     q = SeekerProfile.query.filter(SeekerProfile.id.in_(match_ids))
+    if jobpost_id is not None:  # sort by matching score
+        q = q.join(MatchScores, SeekerProfile.id == MatchScores.seeker_id) \
+            .filter(MatchScores.jobpost_id == jobpost_id) \
+            .order_by(MatchScores.score.desc())
     return q

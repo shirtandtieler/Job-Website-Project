@@ -26,6 +26,17 @@ def update_cache(jobpost_id: int = None, seeker_id: int = None):
 
 
 def get_score(jobpost_id, seeker_id, from_cache=True):
+    # convert if wrong types (likely from company's seeker search)
+    if isinstance(jobpost_id, str):
+        jobpost_id = int(jobpost_id)
+    if isinstance(seeker_id, str):
+        seeker_id = int(seeker_id)
+
+    # handle if invalid values passed (likely from company's seeker search)
+    if jobpost_id < 0 or seeker_id < 0:
+        return -1
+
+
     if from_cache:
         entry = MatchScores.query.filter_by(jobpost_id=jobpost_id, seeker_id=seeker_id).first()
         if entry is None:  # not in cache!

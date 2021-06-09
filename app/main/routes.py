@@ -320,7 +320,7 @@ def job_search():
                            plwr=pg_lower, pupr=pg_upper,
                            dprev=prev_link_clz, prev_url=prev_url,
                            dnext=next_link_clz, next_url=next_url,
-                           get_match_score=lambda jp, s: f"{float(get_score(jp, s)):g}",
+                           get_match_score=lambda jp, s: f"{round(float(get_score(jp, s)),1):g}",
                            show_saveload=False,
                            opts=filter_options_set
                            )
@@ -349,13 +349,19 @@ def job_page(job_id: int):
 
 
 @bp.route("/seekers", methods=['GET', 'POST'])
-# @login_required
+@login_required
 def seeker_search():
     """
     Navigate to the seeker search page.
     """
-    # TODO should be only for companies/admins?
+    # Don't let seekers see this page
+    if current_user._seeker is not None:
+        flash(f"Operation not permitted")
+        return redirect(url_for('main.index'))
+
     if request.method == 'POST':
+        #print(request.form)
+        # first handle when the form was for saving/deleting searches
         saved_name = request.form.get('query_saveas', '')
         delete_info = request.form.get('query_delete', '')
         if saved_name:  # user wants to save the recent search
@@ -370,7 +376,8 @@ def seeker_search():
             delete_seeker_search(q_id, q_label, q_query)
             flash(f"Deleted!")
             return redirect(request.full_path)
-        a = seeker_form_to_url_params(request.form)
+        # then convert and redirect based on the form results
+        a = seeker_form_to_url_params(request.form, request.query_string.decode())
         new_path = f"{request.path}?{a}"
         return redirect(new_path)
 
@@ -408,6 +415,7 @@ def seeker_search():
                            plwr=pg_lower, pupr=pg_upper,
                            dprev=prev_link_clz, prev_url=prev_url,
                            dnext=next_link_clz, next_url=next_url,
+                           get_match_score=lambda jp, s: f"{round(float(get_score(jp, s)), 1):g}",
                            show_saveload=False,
                            opts=filter_options_set
                            )

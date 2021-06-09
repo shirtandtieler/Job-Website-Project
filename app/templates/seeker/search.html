@@ -64,6 +64,9 @@
                     <input class="btn btn-sm btn-outline-danger mt-2 mb-2" type="button" id="resetFilter" value="Reset" onclick="window.location.href='/seekers';" style="width:40%"/>
                 </div>
 
+                <!-- Hidden field for sort by/selected job (so that it gets updated when adding filters) -->
+                <input type="hidden" value="-1" id="hidden-job-select" name="job-select"/>
+
                 <div class="accordion">
                     <!--"Looking for" Work type section-->
                     <div class="accordion-item">
@@ -317,6 +320,18 @@
                     <small class="d-inline">
                         ({{ total }})
                     </small>
+                    {% if current_user._company != None %}
+                    <form method="post">
+                        <select class="form-select mb-4" id="job-select" name="job-select" onchange="on_job_select_change(this)">
+                            <option value="-1" selected>Display scores for...</option>
+                            {% for jp in current_user._company._job_posts %}
+                            {% if jp.active %}
+                            <option value="{{jp.id}}" title="{{ jp.tooltip() }}">{{ jp.job_title }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </form>
+                    {% endif %}
 <!--                    <div class="d-inline">-->
 <!--                        - sorted by match-->
 <!--                    </div>-->
@@ -337,9 +352,11 @@
                             <img src="{{ seeker.avatar(64) }}">
                             </a>
                         </div>
-<!--                        <div style="font-family: monospace">-->
-<!--                            XX%-->
-<!--                        </div>-->
+                        {% if current_user._company != None and request.args.get('sortby') != None %}
+                        <div class="border border-warning rounded-3 p-1" style="text-align: center">
+                            <div style="font-size:11px; letter-spacing:-1px">Match score: </div><b>{{ get_match_score(request.args.get('sortby', -1), seeker.id) }}</b>
+                        </div>
+                        {% endif %}
                     </div>
             <!--        https://stackoverflow.com/questions/26148740/how-to-add-text-over-the-image-in-bootstrap-->
                     <div class="col-md-11">
@@ -481,6 +498,16 @@
 {% block scripts %}
 {{ super() }}
 <script>
+    function on_job_select_change(select) {
+        select.form.submit();
+        /*
+        // only submit form if option isn't the default
+        if (select.value != -1) {
+            select.form.submit();
+        }
+        */
+    }
+
     function extra_reset() {
         // covers resetting fields that the 'reset' input type itself doesn't handle
 
@@ -562,7 +589,6 @@
           return new bootstrap.Tooltip(tooltipTriggerEl)
         })
 
-
         // setup initial text for sliders
         var s1 = $( "#slider-edulvl" );
         $( "#rng-edulvl" ).html( getEduLvlText(s1.slider( "values", 0 ), s1.slider("values", 1)) );
@@ -586,6 +612,11 @@
         $.each({{ opts['sel_atts'] }}, function(i, e){
             $("#sel_atts option[value='" + e + "']").prop("selected", true);
         });
+
+        // update select field for job chooser and hidden field in filter bar
+        $("#job-select").val("{{ request.args.get('sortby', -1) }}");
+        $("#hidden-job-select").val("{{ request.args.get('sortby', -1) }}");
+
     });
 </script>
 {% endblock %}
