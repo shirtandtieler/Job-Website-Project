@@ -1,8 +1,66 @@
 {% extends "base.html" %}
 
+
+
 {% block app_content %}
 
-<head>
+
+<br>
+
+<p class="p1">
+    The #1 Place for jobs
+    <br>
+    In IT, IS, software development...
+    <br>
+    <br>
+    Find your perfect
+    <br>
+    job!
+    <br>
+    <br>
+    <br>
+    <button type="button"> <a href="{{ url_for('auth.register') }}">Sign up for free</a></button>
+</p>
+
+<br>
+<br>
+
+<hr class="hr2">
+
+<p class="p1">
+    More than <a href="https://j.gifs.com/vqZxJE.gif" target="_blank" style="text-decoration: none; color: black;">{{ job_count_ad }}</a>
+    <br>
+    current job postings!!
+    <br>
+    <br>
+    <br>
+    <button type="button"><a href="{{ url_for('main.company_browse') }}">See who's hiring</a></button>
+</p>
+
+<br>
+<br>
+
+<hr class="hr2">
+
+<p class="p1">
+    Let employers find
+    <br>
+    YOU!
+    <br>
+    <br>
+    Our proprietary algorithm
+    <br>
+    matches you with top
+    <br>
+    companies
+</p>
+
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
     <style>
         .hr1 {
             border: 2px solid black;
@@ -27,71 +85,10 @@
             text-decoration: none;
           }
 
-          li a:hover {
-            background-color: #111;
-          }
-
           .p1 {
               text-align: center;
               font-weight: bold;
           }
     </style>
-</head>
-
-<br>
-<br>
-<br>
-
-<hr class="hr1">
-<br>
-
-<p class="p1">
-    The #1 Place for jobs
-    <br>
-    In IT, IS, software development...
-    <br>
-    <br>
-    Find your perfect
-    <br>
-    job!
-    <br>
-    <br>
-    <br>
-    <button type="button"> <a href="{{ url_for('auth.register') }}">Sign up for free</a></button>
-</p>
-
-<br>
-<br>
-
-<hr class="hr2">
-
-<p class="p1">
-    More than 10,000
-    <br>
-    current job postings
-    <br>
-    <br>
-    <br>
-    <button type="button"><a href="{{ url_for('main.job_search') }}">See who's hiring</button>
-</p>
-
-<br>
-<br>
-
-<hr class="hr2">
-
-<p class="p1">
-    Let employers find
-    <br>
-    YOU!
-    <br>
-    <br>
-    Our proprietary algorithm
-    <br>
-    matches you with top
-    <br>
-    companies
-</p>
-
-
+</style>
 {% endblock %}

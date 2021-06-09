@@ -1,7 +1,7 @@
 {% extends 'bootstrap/base.html' %}
 
 {% block title %}
-{% if title %}{{ title }} {% else %} {{ (self | filename).replace("_"," ").replace("/"," ").title() }}{% endif %}
+{{ (self | filename).replace("_"," ").replace("/"," ").title() }}
 {% endblock %}
 
 {% block head %}
@@ -38,12 +38,23 @@
 						{% endif %}
 					</a>
 				</li>
+				{% if current_user._seeker == None %}
+				{# User isn't a seeker (a company or admin #}
 				<li class="nav-item">
 					<a class="nav-link" href="{{ url_for('main.seeker_search') }}">Seekers</a>
 				</li>
+				{% endif %}
+
+				<li class="nav-item">
+					<a class="nav-link" href="{{ url_for('main.company_browse') }}">Companies</a>
+				</li>
+
+				{% if current_user._company == None %}
+				{# User isn't a company (a seeker or admin #}
 				<li class="nav-item">
 					<a class="nav-link" href="{{ url_for('main.job_search') }}">Jobs</a>
 				</li>
+				{% endif %}
 			</ul>
 			<ul class="navbar-nav ms-auto">
 				{% if current_user.is_anonymous %}

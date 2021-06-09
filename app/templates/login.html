@@ -12,7 +12,22 @@
 <p>
     New user? <a href="{{ url_for('auth.register') }}">Click to Register!</a>
 </p>
-<p>
-    Forgot Your Password? <a href="#">Click to Reset It</a>
-</p>
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .btn-default {
+        margin: 10px;
+        color: #0d6efd;
+        border-color: #0d6efd;
+        transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .btn-default:hover {
+        color: #fff;
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+</style>
 {% endblock %}
