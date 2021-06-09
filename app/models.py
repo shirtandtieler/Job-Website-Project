@@ -755,6 +755,12 @@ class JobPost(db.Model):
     def __repr__(self):
         return f"JobPost[by#{self.company_id}|{self.job_title}]"
 
+    def tooltip(self):
+        details = [self.location,
+                   "".join([i[0].upper() for i in self.get_work_types_list()]) + ("R" if self.is_remote else ""),
+                   "Posted: " + self.created_timestamp.strftime("%Y-%m-%d")]
+        return " | ".join(details)
+
     @property
     def company(self):
         return self._company.name
