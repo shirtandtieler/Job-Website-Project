@@ -2,25 +2,25 @@
 
 {% block app_content %}
 
-<h2>Welcome {{name}}, to your dashboard.</h2>
+<h2>Welcome {{company.name}}, to your dashboard.</h2>
 
 <div class="grid-container">
     <div class="newjob">
-        <img src="https://img.icons8.com/metro/100/000000/new-by-copy.png" height="150"/>
+        <img src="{{ url_for('static', filename='images/new-by-copy.png') }}" height="150"/>
         <p>Create a new Job Post</p>
         <form action="{{ url_for('main.new_job') }}">
             <input type="submit" value="Start" />
         </form>
     </div>
     <div class="findseeker">
-        <img src="https://img.icons8.com/material-rounded/100/000000/find-user-male.png" height="150"/>
+        <img src="{{ url_for('static', filename='images/find-user.png') }}" height="150"/>
         <p>Find a Job Seeker</p>
         <form action="{{ url_for('main.seeker_search') }}">
             <input type="submit" value="Start" />
         </form>
     </div>
     <div class="editpost">
-        <img src="https://img.icons8.com/android/100/000000/edit.png" height="150"/>
+        <img src="{{ url_for('static', filename='images/pencil.png') }}" height="150"/>
         <p>Review Job Posts</p>
         <form action="{{ url_for('main.profile') }}">
             <input type="submit" value="Start" />
