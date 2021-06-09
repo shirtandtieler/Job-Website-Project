@@ -1,145 +1,179 @@
-
 {% extends "base.html" %}
 
+{% block content %}
+<div id="top"></div>
+{{ super() }}
+{% endblock %}
+
 {% block app_content %}
-
-<div class="main_left">
-  <div class="medium-4 columns" style="background-color:#f1f1f1;">
-    <ul class="side-nav">
-      <li><a href="#myInput">Seekers</a></li>
-      <li><a href="#myInput2">Companies</a></li>
-      <li><a href="#myInput3">Skills</a></li>
-      <li><a href="#myInput4">Attitutes</a></li>
-      <li><a href="#myInput5">Job Posts</a></li>
-
-    </ul>
-  </div>
-
-
-
-	<div class="medium-8 columns">
-		<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for Seeker names...">
-		<table id="myTable">
-		  <tr class="header">
-			<th style="width:20%;">Seeker_NAME</th>
-			<th style="width:20%;">Seeker_ID</th>
-			<th style="width:20%;">City</th>
-			<th style="width:20%;">State</th>
-			  <th style="width:20%;">Work_wanted</th>
-			<th style="width:40%;">Remote_wanted</th>
-			  <th style="width:20%;">Phone</th>
-		  </tr>
-			{% for dataseeker in dataseekers|sort(attribute='user_id') %}
-			  <tr>
-				<td>{{ dataseeker.last_name + ',' + dataseeker.first_name }}</td>
-				<td>{{ dataseeker.user_id }}</td>
-				<td>{{ dataseeker.city }}</td>
-				<td>{{ dataseeker.state }}</td>
-				<td>{{ dataseeker.Work_wanted }}</td>
-				  <td>{{ dataseeker.remote_wanted }}</td>
-				  <td>{{ dataseeker.phone_number }}</td>
-			  </tr>
-			{% endfor %}
-		</table>
-
-
-		<input type="text" id="myInput2" onkeyup="myFunction2()" placeholder="Search for Company names...">
-			<table id="myTable2">
-		  <tr class="header">
-			<th style="width:20%;">company_NAME</th>
-			<th style="width:20%;">company_ID</th>
-			<th style="width:20%;">city</th>
-			<th style="width:20%;">state</th>
-			  <th style="width:20%;">website</th>
-			<th style="width:40%;">tageline</th>
-
-		  </tr>
-			{% for datacompany in datacompanies|sort(attribute='user_id') %}
-			  <tr>
-				<td>{{ datacompany.name }}</td>
-				<td>{{ datacompany.user_id }}</td>
-				<td>{{ datacompany.city }}</td>
-				<td>{{ datacompany.state }}</td>
-				<td>{{ datacompany.website }}</td>
-				  <td>{{ datacompany.tagline }}</td>
-			  </tr>
-			{% endfor %}
-		</table>
-
-
-		<input type="text" id="myInput3" onkeyup="myFunction3()" placeholder="Search for Skill title...">
-		<table id="myTable3">
-		  <tr class="header">
-			<th style="width:20%;">Skill_TITLE</th>
-			<th style="width:20%;">Skill_ID</th>
-			<th style="width:20%;">Skill_TYPE</th>
-			<th style="width:20%;">Skill_SEEKERS</th>
-					<th style="width:20%;">Skill_JOB_POSTS</th>
-		  </tr>
-
-			{% for dataskill in dataskills|sort(attribute='id') %}
-			  <tr>
-				<td>{{ dataskill.title }}</td>
-				<td>{{ dataskill.id }}</td>
-				  <td>{{ dataskill.type }}</td>
-				<td>{{ dataskill._seekers }}</td>
-				<td>{{ dataskill._job_posts }}</td>
-			  </tr>
-			{% endfor %}
-		</table>
-
-		<input type="text" id="myInput4" onkeyup="myFunction4()" placeholder="Search for Attitue title...">
-		<table id="myTable4">
-		  <tr class="header">
-			<th style="width:20%;">Attitue_TITLE</th>
-			<th style="width:20%;">Attitue_ID</th>
-			<th style="width:20%;">Attitude_SEEKERS</th>
-			<th style="width:20%;">Attitude_JOBPOSTS</th>
-		  </tr>
-
-			{% for dataattitude in dataattitudes|sort(attribute='id') %}
-			  <tr>
-				<td>{{ dataattitude.title }}</td>
-				<td>{{ dataattitude.id }}</td>
-				<td>{{ dataattitude._seekers }}</td>
-				<td>{{ dataattitude._job_posts }}</td>
-			  </tr>
-			{% endfor %}
-		</table>
-
-			<input type="text" id="myInput5" onkeyup="myFunction5()" placeholder="Search for Job Post title...">
-		<table id="myTable5">
-		  <tr class="header">
-			<th style="width:20%;">Jobpost_TITLE</th>
-			<th style="width:20%;">Jobpost_ID</th>
-			<th style="width:20%;">Company_ID</th>
-			<th style="width:20%;">City</th>
-			  <th style="width:20%;">State</th>
-			  <th style="width:20%;">Is_REMOTE</th>
-			  <th style="width:20%;">Salary_MIN</th>
-			  <th style="width:20%;">Salary_MAX</th>
-			  <th style="width:20%;">Timestamp</th>
-			  <th style="width:20%;">Seeker_APPLIED</th>
-		  </tr>
-
-			{% for datajobpost in datajobposts|sort(attribute='id') %}
-			  <tr>
-				<td>{{ datajobpost.job_title }}</td>
-				<td>{{ datajobpost.id }}</td>
-				<td>{{ datajobpost.company_id }}</td>
-				<td>{{ datajobpost.city }}</td>
-				  <td>{{ datajobpost.state }}</td>
-				  <td>{{ datajobpost.is_remote }}</td>
-				  <td>{{ datajobpost.salary_min }}</td>
-				  <td>{{ datajobpost.salary_max }}</td>
-				  <td>{{ datajobpost.created_timestamp }}</td>
-				  <td>{{ datajobpost._seekers_applied }}</td>
-			  </tr>
-			{% endfor %}
-		</table>
-
+<nav class="navbar fixed-bottom navbar-light bg-light" style="width:15%;margin-left:85%">
+	<div class="container-fluid">
+		<button id="btn-toggleterm" style="width:100%;height:50px" class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#terminalCanvas" aria-controls="terminalCanvas"><i class="fas fa-terminal"></i> Toggle terminal </button>
 	</div>
+</nav>
 
+<h4 style="text-align:center">Database Preview</h4>
+
+
+<ul class="nav nav-tabs">
+	<li class="nav-item">
+		<a class="nav-link" href="#header1">Seekers</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="#header2">Companies</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="#header5">Job Posts</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="#header3">Skills</a>
+	</li>
+	<li class="nav-item">
+		<a class="nav-link" href="#header4">Attitudes</a>
+	</li>
+</ul>
+
+<div class="" >
+	<div class="mt-5"><h4 id="header1" class="d-inline mt-5">Seekers</h4> <a href="#top" style="text-decoration: none;"><i class="fas fa-arrow-alt-circle-up d-inline" style="font-size:22px;"></i></a></div>
+	<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for Seeker names...">
+	<table id="myTable">
+	  <tr class="header">
+		<th style="width:20%;">Seeker_Name</th>
+		<th style="width:20%;">Seeker_ID</th>
+		<th style="width:20%;">City</th>
+		<th style="width:20%;">State</th>
+		  <th style="width:20%;">Work_wanted</th>
+		<th style="width:40%;">Remote_wanted</th>
+		  <th style="width:20%;">Phone</th>
+	  </tr>
+		{% for dataseeker in dataseekers|sort(attribute='user_id') %}
+		  <tr>
+			<td>{{ dataseeker.last_name + ',' + dataseeker.first_name }}</td>
+			<td>{{ dataseeker.user_id }}</td>
+			<td>{{ dataseeker.city }}</td>
+			<td>{{ dataseeker.state }}</td>
+			<td>{{ dataseeker.Work_wanted }}</td>
+			  <td>{{ dataseeker.remote_wanted }}</td>
+			  <td>{{ dataseeker.phone_number }}</td>
+		  </tr>
+		{% endfor %}
+	</table>
+
+
+	<div class="mt-5"><h4 id="header2" class="d-inline">Companies</h4> <a href="#top" style="text-decoration: none;"><i class="fas fa-arrow-alt-circle-up d-inline" style="font-size:22px"></i></a></div>
+	<input type="text" id="myInput2" onkeyup="myFunction2()" placeholder="Search for Company names...">
+		<table id="myTable2">
+	  <tr class="header">
+		<th style="width:20%;">Company_NAME</th>
+		<th style="width:20%;">Company_ID</th>
+		<th style="width:20%;">City</th>
+		<th style="width:20%;">State</th>
+		<th style="width:20%;">Website</th>
+		<th style="width:40%;">Tagline</th>
+
+	  </tr>
+		{% for datacompany in datacompanies|sort(attribute='user_id') %}
+		  <tr>
+			<td>{{ datacompany.name }}</td>
+			<td>{{ datacompany.user_id }}</td>
+			<td>{{ datacompany.city }}</td>
+			<td>{{ datacompany.state }}</td>
+			<td>{{ datacompany.website }}</td>
+			<td>{{ datacompany.tagline }}</td>
+		  </tr>
+		{% endfor %}
+	</table>
+
+
+	<div class="mt-5"><h4 id="header3" class="d-inline">Skills</h4> <a href="#top" style="text-decoration: none;"><i class="fas fa-arrow-alt-circle-up d-inline" style="font-size:22px"></i></a></div>
+	<input type="text" id="myInput3" onkeyup="myFunction3()" placeholder="Search for Skill...">
+	<table id="myTable3">
+	  <tr class="header">
+		<th style="width:20%;">Skill_Title</th>
+		<th style="width:20%;">Skill_ID</th>
+		<th style="width:20%;">Skill_Type</th>
+		<th style="width:20%;">Skill_Seekers</th>
+		<th style="width:20%;">Skill_Job_Posts</th>
+	  </tr>
+
+		{% for dataskill in dataskills|sort(attribute='id') %}
+		  <tr>
+			<td>{{ dataskill.title }}</td>
+			<td>{{ dataskill.id }}</td>
+			  <td>{{ dataskill.type }}</td>
+			<td>{{ dataskill._seekers }}</td>
+			<td>{{ dataskill._job_posts }}</td>
+		  </tr>
+		{% endfor %}
+	</table>
+
+	<div class="mt-5"><h4 id="header4" class="d-inline" >Attitudes</h4> <a href="#top" style="text-decoration: none;"><i class="fas fa-arrow-alt-circle-up d-inline" style="font-size:22px"></i></a></div>
+	<input type="text" id="myInput4" onkeyup="myFunction4()" placeholder="Search for Attitude title...">
+	<table id="myTable4">
+	  <tr class="header">
+		<th style="width:20%;">Attitue_Title</th>
+		<th style="width:20%;">Attitue_ID</th>
+		<th style="width:20%;">Attitude_Seekers</th>
+		<th style="width:20%;">Attitude_JobPosts</th>
+	  </tr>
+
+		{% for dataattitude in dataattitudes|sort(attribute='id') %}
+		  <tr>
+			<td>{{ dataattitude.title }}</td>
+			<td>{{ dataattitude.id }}</td>
+			<td>{{ dataattitude._seekers }}</td>
+			<td>{{ dataattitude._job_posts }}</td>
+		  </tr>
+		{% endfor %}
+	</table>
+
+	<div class="mt-5"><h4 id="header5" class="d-inline">Job Posts</h4><a href="#top"  style="text-decoration: none;"><i class="fas fa-arrow-alt-circle-up d-inline" style="font-size:22px"></i></a></div>
+	<input type="text" id="myInput5" onkeyup="myFunction5()" placeholder="Search for Job Post title...">
+	<table id="myTable5">
+	  <tr class="header">
+		<th style="width:20%;">Jobpost_Title</th>
+		<th style="width:20%;">Jobpost_ID</th>
+		<th style="width:20%;">Company_ID</th>
+		<th style="width:20%;">City</th>
+		  <th style="width:20%;">State</th>
+		  <th style="width:20%;">Is_Remote</th>
+		  <th style="width:20%;">Salary_Min</th>
+		  <th style="width:20%;">Salary_Max</th>
+		  <th style="width:20%;">Timestamp</th>
+	  </tr>
+
+		{% for datajobpost in datajobposts|sort(attribute='id') %}
+		  <tr>
+			<td>{{ datajobpost.job_title }}</td>
+			<td>{{ datajobpost.id }}</td>
+			<td>{{ datajobpost.company_id }}</td>
+			<td>{{ datajobpost.city }}</td>
+			<td>{{ datajobpost.state }}</td>
+			<td>{{ datajobpost.is_remote }}</td>
+			<td>{{ datajobpost.salary_min }}</td>
+			<td>{{ datajobpost.salary_max }}</td>
+			<td>{{ datajobpost.created_timestamp }}</td>
+		  </tr>
+		{% endfor %}
+	</table>
+</div>
+
+
+<div class="offcanvas offcanvas-bottom" tabindex="-1" id="terminalCanvas" aria-labelledby="terminalLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="terminalLabel">Database Terminal - Enter a command.</h5>
+		<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body small">
+
+		<form method="post">
+			<input type="text" size="300" name="postgresql_code" placeholder="SELECT * FROM ..."/>
+			<input type="submit" style="display: none" />
+		</form>
+		<div class="overflow-auto">
+			<div style="white-space:pre-wrap;">{{ cmd_results }}</div>
+		</div>
+	</div>
 </div>
 
 {% endblock %}
@@ -147,7 +181,7 @@
 {% block styles %}
 {{ super() }}
 	<style>
-		ul {
+		ul.side-nav {
 			list-style-type: none;
 			margin: 0;
 			padding: 0;
@@ -208,9 +242,6 @@
 		}
 
 		#myInput, #myInput2, #myInput3, #myInput4, #myInput5 {
-		  background-image: url('/css/searchicon.png'); /* Add a search icon to input */
-		  background-position: 10px 12px; /* Position the search icon */
-		  background-repeat: no-repeat; /* Do not repeat the icon image */
 		  width: 100%; /* Full-width */
 		  font-size: 16px; /* Increase font-size */
 		  padding: 12px 20px 12px 40px; /* Add some padding */
@@ -363,5 +394,11 @@ function myFunction5() {
     }
   }
 }
+
+$( document ).ready(function() {
+	if ({{ show_term }}) {
+		$('#btn-toggleterm').click();
+	}
+});
 </script>
 {% endblock %}
