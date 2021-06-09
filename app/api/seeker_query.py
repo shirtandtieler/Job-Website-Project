@@ -256,6 +256,9 @@ def get_seeker_query(
     #
 
     matches = SeekerProfile.query.all()
+    # first, always filter out any non-active jobs
+    matches = filter(lambda m: m._user.is_active, matches)
+
     if worktype is not None and any(worktype):
         bin_worktype = sum(v << i for i, v in enumerate(worktype[::-1]))
         # work wanted only has for the 3 types; add in remote before checking for truthiness
