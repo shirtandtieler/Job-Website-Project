@@ -1,48 +1,10 @@
 {% extends "base.html" %}
 
+
+
 {% block app_content %}
 
-<head>
-    <style>
-        .hr1 {
-            border: 2px solid black;
-            border-radius: 1px;
-            font-weight: bold;
-        }
 
-        .hr2 {
-          border: 1px solid black;
-          border-radius: 1px;
-        }
-
-          li {
-            float: left;
-          }
-
-          li a {
-            display: block;
-            color: white;
-            text-align: center;
-            padding: 14px 16px;
-            text-decoration: none;
-          }
-
-          li a:hover {
-            background-color: #111;
-          }
-
-          .p1 {
-              text-align: center;
-              font-weight: bold;
-          }
-    </style>
-</head>
-
-<br>
-<br>
-<br>
-
-<hr class="hr1">
 <br>
 
 <p class="p1">
@@ -72,7 +34,7 @@
     <br>
     <br>
     <br>
-    <button type="button"><a href="{{ url_for('main.job_search') }}">See who's hiring</button>
+    <button type="button"><a href="{{ url_for('main.job_search') }}">See who's hiring</a></button>
 </p>
 
 <br>
@@ -94,4 +56,39 @@
 </p>
 
 
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<style>
+    <style>
+        .hr1 {
+            border: 2px solid black;
+            border-radius: 1px;
+            font-weight: bold;
+        }
+
+        .hr2 {
+          border: 1px solid black;
+          border-radius: 1px;
+        }
+
+          li {
+            float: left;
+          }
+
+          li a {
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+          }
+
+          .p1 {
+              text-align: center;
+              font-weight: bold;
+          }
+    </style>
+</style>
 {% endblock %}
