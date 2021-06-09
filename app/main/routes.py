@@ -51,7 +51,9 @@ from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
 def index():
     """ Home page / dashboard for logged in users """
     if current_user.is_anonymous:
-        return render_template("index.html", title="Home")
+        job_count = count_rows(JobPost)
+        ad_count = int(job_count / 10)*10
+        return render_template("index.html", job_count_ad = ad_count)
 
     if current_user.account_type == AccountTypes.s:  # seeker
         prof = current_user._seeker
