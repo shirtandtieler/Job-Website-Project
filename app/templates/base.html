@@ -1,7 +1,7 @@
 {% extends 'bootstrap/base.html' %}
 
 {% block title %}
-{% if title %}{{ title }} {% else %} {{ (self | filename).replace("_"," ").replace("/"," ").title() }}{% endif %}
+{{ (self | filename).replace("_"," ").replace("/"," ").title() }}
 {% endblock %}
 
 {% block head %}
