@@ -1,7 +1,6 @@
 # Routes are the different URLs that the application implements.
 # The functions below handle the routing/behavior.
 import json
-import os
 from datetime import datetime
 from io import BytesIO
 
@@ -17,8 +16,6 @@ from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
 from app.api.matchmaker import get_score, update_cache
 from app.api.profile import update_seeker, update_company
-from app.api.matchmaker import update_cache
-from app.api.profile import update_seeker, update_company
 from app.api.seeker_query import get_seeker_query, seeker_form_to_url_params, seeker_url_args_to_query_args, \
     seeker_url_args_to_input_states
 from app.api.routing import modify_query
@@ -27,8 +24,7 @@ from app.api.statistics import get_coordinate_info, get_seeker_counts_by_skill, 
 from app.api.users import save_seeker_search, delete_seeker_search, save_job_search, delete_job_search
 from app.main import bp
 from app.main.forms import JobPostForm
-from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude, \
-    SeekerSkill  # , MatchScores
+from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
 
 
@@ -46,6 +42,8 @@ from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
 #     File "D:\Documents\Escuela\CSC 394 Software Projects\_ProjectRepo\Job-Website-Project\venv\Lib\site-packages\sqlalchemy\util\compat.py", line 211, in raise_
 # raise exception
 # sqlalchemy.orm.exc.UnmappedInstanceError: Class 'flask_sqlalchemy.BaseQuery' is not mapped
+
+## TODO ensure editing pages load existing entries correctly
 
 
 @bp.route("/")
@@ -108,7 +106,6 @@ def seeker_profile(seeker_id):
     """
     Navigate to a specific seeker's profile page.
     """
-    # TODO limit access?
     skr = SeekerProfile.query.filter_by(id=seeker_id).first()
     if skr is None:
         # could not find profile with that id
@@ -120,8 +117,11 @@ def seeker_profile(seeker_id):
 
 
 @bp.route("/seeker/<seeker_id>/upload", methods=['POST'])
+@login_required
 def seeker_resume_upload(seeker_id):
-    # TODO make sure current user is seeker
+    if current_user._seeker is None or current_user._seeker.id != seeker_id:
+        flash("Operation not allowed.")
+        return redirect(url_for('main.index'))
 
     skr = SeekerProfile.query.filter_by(id=seeker_id).first()
     if skr is None:
@@ -135,6 +135,7 @@ def seeker_resume_upload(seeker_id):
 
 
 @bp.route("/seeker/<seeker_id>/download")
+@login_required
 def seeker_resume_download(seeker_id):
     skr = SeekerProfile.query.filter_by(id=seeker_id).first()
     if skr is None:
@@ -150,6 +151,7 @@ def seeker_resume_download(seeker_id):
 
 
 @bp.route("/company/<company_id>")
+@login_required
 def company_profile(company_id: int):
     """
     Navigate to a specific company's profile page.
@@ -285,7 +287,6 @@ def job_search():
     """
     Navigate to the job search page.
     """
-    # TODO limit access to only seekers/admins?
     #print(f"JOBS PAGE-{request.method}\n\tFORM: {request.form}\n\tARGS: {request.args}")
     if request.method == 'POST':
         saved_name = request.form.get('query_saveas', '')
@@ -351,6 +352,7 @@ def job_search():
 
 
 @bp.route("/jobs/download")
+@login_required
 def job_search_download():
     req_kwargs = job_url_args_to_query_args(request.args)
     results = get_job_query(**req_kwargs).all()
@@ -362,12 +364,11 @@ def job_search_download():
 
 
 @bp.route("/job/<job_id>")
-# @login_required
+@login_required
 def job_page(job_id: int):
     """
     Navigate to the job page with the specified id.
     """
-    # TODO limit access?
     job_post = JobPost.query.filter_by(id=job_id).first_or_404()
     return render_template('company/jobpost.html', job=job_post)
 
@@ -445,7 +446,36 @@ def seeker_search():
                            )
 
 
+@bp.route("/companies")
+def company_browse():
+    # `request` is a global value that lets you check the URL request.
+    page_num = request.args.get('page', 1, type=int)
+
+    pager = CompanyProfile.query.paginate(
+        page_num, app.Config.RESULTS_PER_PAGE, False)
+
+    prev_url = modify_query(request, page=pager.prev_num) if pager.has_prev else "#"
+    prev_link_clz = "disabled" if not pager.has_prev else ""
+
+    next_url = modify_query(request, page=pager.next_num) if pager.has_next else "#"
+    next_link_clz = "disabled" if not pager.has_next else ""
+
+    # get lower and upper page count for (up to) 5 surrounding pages
+    max_window = min(5, pager.pages)
+    pg_lower = pg_upper = page_num
+    while pg_upper - pg_lower + 1 < max_window:
+        pg_lower = max(1, pg_lower - 1)
+        pg_upper = min(pager.pages, pg_upper + 1)
+    return render_template('company/browse.html', companies=pager.items,
+                           total=pager.total,
+                           page=page_num,
+                           plwr=pg_lower, pupr=pg_upper,
+                           dprev=prev_link_clz, prev_url=prev_url,
+                           dnext=next_link_clz, next_url=next_url)
+
+
 @bp.route("/seekers/download")
+@login_required
 def seeker_search_download():
     req_kwargs = seeker_url_args_to_query_args(request.args)
     results = get_seeker_query(**req_kwargs).all()
