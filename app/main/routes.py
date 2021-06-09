@@ -503,7 +503,7 @@ def db_editor():
     else:
         show = "false"
 
-    seekerdata = SeekerProfile.query.all()
+    seekerdata = SeekerProfile.query.all() 
     companydata = CompanyProfile.query.all()
     attitudedata = Attitude.query.all()
     skillsdata = Skill.query.all()
