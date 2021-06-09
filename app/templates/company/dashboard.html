@@ -1,94 +1,131 @@
 {% extends "base.html" %}
 
 {% block app_content %}
-<head>
-    <style>
-        .grid-container {
-            display: grid;
-            grid-template-columns: auto auto auto auto;
-            grid-gap: 50px;
-            outline-style: solid;
-            padding: 10px;
-            justify-items: center;
-          }
-          
-          .grid-container > div {
-            outline-style: solid;
-            text-align: center;
-            padding: 20px 0;
-            font-size: 30px;
-          }
-        .editp{
-            outline-style: solid;
-            float: left;
-            margin-top: 20px;
-        }
-        
-        .gotop{
-            margin-left: 75%;
-            float: right;
-            margin-top: 20px;
-            
-        }
-    </style>
-</head>
 
-<h2>Welcome {{name}}, to your dashboard.</h2>
+<h2>Welcome {{company.name}}, to your dashboard.</h2>
+
 <div class="grid-container">
     <div class="newjob">
-        <img src="https://img.icons8.com/ultraviolet/40/000000/new-by-copy.png"/>
-        <p>Create a new Job Post:</p>
+        <img src="{{ url_for('static', filename='images/new-by-copy.png') }}" height="150"/>
+        <p>Create a new Job Post</p>
         <form action="{{ url_for('main.new_job') }}">
             <input type="submit" value="Start" />
         </form>
     </div>
     <div class="findseeker">
-        <img src="https://img.icons8.com/metro/26/000000/find-user-male.png"/>
-        <p>Find a Job Seeker:</p>
+        <img src="{{ url_for('static', filename='images/find-user.png') }}" height="150"/>
+        <p>Find a Job Seeker</p>
         <form action="{{ url_for('main.seeker_search') }}">
             <input type="submit" value="Start" />
         </form>
     </div>
     <div class="editpost">
-        <img src="https://img.icons8.com/android/24/000000/edit.png"/>
-        <p>Edit Job Posts:</p>
+        <img src="{{ url_for('static', filename='images/pencil.png') }}" height="150"/>
+        <p>Review Job Posts</p>
         <form action="{{ url_for('main.profile') }}">
             <input type="submit" value="Start" />
         </form>
     </div>
 </div>
-<div class="editp">
-<ul class="list">
-        {% if name %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Company Name</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Company Name</h4>
-        {% endif %}
 
-        {% if city %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> City</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> City</h4>
-        {% endif %}
-
-        {% if state %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> State</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> State</h4>
-        {% endif %}
-
-        {% if website %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Website</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Website</h4>
-        {% endif %}
-    </ul>
-</div>
-<div class="gotop">
-    <p>Edit Profile:</p>
-    <form action="profile.html">
-        <input type="submit" value="Go" />
-    </form>
+{% if not company.is_profile_complete() %}
+<div class="row mb-2">
+    <h4 class="col-md-4 center border-start border-primary border-5">Your profile needs some updating...</h4>
 </div>
 
+<div class="row">
+    <div class="card col-md-4 center pt-2" style="text-align:left">
+
+        <h4>
+            {% if company.name %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %}
+             Company Name
+        </h4>
+
+        <h4>
+            {% if company.city and company.state %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %}
+             Location
+        </h4>
+
+        <h4>
+            {% if company.website %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %}
+             Website
+        </h4>
+
+        <h4>
+            {% if company.tagline %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %}
+             Tagline
+        </h4>
+
+        <h4>
+            {% if company.summary %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %}
+             Summary
+        </h4>
+        <div class="col-12 mb-2">
+            <div style="display:flex;justify-content: space-between;">
+            <h3>Edit Profile:</h3>
+            <a class="btn btn-primary" href="/profile/edit">Go <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+          .grid-container {
+            display: grid;
+            grid-template-columns: auto auto auto auto;
+            grid-gap: 50px;
+            padding: 10px;
+            justify-items: center;
+
+          }
+
+          .grid-container > div {
+            border: 2px solid;
+            box-shadow: 3px 3px 1px grey;
+            text-align: center;
+            padding: 20px 20px;
+            font-size: 30px;
+          }
+
+          .editp{
+            float: left;
+            margin-top: 20px;
+            border: 2px solid;
+            box-shadow: 3px 3px 1px grey;
+        }
+
+        .center {
+            margin:auto;
+        }
+
+        .card {
+            border: 2px solid;
+            box-shadow: 3px 3px 1px grey;
+        }
+</style>
 {% endblock %}

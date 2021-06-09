@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask, Blueprint, request
@@ -89,6 +90,25 @@ def create_app(config_class=Config):
         for key, val in new_values.items():
             args[key] = val
         return f"{request.path}?{url_encode(args)}"
+
+    @app.template_global()
+    def bitwise_and(lhs, rhs) -> bool:
+        """ Checks if the LHS & RHS > 0 """
+        return lhs & rhs > 0
+
+    @app.template_global()
+    def _print(*content):
+        for item in content:
+            print(item, end=" ")
+        print()
+        return ""
+
+    @app.template_filter('filename')
+    def filename(s):
+        l = re.findall('\'([^\']*).html', str(s))
+        if l:
+            return l[0]
+        return None
 
     return app
 

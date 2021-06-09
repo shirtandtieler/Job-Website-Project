@@ -1,0 +1,17 @@
+{# declares all macros #}
+
+{% macro active_endpoint(endpoint) %}
+{% if request.endpoint.endswith(endpoint) %}
+active
+{% else %}
+
+{% endif %}
+{% endmacro %}
+
+{% macro active_query(query_key, query_val=None) %}
+{% if query_key in request.args and (query_val==None or request.args.get(query_key) == query_val) %}
+active
+{% else %}
+
+{% endif %}
+{% endmacro %}

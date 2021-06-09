@@ -2,152 +2,186 @@
 
 {% block app_content %}
 
-<head>
-    <style>
-        .vertical-align {
-            display: flex;
-            align-items: center;
-        }
-
-        .card {
-            border: 2px solid;
-        }
-
-        .section {
-            margin-top: 25px;
-            margin-bottom: 25px;
-
-            display: flex;
-            display: -webkit-flex;
-            flex-wrap: wrap;
-        }
-
-        /* Vertically center elements */
-        .display-flex-center-broken {
-            display: flex;
-            align-items: center;
-        }
-
-        .display-flex-center {
-            margin:auto;
-        }
-
-        a.card-link:link {
-           color: #000000;
-           text-decoration: none;
-        }
-        a.card-link:visited {
-           color: #000000;
-           text-decoration: none;
-        }
-        a.card-link:hover {
-           color: #000000;
-           text-decoration: none;
-        }
-        a.card-link:active {
-           color: #000000;
-           text-decoration: none;
-        }
-    </style>
-</head>
-
 <h2>Welcome, {{fullname}}!</h2>
 
 <div class="row section">
-    <div class="col-md-3 col-md-offset-2 card">
-        <!-- TODO Should link to companies page when its created-->
-        <a href="{{ url_for('main.job_search', username=current_user.username) }}" class="card-link">
-            <img src="https://img.icons8.com/carbon-copy/100/000000/company.png" height="150" class="center-block"/>
+    <div class="col-md-3 col-md-offset-2 card me-3">
+        <a href="{{ url_for('main.company_browse') }}" class="card-link">
+            <img src="{{ url_for('static', filename='images/company.png') }}" height="150" style="padding-left:20%"/>
             <h1 class="text-center">Companies</h1>
             <h3 class="text-center">Discover Your Perfect Match</h3>
         </a>
     </div>
-    <div class="col-md-3 col-md-offset-2 card">
-        <a href="{{ url_for('main.job_search', username=current_user.username) }}" class="card-link">
-            <img src="https://img.icons8.com/ios/100/000000/new-job.png" height="150" class="center-block"/>
+    <div class="col-md-3 col-md-offset-2 card ms-3">
+        <a href="{{ url_for('main.job_search') }}" class="card-link">
+            <img src="{{ url_for('static', filename='images/new-job.png') }}" height="150"/>
             <h1 class="text-center">Jobs</h1>
-            <h3 class="text-center">For You page</h3>
-        </a>
-    </div>
-</div>
-<div class="row section card">
-    <div class="col-md-3 col-md-offset-1">
-        {% if first_name %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> First Name</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> First Name</h4>
-        {% endif %}
-
-        {% if last_name %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Last Name</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Last Name</h4>
-        {% endif %}
-
-        {% if email %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/>  Email</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Email</h4>
-        {% endif %}
-
-        {% if phone_number %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Phone Number</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Phone Number</h4>
-        {% endif %}
-
-        {% if city %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> City</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> City</h4>
-        {% endif %}
-
-        {% if city %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> State</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> State</h4>
-        {% endif %}
-
-        {% if resume %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Resume</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Resume</h4>
-        {% endif %}
-
-        {% if skills %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Skills</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Skills</h4>
-        {% endif %}
-
-        {% if attitudes %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Cultural Attitudes</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Cultural Attitudes</h4>
-        {% endif %}
-
-        {% if history_edus %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Education</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Education</h4>
-        {% endif %}
-
-        {% if history_jobs %}
-        <h4><img src="https://img.icons8.com/small/16/000000/checked-2--v1.png"/> Job History</h4>
-        {% else %}
-        <h4><img src="https://img.icons8.com/small/16/000000/unchecked-checkbox.png"/> Job History</h4>
-        {% endif %}
-
-        <!-- TODO If all fields are completed the page should have a different message about the user's profile -->
-
-    </div>
-    <div class="col-md-7 display-flex-center">
-        <a href="{{ url_for('main.profile', username=current_user.username) }}" class="card-link">
-            <h3 class="text-center">Your profile needs some updating.</h3>
-            <h3 class="text-center">Want to switch to editing view?</h3>
-            <img src="https://img.icons8.com/material-rounded/100/000000/arrow.png" class="center-block"/>
+            <h3 class="text-center">For You</h3>
         </a>
     </div>
 </div>
 
+{% if not is_profile_complete %}
+<div class="row mb-2">
+   <h4 class="border-start border-primary border-3 col-md-4 center">Your profile needs some updating...</h4>
+</div>
+<div class="row" style="justify-content:start">
+    <div class="col-md-4 center card pt-2">
+        <h4>
+            {% if first_name %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %} First Name
+        </h4>
+
+        <h4>
+            {% if last_name %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %} Last Name
+        </h4>
+
+        <h4>
+            {% if email %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %} Email
+        </h4>
+
+        <h4>
+            {% if phone_number %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %} Phone Number
+        </h4>
+
+        <h4>
+            {% if city %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %} City
+        </h4>
+
+        <h4>
+            {% if city %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %} State
+        </h4>
+
+        <h4>
+            {% if resume %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %} Resume
+        </h4>
+
+        <h4>
+            {% if skills %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %} Skills
+        </h4>
+
+        <h4>
+            {% if attitudes %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %} Cultural Attitudes
+        </h4>
+
+        <h4>
+            {% if history_edus %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %} Education
+        </h4>
+
+        <h4>
+            {% if history_jobs %}
+            <i class="far fa-check-square"></i>
+            {% else %}
+            <i class="far fa-square"></i>
+            {% endif %} Job History
+        </h4>
+
+        <div class="col-12 mb-2">
+            <div style="display:flex;justify-content: space-between;">
+            <h3>Edit Profile:</h3>
+            <a class="btn btn-primary" href="/profile/edit">Go <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+<style>
+    .vertical-align {
+        display: flex;
+        align-items: center;
+    }
+
+    .card {
+        border: 2px solid;
+        box-shadow: 3px 3px 1px grey;
+    }
+
+    .section {
+        margin-top: 25px;
+        margin-bottom: 25px;
+
+        display: flex;
+        display: -webkit-flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    /* Vertically center elements */
+    .display-flex-center-broken {
+        display: flex;
+        align-items: center;
+    }
+
+    .display-flex-center {
+        margin:auto;
+    }
+
+    .center{
+        margin:auto;
+    }
+
+    .card-link {
+        margin:auto;
+    }
+
+    a.card-link:link {
+       color: #000000;
+       text-decoration: none;
+    }
+    a.card-link:visited {
+       color: #000000;
+       text-decoration: none;
+    }
+    a.card-link:hover {
+       color: #000000;
+       text-decoration: none;
+    }
+    a.card-link:active {
+       color: #000000;
+       text-decoration: none;
+    }
+</style>
 {% endblock %}

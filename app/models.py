@@ -171,6 +171,7 @@ class Skill(db.Model):
 
     @staticmethod
     def to_tech_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        """ Gets the title and ID of all tech skill entries """
         global TSKILL_TITLEIDS
         if TSKILL_TITLEIDS is None:
             TSKILL_TITLEIDS = [(s.title, s.id) for s in Skill.query.all() if s.is_tech()]
@@ -187,6 +188,7 @@ class Skill(db.Model):
 
     @staticmethod
     def to_biz_tuples(sort_index=None, reverse=False) -> List[Tuple[str, int]]:
+        """ Gets the title and ID of all business skill entries """
         global BSKILL_TITLEIDS
         if BSKILL_TITLEIDS is None:
             BSKILL_TITLEIDS = [(s.title, s.id) for s in Skill.query.all() if s.is_biz()]
@@ -251,7 +253,7 @@ class User(UserMixin, db.Model):
 
 @login.user_loader
 def load_user(id_):
-    print(f"Loading user w/id {id_}")
+    #print(f"Loading user w/id {id_}")
     return User.query.get(int(id_))
 
 
@@ -297,6 +299,9 @@ class CompanyProfile(db.Model):  # one to one with company-type user account
         if acct.account_type != AccountTypes.c:
             raise ValueError(f"Account type is not a Company")
         return company_id
+
+    def is_profile_complete(self):
+        return self.name and self.city and self.state and self.website and self.tagline and self.summary
 
     def avatar(self, size=128):
         _hashstr = re.sub(r"\W", "", self.name)
@@ -350,6 +355,9 @@ class SeekerProfile(db.Model):
     _applications = relationship("SeekerApplication", back_populates="_seeker")
     _bookmarks = relationship('SeekerBookmark', back_populates='_seeker')
 
+    #_scores = db.relationship('MatchScores', backref='_seekers', lazy='dynamic', foreign_keys='MatchScores.seeker_id')
+    _scores = relationship("MatchScores", back_populates="_seekers")
+
     def __repr__(self):
         return f"SeekerProfile[{self.first_name}{self.last_name}]"
 
@@ -361,6 +369,13 @@ class SeekerProfile(db.Model):
         if acct.account_type != AccountTypes.s:
             raise ValueError(f"Account type is not a Seeker")
         return seeker_id
+
+    def is_profile_complete(self):
+        return all([
+            self.first_name, self.last_name, self.phone_number, self.city, self.state,
+            self.tagline, self.summary, self.resume, len(self._skills), len(self._attitudes),
+            len(self._history_edus), len(self._history_jobs)
+        ])
 
     @property
     def full_name(self):
@@ -439,7 +454,7 @@ class SeekerProfile(db.Model):
         return sum([job.years_employed for job in self._history_jobs])
 
     def get_tech_skills_levels(self):
-        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if
+        output = [[skr_skl._skill.title, int(skr_skl.skill_level)] for skr_skl in self._skills if
                   skr_skl._skill.is_tech()]
         output.sort(key=itemgetter(1), reverse=True)
         return output
@@ -459,7 +474,7 @@ class SeekerProfile(db.Model):
         return skls
 
     def get_biz_skills_levels(self) -> List[Tuple[str, int]]:
-        output = [(skr_skl._skill.title, int(skr_skl.skill_level)) for skr_skl in self._skills if
+        output = [[skr_skl._skill.title, int(skr_skl.skill_level)] for skr_skl in self._skills if
                   skr_skl._skill.is_biz()]
         output.sort(key=itemgetter(1), reverse=True)
         return output
@@ -737,8 +752,17 @@ class JobPost(db.Model):
     _seekers_applied = relationship("SeekerApplication", back_populates="_job_post")
     _seekers_bookmarked = relationship("SeekerBookmark", back_populates="_job_post")
 
+    #_scores = db.relationship('MatchScores', backref='_job_posts', lazy='dynamic', foreign_keys='MatchScores.jobpost_id')
+    _scores = relationship("MatchScores", back_populates="_job_posts")
+
     def __repr__(self):
         return f"JobPost[by#{self.company_id}|{self.job_title}]"
+
+    def tooltip(self):
+        details = [self.location,
+                   "".join([i[0].upper() for i in self.get_work_types_list()]) + ("R" if self.is_remote else ""),
+                   "Posted: " + self.created_timestamp.strftime("%Y-%m-%d")]
+        return " | ".join(details)
 
     @property
     def company(self):
@@ -1035,6 +1059,7 @@ class LocationCoordinates(db.Model):
             (just state if city cannot be found, otherwise just 'USA')
         """
         loc_id = LocationCoordinates.to_location(city, state)
+
         row = LocationCoordinates.query.get(loc_id)
         if row is None:
             # not present, create then return
@@ -1042,11 +1067,27 @@ class LocationCoordinates(db.Model):
             if loc_obj is None or loc_obj.latitude is None:
                 if not fallback:
                     raise ValueError(f"Cannot be found: '{loc_id}' (city: {city}, state: {state})")
-                if city is not None:  # try just getting the state
+                if state is not None:  # try just getting the state
                     return LocationCoordinates.get(None, state, fallback)
-                # otherwise just get 'USA'
-                return LocationCoordinates.get(None, None, fallback)
+                # otherwise place in bermuda
+                return 32.3078, -64.7505
             row = LocationCoordinates(location=loc_id, latitude=loc_obj.latitude, longitude=loc_obj.longitude)
             db.session.add(row)
             db.session.commit()
         return row.latitude, row.longitude
+
+
+class MatchScores(db.Model):
+    """
+    This table contains records of seeker-job post match scores.
+    It should be updated when a seeker or job is updated.
+    It is used by the search results to order by match score.
+    """
+    __tablename__ = 'match_scores'
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('seeker_profile.id'), nullable=False)
+    jobpost_id = Column(Integer, ForeignKey('jobpost.id'), nullable=False)
+    score = Column(Numeric, nullable=False)
+
+    _seekers = relationship("SeekerProfile", back_populates="_scores")
+    _job_posts = relationship("JobPost", back_populates="_scores")

@@ -1,2 +1,3 @@
 FLASK_APP=webapp.py
 FLASK_ENV=development
+GOOGLE_APPLICATION_CREDENTIALS=app/static/credentials.json

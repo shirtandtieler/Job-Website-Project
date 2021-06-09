@@ -346,9 +346,19 @@
                                         <p> {{ job.description }} </p>
                                     </div>
                                 </div>
-                                <div class="row" title="{{ job.created_timestamp.strftime('%b %d %Y @ %I:%M %p') }}">
+                                <div class="row">
+                                    <!-- Score -->
+                                    <div class="col-8">
+                                        {% if current_user._seeker != None %}
+                                        <span class="border border-warning rounded-3 p-1">
+                                            Match score: <b>{{ get_match_score(job.id, current_user._seeker.id) }}</b>
+                                        </span>
+                                        {% endif %}
+                                    </div>
                                     <!-- Posted timestamp -->
-                                    <small style="text-align: right; color: gray">Posted {{ job.age }} ago</small>
+                                    <div class="col-4" style="text-align: right; color: gray" title="{{ job.created_timestamp.strftime('%b %d %Y @ %I:%M %p') }}">
+                                        <small>Posted {{ job.age }} ago</small>
+                                    </div>
                                 </div>
                             </div>
 
@@ -394,10 +404,6 @@
 {% block scripts %}
 {{ super() }}
 <script>
-    function extra_reset() {
-        // covers resetting fields that the 'reset' input type itself doesn't handle
-
-    }
 
     function getSalaryText(val0, val1) {
         if ( val1-val0 == 205 ) {
@@ -466,6 +472,8 @@
         $.each({{ opts['sel_atts'] }}, function(i, e){
             $("#sel_atts option[value='" + e + "']").prop("selected", true);
         });
+
+
     });
 </script>
 {% endblock %}

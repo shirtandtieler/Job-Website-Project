@@ -1,0 +1,85 @@
+{# This page is for browsing companies #}
+{% extends "base.html" %}
+
+{% block app_content %}
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <!-- company listing/pagination -->
+            {% for company in companies %}
+            <div class="card mb-3">
+                <div class="row g-0 ps-5">
+                    <div class="col-md-1 d-flex flex-column justify-content-center align-items-center">
+                        <div class="avatar-container mt-2 mb-2">
+                            <a href="{{ url_for('main.company_profile', company_id=company.id) }}" style="text-decoration: none; color: black;">
+                                <img src="{{ company.avatar(96) }}">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-11 ps-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div class="flex-fill">
+                                    <a href="{{ url_for('main.company_profile', company_id=company.id) }}" style="text-decoration: none; color: black;">
+                                        <h5 class="card-title mb-0">{{ company.name }}</h5>
+                                    </a>
+                                    <p class="card-text mb-1">
+                                        <small class="text-muted">{{ company.location }}</small>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="container">
+                                <div class="row">
+                                    <!-- Description -->
+                                    <div class="col">
+                                        <p> {{ company.summary or company.tagline or '' }} </p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <!-- List jobs -->
+                                    <div class="col">
+
+                                        <span class="p-1 job-sample">
+                                            {% if company._job_posts|length > 0 %}
+                                            <b>{{ company._job_posts|length }}</b> jobs available, including:
+                                            {% for jp in company._job_posts[:3] %}
+                                            <span style="border:1px solid gray; border-radius: 10px; padding-left: 2px; padding-right:2px">{{jp.job_title}}</span>,
+                                            {% endfor %}...
+                                            {% else %}
+                                            <small>Stay tuned for this company to post some jobs!</small>
+                                            {% endif %}
+                                        </span>
+
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor%}
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {{ dprev }}">
+                        <a class="page-link" href="{{ prev_url }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% for i in range(plwr, pupr+1) %}
+                    <li class="page-item {{ 'active' if i == page else '' }}">
+                        <a class="page-link" href="{{ modify_query(page=i) }}">{{ i }}</a>
+                    </li>
+                    {% endfor %}
+                    <li class="page-item  {{ dnext }}">
+                        <a class="page-link" href="{{ next_url }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}
