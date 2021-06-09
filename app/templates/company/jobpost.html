@@ -16,6 +16,10 @@
             <i class="fas fa-map-marker-alt"></i>
             {{ job.location }}
         </p>
+        <p class="mb-1"><i class="fas fa-business-time"></i> {{ " • ".join(job.get_work_types_list()) }} </p>
+        {% if job.is_remote %}
+        <p class="mb-1"><i class="fas fa-laptop-house"></i> remote</p>
+        {% endif %}
         <p>
             <i class="fas fa-money-bill"></i>
             {{ job.expected_salary }}

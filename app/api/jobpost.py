@@ -2,7 +2,7 @@ import traceback
 from typing import Tuple, Union, List
 
 from app import db
-from app.models import JobPost, JobPostSkill, SkillLevels, ImportanceLevel, Skill, JobPostAttitude, Attitude
+from app.models import JobPost, JobPostSkill, SkillLevels, ImportanceLevel, Skill, JobPostAttitude, Attitude, WorkTypes
 
 
 def extract_details(form):
@@ -13,6 +13,11 @@ def extract_details(form):
     details['city'] = form.city.data if form.city.data else None
     details['state'] = form.state.data if form.state.data else None
     details['description'] = form.description.data if form.description.data else None
+    # convert work type boolean fields to integer
+    wt_int = int(form.work_types.data.get('full_time', False)) * int(WorkTypes.full) \
+             + int(form.work_types.data.get('part_time', False)) * int(WorkTypes.part) \
+             + int(form.work_types.data.get('contract', False)) * int(WorkTypes.contract)
+    details['work_type'] = wt_int
     details['remote'] = form.remote.data
     details['salary'] = (form.salary_min.data, form.salary_max.data)
     details['active'] = form.active.data
@@ -23,7 +28,8 @@ def extract_details(form):
 
 
 def new_jobpost(company_id: int, title: str,
-                city: str = None, state: str = None, description: str = None, remote: bool = None,
+                city: str = None, state: str = None, description: str = None,
+                work_type: int = None, remote: bool = None,
                 salary: Tuple[int, int] = None, active: bool = True,
                 skills: List[Tuple[Union[str, int], int, int]] = None,
                 attitudes: List[Tuple[Union[str, int], int]] = None) -> int:
@@ -39,9 +45,12 @@ def new_jobpost(company_id: int, title: str,
         2. the importance level (0-5)
     Returns the id of the added job post.
     """
+    if work_type is None:
+        work_type = int(WorkTypes.any)
     post = JobPost(company_id=company_id, job_title=title,
                    city=city, state=state, description=description,
-                   is_remote=remote, active=active)
+                   work_type=WorkTypes(work_type), is_remote=remote,
+                   active=active)
     if salary is not None:
         post.salary_min = salary[0]
         post.salary_max = salary[1]
@@ -85,7 +94,8 @@ def new_jobpost(company_id: int, title: str,
 
 def edit_jobpost(post_id: int,
                  title: str = None, city: str = None, state: str = None, description: str = None,
-                 remote: bool = None, salary: Tuple[Union[None, int], Union[None, int]] = None, active: bool = None,
+                 work_type: int = None, remote: bool = None, salary: Tuple[Union[None, int], Union[None, int]] = None,
+                 active: bool = None,
                  skills: List[Tuple[Union[str, int], int, int]] = None,
                  attitudes: List[Tuple[Union[str, int], int]] = None):
     """
@@ -113,7 +123,9 @@ def edit_jobpost(post_id: int,
         post.state = state
     if description:
         post.description = description
-    if remote:
+    if work_type:
+        post.work_type = WorkTypes(work_type)
+    if remote is not None:
         post.is_remote = remote
     if salary:
         if salary[0]:
@@ -136,12 +148,15 @@ def edit_jobpost(post_id: int,
                 jp_skill.importance_level = ImportanceLevel(new_skill_lookup[jp_skill.skill_id][1])
                 # now pop out of dictionary so that it wont be added in the following step
                 _ = new_skill_lookup.pop(jp_skill.skill_id)
+                print(f"Update skill {jp_skill}")
             else:  # skill wasn't included in new list; assume deletion
                 db.session.delete(jp_skill)
+                print(f"Delete skill {jp_skill}")
         # for the remaining skills in the dict, add them in
         for sid, (slvl, simp) in new_skill_lookup.items():
             jp_skill = JobPostSkill(jobpost_id=post.id, skill_id=sid, skill_level_min=slvl, importance_level=simp)
             db.session.add(jp_skill)
+            print(f"Add skill {jp_skill}")
     if attitudes:
         # make a dictionary mapping new ids to their importance
         # to make it easy to query differences

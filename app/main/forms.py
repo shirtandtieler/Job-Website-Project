@@ -35,11 +35,18 @@ class FlexibleIntegerField(IntegerField):
         return super(FlexibleIntegerField, self).process_formdata(valuelist)
 
 
+class WorkTypeField(Form):
+    full_time = BooleanField('Full Time')
+    part_time = BooleanField('Part Time')
+    contract = BooleanField('Contract')
+
+
 class JobPostForm(FlaskForm):
     active = BooleanField('Active', default=True)
     title = StringField('Job Title', validators=[DataRequired()])
     city = StringField('City')
     state = SelectField('State', choices=[""] + STATE_ABBVS)
+    work_types = FormField(WorkTypeField)
     remote = BooleanField('Remote')
     salary_min = FlexibleIntegerField('Min. Salary', validators=[Optional()])
     salary_max = FlexibleIntegerField('Max. Salary', validators=[Optional()])

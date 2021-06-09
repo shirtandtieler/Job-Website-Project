@@ -2,13 +2,11 @@ from flask import url_for, flash, render_template
 from flask_login import current_user, login_user, login_required, logout_user
 from werkzeug.utils import redirect
 
-from app.api.users import new_seeker, new_company
+from app.api.users import new_seeker, new_company, update_last_login
 from app.auth import bp
 from app.auth.forms import LoginForm, RegisterForm
 from app.models import User
 
-
-# TODO update last login of user if successful
 
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -22,6 +20,7 @@ def login():
             flash('Invalid username or password')
             return redirect(url_for('auth.login'))
         login_user(user, remember=form.remember_me.data)
+        update_last_login(user.id)
         return redirect(url_for('main.index'))
     return render_template('login.html', title='Sign In', form=form)
 

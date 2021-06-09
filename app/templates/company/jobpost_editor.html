@@ -32,11 +32,32 @@
                 </div>
             </div>
 
+            <br />
+
+            <div class="checkbox">
+                <label>
+                    {{ form.work_types.full_time }} Full Time
+                </label>
+            </div>
+
+            <div class="checkbox">
+                <label>
+                    {{ form.work_types.part_time }} Part Time
+                </label>
+            </div>
+
+            <div class="checkbox">
+                <label>
+                    {{ form.work_types.contract }} Contract
+                </label>
+            </div>
+
             <div class="checkbox">
                 <label>
                     {{ form.remote }} Remote available
                 </label>
             </div>
+
             <br />
 
             <div class="form-row">
@@ -111,12 +132,16 @@
     }
 
     function new_req(name, is_skill, chosen_skill_lvl, chosen_imp_lvl) {
-        // setup default values
+        // setup default values or else subtract 1 since they're 1-indexed
         if (!chosen_skill_lvl) {
             chosen_skill_lvl = 0;
+        } else {
+            chosen_skill_lvl -= 1;
         }
         if (!chosen_imp_lvl) {
             chosen_imp_lvl = 0;
+        } else {
+            chosen_imp_lvl -= 1;
         }
 
         // setup references and ids
@@ -289,12 +314,13 @@
     $(document).ready(function () {
         $('[data-toggle="tooltip"]').tooltip();
         if (init_skills_added) {
-            for (i = 0; i < init_skills_added.length; i++) {
+            for (var i = 0; i < init_skills_added.length; i++) {
+                //console.log(`#${i}: ${init_skills_added[i]}`);
                 new_req(init_skills_added[i][0], true, init_skills_added[i][1], init_skills_added[i][2]);
             }
         }
         if (init_attitudes_added) {
-            for (i = 0; i < init_attitudes_added.length; i++) {
+            for (var i = 0; i < init_attitudes_added.length; i++) {
                 new_req(init_attitudes_added[i][0], false, init_attitudes_added[i][1], init_attitudes_added[i][2]);
             }
         }

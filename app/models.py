@@ -246,10 +246,6 @@ class User(UserMixin, db.Model):
         digest = md5(self.email.lower().encode('utf-8')).hexdigest()
         return 'https://www.gravatar.com/avatar/{}?d=identicon&s={}'.format(digest, size)
 
-    def update(self):
-        if self.is_active:
-            self.last_login = datetime.utcnow
-
 
 @login.user_loader
 def load_user(id_):

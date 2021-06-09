@@ -25,32 +25,16 @@ from app.api.statistics import get_coordinate_info, get_seeker_counts_by_skill, 
 from app.api.users import save_seeker_search, delete_seeker_search, save_job_search, delete_job_search
 from app.main import bp
 from app.main.forms import JobPostForm
-from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude
+from app.models import SeekerProfile, CompanyProfile, AccountTypes, JobPost, Skill, Attitude, WorkTypes
 from resources.generators import ATTITUDE_NAMES, SKILL_NAMES
-
-
-## TODO FAILED TO DEL SEEKERID:
-# File "D:\Documents\Escuela\CSC 394 Software Projects\_ProjectRepo\Job-Website-Project\app\main\routes.py", line 191, in edit_profile
-# update_seeker(current_user._seeker, request.form, request.files)
-# File "D:\Documents\Escuela\CSC 394 Software Projects\_ProjectRepo\Job-Website-Project\app\api\profile.py", line 67, in update_seeker
-# remove_seeker_skill(seeker.id, ss.skill_id)
-# File "D:\Documents\Escuela\CSC 394 Software Projects\_ProjectRepo\Job-Website-Project\app\api\users.py", line 222, in remove_seeker_skill
-# db.session.delete(entry)
-# File "<string>", line 2, in delete
-#
-# File "D:\Documents\Escuela\CSC 394 Software Projects\_ProjectRepo\Job-Website-Project\venv\Lib\site-packages\sqlalchemy\orm\session.py", line 2563, in delete
-# util.raise_(
-#     File "D:\Documents\Escuela\CSC 394 Software Projects\_ProjectRepo\Job-Website-Project\venv\Lib\site-packages\sqlalchemy\util\compat.py", line 211, in raise_
-# raise exception
-# sqlalchemy.orm.exc.UnmappedInstanceError: Class 'flask_sqlalchemy.BaseQuery' is not mapped
-
-## TODO ensure editing pages load existing entries correctly
 
 
 @bp.route("/")
 @bp.route("/index")
 def index():
     """ Home page / dashboard for logged in users """
+    #print(current_user)
+
     if current_user.is_anonymous:
         job_count = count_rows(JobPost)
         ad_count = int(job_count / 10)*10
@@ -58,6 +42,9 @@ def index():
 
     if current_user.account_type == AccountTypes.s:  # seeker
         prof = current_user._seeker
+        if prof is None:
+            flash("Logged in user was a seeker but didn't have a profile...?? Fatal error. Logged user out.")
+            return redirect(url_for('auth.logout'))
         _is_profile_complete = prof.is_profile_complete()
         _first_name = prof.first_name
         _last_name = prof.last_name
@@ -231,6 +218,7 @@ def new_job():
     if current_user.account_type != AccountTypes.c:
         flash(f'You cannot access this page.')
         return redirect(url_for('main.index'))
+
     form = JobPostForm()
     if form.validate_on_submit():
         deets = extract_details(form)
@@ -250,6 +238,7 @@ def new_job():
 @login_required
 def edit_job(job_id):
     job_post = JobPost.query.filter_by(id=job_id).first_or_404()
+    #print("GET w/", job_post.to_dict())
 
     # Don't allow to editor if user isn't a company or if the post doesn't belong to the company.
     if current_user.account_type != AccountTypes.c or job_post.company_id != current_user._company.id:
@@ -259,6 +248,7 @@ def edit_job(job_id):
     form = JobPostForm()
     if form.validate_on_submit():  # using POST; push changes
         deets = extract_details(form)
+        #print("POST w/", deets)
         edit_jobpost(job_id, **deets)
 
         # now update the cache for this post
@@ -272,6 +262,10 @@ def edit_job(job_id):
     form.city.data = job_post.city
     form.state.data = job_post.state
     form.description.data = job_post.description
+    itype = int(job_post.work_type)
+    form.work_types.full_time.data = itype & int(WorkTypes.full) > 0
+    form.work_types.part_time.data = itype & int(WorkTypes.part) > 0
+    form.work_types.contract.data = itype & int(WorkTypes.contract) > 0
     form.remote.data = job_post.is_remote
     form.salary_min.data = job_post.salary_min
     form.salary_max.data = job_post.salary_max
@@ -279,6 +273,7 @@ def edit_job(job_id):
     # skills/attitudes need to be passed as arguments
     _skls = [[s._skill.title, int(s.skill_level_min), int(s.importance_level)] for s in job_post._skills]
     _atts = [[a._attitude.title, int(a.importance_level)] for a in job_post._attitudes]
+    #print(f"Passing {len(_skls)} skls and {len(_atts)} attitudes")
     return render_template('company/jobpost_editor.html',
                            form=form, skill_list=SKILL_NAMES, attitude_list=ATTITUDE_NAMES,
                            init_skills=_skls, init_attitudes=_atts
@@ -503,7 +498,7 @@ def db_editor():
     else:
         show = "false"
 
-    seekerdata = SeekerProfile.query.all() 
+    seekerdata = SeekerProfile.query.all()
     companydata = CompanyProfile.query.all()
     attitudedata = Attitude.query.all()
     skillsdata = Skill.query.all()

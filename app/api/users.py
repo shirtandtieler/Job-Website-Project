@@ -1,4 +1,5 @@
 # TODO add functions to create/update/get entries in database related to users or their account/profile
+from datetime import datetime
 from typing import Union
 
 from app import db
@@ -8,6 +9,14 @@ from app.models import User, CompanyProfile, SeekerProfile
 
 
 # TODO should add arg for commiting? May increase performance when updating in bulk
+
+def update_last_login(user_id):
+    entry = User.query.filter_by(id=user_id).first()
+    if entry is None:
+        raise ValueError(f"No user with id {user_id}")
+    entry.last_login = datetime.now()
+    db.session.commit()
+
 
 def save_seeker_search(user_id, label, query):
     entry = CompanySeekerSearch(user_id=user_id, label=label, query=query)
