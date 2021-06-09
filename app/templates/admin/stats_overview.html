@@ -83,7 +83,7 @@
 
     var activeness_data = [{
         type: 'pie',
-        values: [200, 10],
+        values: {{ seeker_activeness_count }},
         labels: ['Active', 'Inactive' ],
         textposition: 'inside',
         domain: {column: 0},
@@ -95,19 +95,7 @@
         },
     },{
         type: 'pie',
-        values: [15, 2],
-        labels: ['Active', 'Inactive' ],
-        title: {text: 'Companies'},
-        name: 'Companies',
-        textposition: 'inside',
-        domain: {column: 1},
-        hoverinfo: 'label+value+name',
-        marker: {
-            colors: ['rgb(60, 179, 113)', 'rgb(255, 102, 102)']
-        },
-    },{
-        type: 'pie',
-        values: [60, 8],
+        values: {{ jobs_activeness_count }},
         labels: ['Active', 'Inactive' ],
         title: {text: 'Jobs'},
         name: 'Jobs',

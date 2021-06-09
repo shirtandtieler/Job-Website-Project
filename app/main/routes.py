@@ -10,7 +10,7 @@ from flask_login import current_user, login_required
 
 import app
 from app.api.colors import lerp_color
-from app.api.db import count_rows
+from app.api.db import count_rows, job_activeness_count, seeker_activeness_count
 from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
     job_form_to_url_params
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
@@ -501,7 +501,9 @@ def stats_overview():
     return render_template('admin/stats_overview.html',
                            seeker_coords=seeker_coord_info,
                            job_coords=job_coord_info,
-                           company_coords=company_coord_info)
+                           company_coords=company_coord_info,
+                           seeker_activeness_count=list(seeker_activeness_count()),
+                           jobs_activeness_count=list(job_activeness_count()))
 
 
 @bp.route("/analytics/relationships")
@@ -526,7 +528,6 @@ def stats_relationships():
         flash(f"Operation not allowed.")
         return redirect(url_for('main.index'))
 
-    # TODO only admin
     nodes = [{"id": s.id, "label": s.title} for s in Skill.query.all() if s.is_tech() and len(s._seekers) > 0]
 
     # [a, b, c, d, e]
