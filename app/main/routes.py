@@ -1,6 +1,7 @@
 # Routes are the different URLs that the application implements.
 # The functions below handle the routing/behavior.
 import json
+import traceback
 from datetime import datetime
 from io import BytesIO
 
@@ -487,7 +488,36 @@ def seeker_search_download():
                     mimetype='text/json',
                     headers={'Content-disposition': 'attachment; filename=seeker_search_results.json'})
 
+  
+@bp.route("/admin/edit", methods=["GET", "POST"])
+def db_editor():
+    result = ""
+    if request.method == "POST":
+        code = request.form.get('postgresql_code')
+        show = "true"
+        result = f"> {code}\n"
+        try:
+            result += str(app.db.engine.execute(code).all())
+        except:
+            result += traceback.format_exc()
+    else:
+        show = "false"
 
+    seekerdata = SeekerProfile.query.all()
+    companydata = CompanyProfile.query.all()
+    attitudedata = Attitude.query.all()
+    skillsdata = Skill.query.all()
+    jopostdata = JobPost.query.all()
+    return render_template("admin/db_editor.html",
+                           datajobposts=jopostdata,
+                           dataskills=skillsdata,
+                           dataseekers=seekerdata,
+                           datacompanies=companydata,
+                           dataattitudes=attitudedata,
+                           show_term=show,
+                           cmd_results=result)
+
+  
 @bp.route("/analytics")
 @login_required
 def stats_overview():

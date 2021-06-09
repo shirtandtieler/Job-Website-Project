@@ -748,6 +748,7 @@ class JobPost(db.Model):
     _company = relationship("CompanyProfile", back_populates="_job_posts")
     _skills = relationship("JobPostSkill", back_populates="_job_post")
     _attitudes = relationship("JobPostAttitude", back_populates="_job_post")
+
     _seekers_applied = relationship("SeekerApplication", back_populates="_job_post")
     _seekers_bookmarked = relationship("SeekerBookmark", back_populates="_job_post")
 
