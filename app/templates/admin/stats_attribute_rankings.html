@@ -1,0 +1,112 @@
+{% extends "admin/stats__base.html" %}
+{% from "macros.html" import active_query with context %}
+
+{% block app_content %}
+
+<ul class="nav nav-tabs">
+    <li class="nav-item">
+        <a class="nav-link {{ active_query('attr', 't') }}" href="{{ url_for('main.stats_rankings', attr='t') }}">Tech Skills</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ active_query('attr', 'b') }}" href="{{ url_for('main.stats_rankings', attr='b') }}">Biz Skills</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ active_query('attr', 'v') }}" href="{{ url_for('main.stats_rankings', attr='v') }}">Values</a>
+    </li>
+</ul>
+
+<div class="overflow-auto border-start border-end border-bottom pb-4">
+    <div class="row ">
+        <div class="col-auto me-auto"></div>
+        <div class="col-auto me-3">
+            <input class="ms-3 mt-3" id="chk-normalize" type="checkbox">
+            <!-- {% if 'norm' in request.query_string.decode() %}checked{% endif %} -->
+            <label for="chk-normalize">Normalize</label>
+            <i class="fas fa-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="" id="norm-tooltip"></i>
+        </div>
+    </div>
+    <div id="rank-chart" style="width:100%; height:100%; min-height:500px"></div>
+</div>
+{% endblock %}
+
+
+{% block styles %}
+{{ super() }}
+<style>
+
+</style>
+{% endblock %}
+
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/plotly-2.0.0.min.js') }}"></script>
+<script>
+var trace1 = {
+  x: {{ column_names|safe }},
+  y: {{ counts_seeker|safe }},
+  name: 'Seeker',
+  type: 'bar'
+};
+
+var trace2 = {
+  x: {{ column_names|safe }},
+  y: {{ counts_job|safe }},
+  name: 'Job',
+  type: 'bar'
+};
+
+var data = [trace1, trace2];
+
+var lengths = {{ lengths }};
+
+var layout = {
+    barmode: 'group',
+    //width: 5000,
+    legend: {
+        orientation: "h",
+
+        x: 0,
+        y: 1.2,
+        font: {
+          size: 22
+        },
+    },
+    bargap: 0.5,
+    autosize: true,
+    automargin: true,
+    margin: {l: 30, r: 10, b: 150 }
+};
+
+Plotly.newPlot('rank-chart', data, layout);
+</script>
+<script>
+    $(document).ready(function() {
+
+        $('#chk-normalize').change(function() {
+            if(this.checked) {
+                for (i = 0; i < trace1.y.length; i++) {
+                    trace1.y[i] /= lengths[0];
+                    trace2.y[i] /= lengths[1];
+                }
+
+            } else {
+                for (i = 0; i < trace1.y.length; i++) {
+                    trace1.y[i] *= lengths[0];
+                    trace2.y[i] *= lengths[1];
+                }
+            }
+            data = [trace1, trace2];
+            Plotly.update('rank-chart', data, layout);
+        });
+
+        // update tooltip title here because it was displaying for a split second on refresh
+        $('#norm-tooltip').attr('title', 'Based on {{ lengths[0] }} seekers and {{ lengths[1] }} jobs');
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+{% endblock %}

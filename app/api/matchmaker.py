@@ -1,5 +1,7 @@
 from app import db
+
 from app.models import SeekerProfile, JobPost, CompanyProfile, Skill, Attitude, MatchScores
+
 
 
 def update_cache(jobpost_id: int = None, seeker_id: int = None):
@@ -139,7 +141,7 @@ def get_score(jobpost_id, seeker_id, from_cache=True):
 
     return seeker_points
 
-#returns a list of tuples where the t
+  
 def get_jobs_sorted(seeker_id, jobs_list=None, limit=50):
     """
     Get a list of the best matching jobs for a seeker, where each entry contains:
