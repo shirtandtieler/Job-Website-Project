@@ -15,6 +15,7 @@ from app.api.db import count_rows
 from app.api.job_query import job_url_args_to_query_args, get_job_query, job_url_args_to_input_states, \
     job_form_to_url_params
 from app.api.jobpost import new_jobpost, extract_details, edit_jobpost
+from app.api.matchmaker import get_score, update_cache
 from app.api.profile import update_seeker, update_company
 from app.api.matchmaker import update_cache
 from app.api.profile import update_seeker, update_company
@@ -229,6 +230,10 @@ def new_job():
     if form.validate_on_submit():
         deets = extract_details(form)
         post_id = new_jobpost(current_user._company.id, deets.pop('title'), **deets)
+
+        # now update the cache for this new post
+        update_cache(jobpost_id=post_id)
+
         flash(f"Created job post with ID {post_id}")
         return redirect(url_for('main.job_page', job_id=post_id))
     return render_template('company/jobpost_editor.html',
@@ -250,6 +255,10 @@ def edit_job(job_id):
     if form.validate_on_submit():  # using POST; push changes
         deets = extract_details(form)
         edit_jobpost(job_id, **deets)
+
+        # now update the cache for this post
+        update_cache(jobpost_id=job_id)
+
         flash(f"Edited job successfully.")
         return redirect(url_for('main.job_page', job_id=job_id))
 
@@ -270,9 +279,8 @@ def edit_job(job_id):
                            init_skills=_skls, init_attitudes=_atts
                            )
 
-
 @bp.route("/jobs", methods=['GET', 'POST'])
-# @login_required
+@login_required
 def job_search():
     """
     Navigate to the job search page.
@@ -305,6 +313,10 @@ def job_search():
     # https://flask-sqlalchemy.palletsprojects.com/en/2.x/api/#flask_sqlalchemy.BaseQuery.paginate
     req_kwargs = job_url_args_to_query_args(request.args)
 
+    # add in seeker's ID if that's who is conducting the search
+    if current_user._seeker is not None:
+        req_kwargs['seeker_id'] = current_user._seeker.id
+
     pager = get_job_query(**req_kwargs).paginate(
         page_num, app.Config.RESULTS_PER_PAGE, False)
 
@@ -332,6 +344,7 @@ def job_search():
                            plwr=pg_lower, pupr=pg_upper,
                            dprev=prev_link_clz, prev_url=prev_url,
                            dnext=next_link_clz, next_url=next_url,
+                           get_match_score=lambda jp, s: f"{round(float(get_score(jp, s)),1):g}",
                            show_saveload=False,
                            opts=filter_options_set
                            )
@@ -360,13 +373,19 @@ def job_page(job_id: int):
 
 
 @bp.route("/seekers", methods=['GET', 'POST'])
-# @login_required
+@login_required
 def seeker_search():
     """
     Navigate to the seeker search page.
     """
-    # TODO should be only for companies/admins?
+    # Don't let seekers see this page
+    if current_user._seeker is not None:
+        flash(f"Operation not permitted")
+        return redirect(url_for('main.index'))
+
     if request.method == 'POST':
+        #print(request.form)
+        # first handle when the form was for saving/deleting searches
         saved_name = request.form.get('query_saveas', '')
         delete_info = request.form.get('query_delete', '')
         if saved_name:  # user wants to save the recent search
@@ -381,7 +400,8 @@ def seeker_search():
             delete_seeker_search(q_id, q_label, q_query)
             flash(f"Deleted!")
             return redirect(request.full_path)
-        a = seeker_form_to_url_params(request.form)
+        # then convert and redirect based on the form results
+        a = seeker_form_to_url_params(request.form, request.query_string.decode())
         new_path = f"{request.path}?{a}"
         return redirect(new_path)
 
@@ -419,6 +439,7 @@ def seeker_search():
                            plwr=pg_lower, pupr=pg_upper,
                            dprev=prev_link_clz, prev_url=prev_url,
                            dnext=next_link_clz, next_url=next_url,
+                           get_match_score=lambda jp, s: f"{round(float(get_score(jp, s)), 1):g}",
                            show_saveload=False,
                            opts=filter_options_set
                            )

@@ -5,7 +5,7 @@ from itertools import groupby
 from werkzeug.datastructures import ImmutableMultiDict
 from werkzeug.urls import url_encode
 
-from app.models import Skill, Attitude, JobPost, WorkTypes
+from app.models import Skill, Attitude, JobPost, WorkTypes, MatchScores
 
 
 def _compress(indices: List[int], max_size: int) -> str:
@@ -209,9 +209,11 @@ def get_job_query(
         worktype: Tuple[bool, bool, bool, bool] = None,
         sal_range: Tuple[int, int] = None,
         loc_distance: int = None, loc_citystate: Tuple[str, str] = None,
-        tech_skills: int = None, biz_skills: int = None, atts: int = None):
+        tech_skills: int = None, biz_skills: int = None, atts: int = None,
+        seeker_id: int = None):
     """
     Performs a search query on the jobs based on the provided filters.
+    If seeker_id is passed results will be sorted by matching score, otherwise by date.
     Returns a 'query' object that can then be passed to 'paginate'.
     """
 
@@ -251,5 +253,11 @@ def get_job_query(
     # )
 
     match_ids = [m.id for m in matches]
-    q = JobPost.query.filter(JobPost.id.in_(match_ids)).order_by(JobPost.created_timestamp.desc())
+    q = JobPost.query.filter(JobPost.id.in_(match_ids))
+    if seeker_id is not None:  # sort by matching score, then by time created
+        q = q.join(MatchScores, JobPost.id == MatchScores.jobpost_id)\
+            .filter(MatchScores.seeker_id == seeker_id)\
+            .order_by(MatchScores.score.desc(), JobPost.created_timestamp.desc())
+    else:  # fallback to sorting just by time created
+        q = q.order_by(JobPost.created_timestamp.desc())
     return q

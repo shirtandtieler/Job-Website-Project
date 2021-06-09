@@ -355,6 +355,9 @@ class SeekerProfile(db.Model):
     _applications = relationship("SeekerApplication", back_populates="_seeker")
     _bookmarks = relationship('SeekerBookmark', back_populates='_seeker')
 
+    #_scores = db.relationship('MatchScores', backref='_seekers', lazy='dynamic', foreign_keys='MatchScores.seeker_id')
+    _scores = relationship("MatchScores", back_populates="_seekers")
+
     def __repr__(self):
         return f"SeekerProfile[{self.first_name}{self.last_name}]"
 
@@ -748,8 +751,17 @@ class JobPost(db.Model):
     _seekers_applied = relationship("SeekerApplication", back_populates="_job_post")
     _seekers_bookmarked = relationship("SeekerBookmark", back_populates="_job_post")
 
+    #_scores = db.relationship('MatchScores', backref='_job_posts', lazy='dynamic', foreign_keys='MatchScores.jobpost_id')
+    _scores = relationship("MatchScores", back_populates="_job_posts")
+
     def __repr__(self):
         return f"JobPost[by#{self.company_id}|{self.job_title}]"
+
+    def tooltip(self):
+        details = [self.location,
+                   "".join([i[0].upper() for i in self.get_work_types_list()]) + ("R" if self.is_remote else ""),
+                   "Posted: " + self.created_timestamp.strftime("%Y-%m-%d")]
+        return " | ".join(details)
 
     @property
     def company(self):
@@ -1062,3 +1074,19 @@ class LocationCoordinates(db.Model):
             db.session.add(row)
             db.session.commit()
         return row.latitude, row.longitude
+
+
+class MatchScores(db.Model):
+    """
+    This table contains records of seeker-job post match scores.
+    It should be updated when a seeker or job is updated.
+    It is used by the search results to order by match score.
+    """
+    __tablename__ = 'match_scores'
+    id = Column(Integer, nullable=False, primary_key=True)
+    seeker_id = Column(Integer, ForeignKey('seeker_profile.id'), nullable=False)
+    jobpost_id = Column(Integer, ForeignKey('jobpost.id'), nullable=False)
+    score = Column(Numeric, nullable=False)
+
+    _seekers = relationship("SeekerProfile", back_populates="_scores")
+    _job_posts = relationship("JobPost", back_populates="_scores")
